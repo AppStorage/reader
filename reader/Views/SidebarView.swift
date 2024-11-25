@@ -46,7 +46,6 @@ struct SidebarView: View {
                 isHovered = hovering
             }
         }
-        .frame(minWidth: 200)
     }
 
     private func backgroundForStatus(_ status: StatusFilter) -> some View {

@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ActionButtons: View {
+struct BookActionButton: View {
     @ObservedObject var viewModel: ContentViewModel
     @EnvironmentObject var appState: AppState
 

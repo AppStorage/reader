@@ -52,7 +52,6 @@ struct DetailView: View {
             ),
             statusColor: statusColor(for: book.status)
         )
-        .frame(minWidth: 325)
     }
     
     private var bookDateInfoSection: some View {

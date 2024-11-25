@@ -68,9 +68,8 @@ struct EmptyDetailView: View {
         EmptyStateView(
             imageName: "book.pages",
             title: "Select a book to view details",
-            message: nil, // No additional message
-            spacing: 10,
-            minWidth: 375
+            message: nil,
+            spacing: 10
         )
     }
 }
