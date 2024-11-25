@@ -53,20 +53,28 @@ struct ItemForm: View {
     private var formButtons: some View {
         HStack {
             Button("Cancel") {
-                onCancel()
+                withAnimation(.easeOut(duration: 0.75)) {
+                    onCancel()
+                }
             }
             .buttonStyle(BorderlessButtonStyle())
             .foregroundColor(.secondary)
+            .scaleEffect(1.0)
+            .animation(.easeOut(duration: 0.75), value: true)
 
             Spacer()
 
             Button("Save") {
-                onSave()
+                withAnimation(.easeOut(duration: 0.75)) {
+                    onSave()
+                }
             }
             .buttonStyle(.borderedProminent)
             .tint(Color.accentColor)
             .foregroundColor((text.isEmpty || supplementaryField.isEmpty) ? .gray : .white)
             .disabled(text.isEmpty || supplementaryField.isEmpty)
+            .scaleEffect((text.isEmpty || supplementaryField.isEmpty) ? 0.95 : 1.0)
+            .animation(.easeOut(duration: 0.75), value: (text.isEmpty || supplementaryField.isEmpty))
         }
     }
 }
