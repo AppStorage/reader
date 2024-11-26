@@ -5,14 +5,19 @@ import SwiftData
 @MainActor
 final class DataManager: ObservableObject {
     @Published var books: [BookData] = []
-    let modelContainer: ModelContainer
-    private let apiKey = "GOOGLE_BOOKS_API_KEY"
-    
+    private let modelContainer: ModelContainer
+    private let apiKey: String = {
+        guard let key = Bundle.main.object(forInfoDictionaryKey: "GOOGLE_BOOKS_API_KEY") as? String else {
+            fatalError("API key not found in Info.plist")
+        }
+        return key
+    }()
+
     init(modelContainer: ModelContainer) {
         self.modelContainer = modelContainer
-        fetchBooks()  // Initial fetch to populate the books list
+        fetchBooks()
     }
-    
+
     func fetchBooks() {
         do {
             books = try modelContainer.mainContext.fetch(FetchDescriptor<BookData>())
@@ -20,7 +25,7 @@ final class DataManager: ObservableObject {
             books = []
         }
     }
-    
+
     func fetchBookData(
         title: String,
         author: String,
@@ -28,60 +33,45 @@ final class DataManager: ObservableObject {
         inputISBN: String? = nil,
         publisher: String? = nil
     ) async -> BookData? {
-        var query = "intitle:\(title) inauthor:\(author)"
-        if let publishedDate = publishedDate, !publishedDate.isEmpty {
-            query += " inpublishedDate:\(publishedDate)"
-        }
-        if let inputISBN = inputISBN, !inputISBN.isEmpty {
-            query += " isbn:\(inputISBN)"
-        }
+        let queryParameters: [String: String] = [
+            "intitle": title,
+            "inauthor": author,
+            "inpublishedDate": publishedDate ?? "",
+            "isbn": inputISBN ?? ""
+        ]
 
-        guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "https://www.googleapis.com/books/v1/volumes?q=\(encodedQuery)&key=\(apiKey)") else {
+        guard let url = constructQueryURL(apiKey: apiKey, queryParameters: queryParameters) else {
             print("Failed to construct query URL.")
             return nil
         }
 
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
-            
-            // Log the raw JSON response for debugging
             if let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) {
                 print("API Response: \(jsonResponse)")
             }
-            
+
             let result = try JSONDecoder().decode(GoogleBooksResponse.self, from: data)
-            
-            // Check if `items` exists and is not empty
             guard let items = result.items, !items.isEmpty else {
                 print("No matching books found in the API response.")
                 return nil
             }
 
-            // Validate against all input parameters
-            let matchedBook = items.first(where: { book in
-                let bookInfo = book.volumeInfo
-                
-                let titleMatches = bookInfo.title.localizedCaseInsensitiveContains(title)
-                
-                let authorMatches = bookInfo.authors?.contains(where: { $0.localizedCaseInsensitiveContains(author) }) ?? false
-                
-                let publishedDateMatches = publishedDate == nil || bookInfo.publishedDate == publishedDate
-                
-                let isbnMatches = inputISBN == nil || (bookInfo.industryIdentifiers?.contains(where: { $0.identifier == inputISBN }) ?? false)
-                
-                let publisherMatches = publisher == nil || (bookInfo.publisher?.localizedCaseInsensitiveContains(publisher!) ?? false)
-                
-                return titleMatches && authorMatches && publishedDateMatches && isbnMatches && publisherMatches
-            })
-
-            // If no match, return nil
-            guard let validBook = matchedBook else {
+            guard let matchedBook = items.first(where: {
+                matchBook(
+                    bookInfo: $0.volumeInfo,
+                    title: title,
+                    author: author,
+                    publishedDate: publishedDate,
+                    inputISBN: inputISBN,
+                    publisher: publisher
+                )
+            }) else {
                 print("No books matched all input parameters.")
                 return nil
             }
 
-            return constructBookData(from: validBook.volumeInfo)
+            return constructBookData(from: matchedBook.volumeInfo)
         } catch {
             print("Failed to fetch or decode data: \(error)")
             return nil
@@ -89,38 +79,24 @@ final class DataManager: ObservableObject {
     }
 
     private func constructBookData(from bookInfo: VolumeInfo) -> BookData {
-        let isbn = bookInfo.industryIdentifiers?.first(where: { $0.type == "ISBN_13" || $0.type == "ISBN_10" })?.identifier
-        let series = bookInfo.subtitle ?? bookInfo.series
-        let sanitizedDescription = sanitizeDescription(bookInfo.description)
-        let formattedPublishedDate = DateFormatter()
-        formattedPublishedDate.dateFormat = "yyyy-MM-dd"
-        let publishedDateParsed = formattedPublishedDate.date(from: bookInfo.publishedDate) ?? Date()
-
         return BookData(
-            title: bookInfo.title,
+            title: bookInfo.fullTitle,
             author: bookInfo.authors?.joined(separator: ", ") ?? "",
-            published: publishedDateParsed,
+            published: bookInfo.parsedPublishedDate ?? Date(),
             publisher: bookInfo.publisher,
-            genre: bookInfo.categories?.first,
-            series: series,
-            isbn: isbn,
-            bookDescription: sanitizedDescription,
+            genre: bookInfo.primaryCategory,
+            series: bookInfo.series,
+            isbn: bookInfo.primaryISBN,
+            bookDescription: bookInfo.sanitizedDescription,
             status: .unread
         )
     }
-    
-    // Sanitize the description for line breaks and HTML
-    private func sanitizeDescription(_ description: String?) -> String? {
-        guard let description = description else { return nil }
-        return description
-            .replacingOccurrences(of: "<br>", with: "\n")
-            .replacingOccurrences(of: "</p>", with: "\n")
-            .replacingOccurrences(of: "<p>", with: "")
-    }
-    
+
     func sanitizeExistingDescriptions() {
-        for book in books where book.bookDescription != nil {
-            book.bookDescription = sanitizeDescription(book.bookDescription)
+        books.forEach { book in
+            if let description = book.bookDescription {
+                book.bookDescription = sanitizeDescription(description)
+            }
         }
         saveChanges()
     }
@@ -147,16 +123,15 @@ final class DataManager: ObservableObject {
             bookDescription: sanitizedDescription,
             status: .unread
         )
-        
         modelContainer.mainContext.insert(newBook)
-        saveChanges() // Save and refresh the list
+        saveChanges()
     }
-    
+
     func permanentlyDeleteBook(_ book: BookData) {
-        modelContainer.mainContext.delete(book)  // Remove book from the context
-        saveChanges()  // Persist changes and refresh the books list
+        modelContainer.mainContext.delete(book)
+        saveChanges()
     }
-    
+
     func updateBookStatus(_ book: BookData, to status: ReadingStatus) {
         book.status = status
         saveChanges()
