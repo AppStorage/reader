@@ -17,11 +17,7 @@ struct MiddlePanelView: View {
         .navigationTitle("Library")
         .onChange(of: localSelectedBook) { oldValue, newSelectedBook in
             if let newSelectedBook = newSelectedBook {
-                if newSelectedBook.status == .deleted {
-                    viewModel.selectedBook = newSelectedBook
-                } else {
-                    viewModel.selectedBook = newSelectedBook
-                }
+                viewModel.selectedBook = newSelectedBook
             } else {
                 viewModel.selectedBook = nil
             }
@@ -34,61 +30,64 @@ struct MiddlePanelView: View {
         }
     }
     
+    // MARK: - Toolbar
     private var toolbar: some View {
         HStack {
-            // Search bar on the left
             SearchBar(text: $viewModel.searchQuery)
                 .frame(maxWidth: .infinity)
             
-            // Buttons on the right
-            HStack(spacing: 16) {
-                // Sort Menu
-                Menu {
-                    sortOptions
-                    Divider()
-                    sortOrderOptions
-                } label: {
-                    Image(systemName: "arrow.up.arrow.down")
-                        .font(.system(size: 16, weight: .medium))
-                        .frame(width: 24, height: 24)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.borderless)
-                .accessibilityLabel("Sort")
-                .help("Sort")
-
-                // Add Book Button
-                Button(action: {
-                    openWindow(id: "addBookWindow")
-                }) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 16, weight: .medium))
-                        .frame(width: 24, height: 24)
-                        .contentShape(Rectangle())
-                        .brightness(isHovered ? 0.5 : 0)
-                }
-                .buttonStyle(.borderless)
-                .accessibilityLabel("Add Book")
-                .help("Add Book")
-                .onHover { hovering in
-                    isHovered = hovering
-                }
-            }
+            toolbarActions
         }
         .padding()
         .background(Color(nsColor: .controlBackgroundColor))
     }
-
+    
+    private var toolbarActions: some View {
+        HStack(spacing: 16) {
+            sortMenu
+            addBookButton
+        }
+    }
+    
+    private var sortMenu: some View {
+        Menu {
+            sortOptions
+            Divider()
+            sortOrderOptions
+        } label: {
+            Image(systemName: "arrow.up.arrow.down")
+                .font(.system(size: 16, weight: .medium))
+                .frame(width: 24, height: 24)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.borderless)
+        .accessibilityLabel("Sort")
+        .help("Sort")
+    }
+    
+    private var addBookButton: some View {
+        Button(action: {
+            openWindow(id: "addBookWindow")
+        }) {
+            Image(systemName: "plus")
+                .font(.system(size: 16, weight: .medium))
+                .frame(width: 24, height: 24)
+                .contentShape(Rectangle())
+                .brightness(isHovered ? 0.5 : 0)
+        }
+        .buttonStyle(.borderless)
+        .accessibilityLabel("Add Book")
+        .help("Add Book")
+        .onHover { hovering in
+            isHovered = hovering
+        }
+    }
+    
+    // MARK: - Book List
     private var bookList: some View {
         Group {
             if viewModel.displayedBooks.isEmpty {
-                if viewModel.searchQuery.isEmpty && viewModel.selectedStatus == .deleted {
-                    EmptyDeletedListView()
-                } else if viewModel.searchQuery.isEmpty {
-                    EmptyListView()
-                } else {
-                    EmptySearchListView()
-                }
+                emptyStateView
             } else {
                 List(viewModel.displayedBooks, id: \.id, selection: $localSelectedBook) { book in
                     BookRowView(book: book)
@@ -97,7 +96,20 @@ struct MiddlePanelView: View {
             }
         }
     }
-
+    
+    private var emptyStateView: some View {
+        Group {
+            if viewModel.searchQuery.isEmpty && viewModel.selectedStatus == .deleted {
+                EmptyDeletedListView()
+            } else if viewModel.searchQuery.isEmpty {
+                EmptyListView()
+            } else {
+                EmptySearchListView()
+            }
+        }
+    }
+    
+    // MARK: - Sort Options
     private var sortOptions: some View {
         Group {
             Button(action: { viewModel.sortOption = .title }) {
@@ -129,7 +141,7 @@ struct MiddlePanelView: View {
             }
         }
     }
-
+    
     private var sortOrderOptions: some View {
         Group {
             Button(action: { viewModel.sortOrder = .ascending }) {
