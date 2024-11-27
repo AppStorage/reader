@@ -14,14 +14,21 @@ struct QuotesSection: View {
     @FocusState private var isFocusedOnPage: Bool
     
     var modelContext: ModelContext
-
+    
     private var quotesArray: [String] {
         book.quotes.components(separatedBy: "|||").filter { !$0.isEmpty }
     }
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            header
+            CollapsibleHeader(
+                isCollapsed: $isCollapsed,
+                isEditing: $isEditing,
+                title: "Quotes",
+                onToggleCollapse: { isCollapsed.toggle() },
+                onEditToggle: { isEditing.toggle() },
+                isEditingDisabled: book.status == .deleted
+            )
             if !isCollapsed {
                 content
             }
@@ -30,32 +37,7 @@ struct QuotesSection: View {
         .cornerRadius(12)
         .animation(.easeInOut(duration: 0.25), value: isEditing)
     }
-
-    // MARK: Header
-    private var header: some View {
-        HStack {
-            Button(action: { isCollapsed.toggle() }) {
-                HStack {
-                    Image(systemName: isCollapsed ? "chevron.right" : "chevron.down")
-                        .font(.body)
-                    Text("Quotes")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                }
-            }
-            .buttonStyle(PlainButtonStyle())
-            
-            Spacer()
-            
-            Button(isEditing ? "Done" : "Edit") {
-                withAnimation { isEditing.toggle() }
-            }
-            .buttonStyle(LinkButtonStyle())
-            .disabled(book.status == .deleted)
-        }
-        .padding(.bottom, 4)
-    }
-
+    
     // MARK: Content
     private var content: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -63,7 +45,7 @@ struct QuotesSection: View {
                 let components = quote.components(separatedBy: " [p. ")
                 let text = components.first ?? quote
                 let pageNumber = components.count > 1 ? components.last?.replacingOccurrences(of: "]", with: "") : nil
-
+                
                 ItemDisplayRow(
                     text: text,
                     secondaryText: pageNumber.map { "\(PageInputHelper.pagePrefix(for: $0)) \($0)" },
@@ -82,18 +64,6 @@ struct QuotesSection: View {
         }
     }
     
-    private func removeQuoteButton(quote: String) -> some View {
-        ItemActionButton(
-            label: nil,
-            systemImageName: "minus.circle.fill",
-            foregroundColor: .red,
-            action: { removeQuote(quote) },
-            padding: nil
-        )
-        .buttonStyle(BorderlessButtonStyle())
-        .transition(.opacity)
-    }
-
     private var addQuoteButton: some View {
         ItemActionButton(
             label: "Add Quote",
@@ -104,7 +74,7 @@ struct QuotesSection: View {
         )
         .disabled(book.status == .deleted)
     }
-
+    
     // MARK: Quote form
     private var addQuoteForm: some View {
         ItemForm(
@@ -124,17 +94,17 @@ struct QuotesSection: View {
         addQuote(formattedQuote)
         resetAddQuoteForm()
     }
-
+    
     private func addQuote(_ quote: String) {
         book.quotes = (quotesArray + [quote]).joined(separator: "|||")
         try? modelContext.save()
     }
-
+    
     private func removeQuote(_ quote: String) {
         book.quotes = quotesArray.filter { $0 != quote }.joined(separator: "|||")
         try? modelContext.save()
     }
-
+    
     private func resetAddQuoteForm() {
         newQuote = ""
         newPageNumber = ""

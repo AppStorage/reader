@@ -14,14 +14,21 @@ struct NotesSection: View {
     @FocusState private var isFocusedOnPage: Bool
     
     var modelContext: ModelContext
-
+    
     private var notesArray: [String] {
         book.notes.components(separatedBy: "|||").filter { !$0.isEmpty }
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            header
+            CollapsibleHeader(
+                isCollapsed: $isCollapsed,
+                isEditing: $isEditing,
+                title: "Notes",
+                onToggleCollapse: { isCollapsed.toggle() },
+                onEditToggle: { isEditing.toggle() },
+                isEditingDisabled: book.status == .deleted
+            )
             if !isCollapsed {
                 content
             }
@@ -30,32 +37,7 @@ struct NotesSection: View {
         .cornerRadius(12)
         .animation(.easeInOut(duration: 0.25), value: isEditing)
     }
-
-    // MARK: Header
-    private var header: some View {
-        HStack {
-            Button(action: { isCollapsed.toggle() }) {
-                HStack {
-                    Image(systemName: isCollapsed ? "chevron.right" : "chevron.down")
-                        .font(.body)
-                    Text("Notes")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                }
-            }
-            .buttonStyle(PlainButtonStyle())
-            
-            Spacer()
-            
-            Button(isEditing ? "Done" : "Edit") {
-                withAnimation { isEditing.toggle() }
-            }
-            .buttonStyle(LinkButtonStyle())
-            .disabled(book.status == .deleted)
-        }
-        .padding(.bottom, 4)
-    }
-
+    
     // MARK: Content
     private var content: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -63,7 +45,7 @@ struct NotesSection: View {
                 let components = note.components(separatedBy: " [p. ")
                 let text = components.first ?? note
                 let pageNumber = components.count > 1 ? components.last?.replacingOccurrences(of: "]", with: "") : nil
-
+                
                 ItemDisplayRow(
                     text: text,
                     secondaryText: pageNumber.map { "\(PageInputHelper.pagePrefix(for: $0)) \($0)" },
@@ -81,8 +63,8 @@ struct NotesSection: View {
             }
         }
     }
-
-
+    
+    
     private func removeNoteButton(note: String) -> some View {
         ItemActionButton(
             label: nil,
@@ -94,7 +76,7 @@ struct NotesSection: View {
         .buttonStyle(BorderlessButtonStyle())
         .transition(.opacity)
     }
-
+    
     private var addNoteButton: some View {
         ItemActionButton(
             label: "Add Note",
@@ -125,17 +107,17 @@ struct NotesSection: View {
         addNote(formattedNote)
         resetAddNoteForm()
     }
-
+    
     private func addNote(_ note: String) {
         book.notes = (notesArray + [note]).joined(separator: "|||")
         try? modelContext.save()
     }
-
+    
     private func removeNote(_ note: String) {
         book.notes = notesArray.filter { $0 != note }.joined(separator: "|||")
         try? modelContext.save()
     }
-
+    
     private func resetAddNoteForm() {
         newNote = ""
         newPageNumber = ""
