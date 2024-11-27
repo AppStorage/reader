@@ -4,14 +4,16 @@ import SwiftUI
 class AppState: ObservableObject {
     @AppStorage("selectedTheme") private var storedTheme: String = "system"
     @AppStorage("checkForUpdatesAutomatically") var checkForUpdatesAutomatically: Bool = false
-
+    
     @Published var selectedTheme: Theme = .system {
         didSet {
             storedTheme = selectedTheme.rawValue
             applyTheme(selectedTheme)
         }
     }
-
+    
+    @Published var isCheckingForUpdates: Bool = false
+    
     init() {
         DispatchQueue.main.async {
             self.selectedTheme = Theme(rawValue: self.storedTheme) ?? .system

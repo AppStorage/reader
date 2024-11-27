@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var appState: AppState
+    var checkForUpdates: () -> Void
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -41,7 +42,33 @@ struct SettingsView: View {
                 Text("Updates will be checked once a day.")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+            }
+            
+            HStack {
+                Spacer()
+                Button(action: {
+                    checkForUpdates()
+                }) {
+                    if appState.isCheckingForUpdates {
+                        HStack(spacing: 5) {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                            Text("Checking...")
+                                .font(.system(size: 13, weight: .regular))
+                                .foregroundColor(.secondary)
+                        }
+                    } else {
+                        HStack(spacing: 5) {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 13, weight: .regular))
+                            Text("Check for Updates")
+                                .font(.system(size: 13, weight: .regular))
+                        }
+                    }
+                }
+                .buttonStyle(.borderless)
+                .disabled(appState.isCheckingForUpdates)
+                Spacer()
             }
         }
     }

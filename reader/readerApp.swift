@@ -78,8 +78,10 @@ struct readerApp: App {
     // MARK: - Settings Window
     private var settingsWindow: some Scene {
         Window("Settings", id: "settingsWindow") {
-            SettingsView()
-                .environmentObject(appState)
+            SettingsView(checkForUpdates: {
+                checkForAppUpdates(isUserInitiated: true)
+            })
+            .environmentObject(appState)
         }
         .windowStyle(HiddenTitleBarWindowStyle())
         .windowResizability(.contentSize)
@@ -149,7 +151,7 @@ struct readerApp: App {
     
     // Consolidated Update Check
     private func checkForAppUpdates(isUserInitiated: Bool) {
-        isCheckingForUpdates = true
+        appState.isCheckingForUpdates = true
         
         Task {
             do {
@@ -167,7 +169,7 @@ struct readerApp: App {
                 print("Failed to check for updates: \(error.localizedDescription)")
             }
             
-            isCheckingForUpdates = false
+            appState.isCheckingForUpdates = false
         }
     }
     
