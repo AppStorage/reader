@@ -1,17 +1,17 @@
-# reader
-
 <div align="center">
-    <img src="../reader/Assets.xcassets/AppIcon.appiconset/256x256.png" width="200" height="200">
+    <img src="../reader/Assets.xcassets/AppIcon.appiconset/256x256.png" width="200" height="200" />
+    <h1>reader</h1>
 </div>
 
 reader is a simple book library and reading tracker app for macOS, designed and developed in Swift. It was purposefully built for personal use and to share with a friend, making it easier to manage book collections and track reading progress.
 
 ![Screenshot](./assets/img01.png)
 
-[![Download](https://img.shields.io/badge/download-latest-brightgreen?style=flat-square)](https://github.com/chippokiddo/reader/releases/latest)
-![Platform](https://img.shields.io/badge/platform-macOS-blue?style=flat-square)
-![Requirements](https://img.shields.io/badge/requirements-macOS%2014%2B-fa4e49?style=flat-square)
-[![License](https://img.shields.io/github/license/chippokiddo/reader?style=flat-square)](../LICENSE)
+![Platform](https://img.shields.io/badge/platform-macOS-blue?style=flat)
+![Requirements](https://img.shields.io/badge/requirements-macOS%2014%2B-fa4e49?style=flat)
+[![Download Latest](https://img.shields.io/badge/download-latest-brightgreen?style=flat)](https://github.com/chippokiddo/reader/releases/latest)
+![Downloads](https://img.shields.io/github/downloads/chippokiddo/reader/total)
+![License](https://img.shields.io/github/license/chippokiddo/reader)
 
 ## Features
 
@@ -68,7 +68,7 @@ If you'd like to compile the app yourself, follow these steps:
 
 > [!IMPORTANT]
 >
-> Make sure you are running macOS 14 or higher and have Xcode 16 or later installed, as the project uses Swift 6
+> Make sure you're running macOS 14 or higher and have Xcode 16 or later installed, since the project uses Swift 6
 
 3. Locate the cloned repository and open the `reader` directory in Finder
 
