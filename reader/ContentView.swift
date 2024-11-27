@@ -6,7 +6,7 @@ struct ContentView: View {
     @Environment(\.openWindow) private var openWindow
     
     @ObservedObject var viewModel: ContentViewModel
-
+    
     @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
     
     var body: some View {
@@ -18,22 +18,30 @@ struct ContentView: View {
             MiddlePanelView(viewModel: viewModel)
                 .frame(minWidth: 400, maxWidth: .infinity)
         } detail: {
-            if let selectedBook = viewModel.selectedBook {
-                DetailView(book: selectedBook)
-                    .frame(width: 450)
-            } else {
-                EmptyDetailView()
-                    .frame(width: 450)
-            }
+            detailView
         }
         .navigationSplitViewStyle(.balanced)
         .toolbar {
-            ToolbarItemGroup(placement: .automatic) {
-                if viewModel.selectedBook != nil {
-                    BookActionButton(viewModel: viewModel)
-                }
+            toolbarContent
+        }
+    }
+    
+    @ViewBuilder
+    private var detailView: some View {
+        if let selectedBook = viewModel.selectedBook {
+            DetailView(book: selectedBook)
+                .frame(width: 450)
+        } else {
+            EmptyDetailView()
+                .frame(width: 450)
+        }
+    }
+    
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItemGroup(placement: .automatic) {
+            if viewModel.selectedBook != nil {
+                BookActionButton(viewModel: viewModel)
             }
         }
-
     }
 }
