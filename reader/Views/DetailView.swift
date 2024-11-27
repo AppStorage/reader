@@ -50,7 +50,7 @@ struct DetailView: View {
                     handleStatusChange(newStatus)
                 }
             ),
-            statusColor: statusColor(for: book.status)
+            statusColor: DetailHelper.statusColor(for: book.status)
         )
     }
     
@@ -87,7 +87,7 @@ struct DetailView: View {
             modelContext: modelContext
         )
     }
-
+    
     
     // MARK: - Helper Methods
     
@@ -97,7 +97,7 @@ struct DetailView: View {
             saveBookStatusChange()
         }
     }
-
+    
     private func updateBookDates(for newStatus: ReadingStatus) {
         switch newStatus {
         case .unread:
@@ -125,19 +125,10 @@ struct DetailView: View {
             print("Failed to save book status change: \(error)")
         }
     }
-
+    
     private func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: date)
-    }
-
-    private func statusColor(for status: ReadingStatus) -> Color {
-        switch status {
-        case .unread: return .gray
-        case .reading: return .blue
-        case .read: return .green
-        case .deleted: return .red
-        }
     }
 }
