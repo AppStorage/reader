@@ -28,6 +28,10 @@ reader is a simple book library and reading tracker app for macOS, designed and 
     <figcaption>reader in light mode</figcaption>
 </figure>
 
+## Permissions
+
+reader requires network access to fetch book data via the Google Books API.
+
 ## Install
 
 - Download the `reader.zip` file from the [latest release](https://github.com/chippokiddo/reader/releases/latest)
@@ -73,18 +77,18 @@ If you'd like to compile the app yourself, follow these steps:
    ```
    .
    └── reader/
-      ├── Assets.xcassets
-      ├── Configurations
-      ├── ContentView.swift
-      ├── Helpers
-      ├── Info.plist
-      ├── Merriweather
-      ├── Modells
-      ├── Preview Content
-      ├── reader.entitlements
-      ├── Subviews
-      ├── Utils
-      └── Views
+       ├── Assets.xcassets
+       ├── Configurations
+       ├── ContentView.swift
+       ├── Helpers
+       ├── Info.plist
+       ├── Merriweather
+       ├── Models
+       ├── Preview Content
+       ├── reader.entitlements
+       ├── Subviews
+       ├── Utils
+       └── Views
    ```
 
 5. Add Your Google Books API Key
@@ -126,7 +130,7 @@ If you'd like to compile the app yourself, follow these steps:
 
    - In Xcode, go to Product > Archive from the menu bar
    - Once the archiving process completes, the organizer window will appear
-   - Select the latest build and click 'Distribute App'
+   - Select the latest build and click Distribute App
    - In the popup that appears, click 'custom,' then click 'next' in the bottom right of the popup
    - Click 'copy app'
    - Once completed, you’ll see `reader.app` in a folder where you saved it. Drag reader to your Applications folder, and you're done!
@@ -138,10 +142,6 @@ If you'd like to compile the app yourself, follow these steps:
 > - Any modifications to the source code must also be distributed under GPLv3.
 > - If you share a modified version of this app, you must include the source code for your modifications.
 > - For more details, refer to the [GPLv3 License Terms](../LICENSE).
-
-## Permissions
-
-reader requires network access to fetch book data via the Google Books API.
 
 ## Contribute
 
