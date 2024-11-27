@@ -3,15 +3,15 @@
     <h1>reader</h1>
 </div>
 
-reader is a simple book library and reading tracker app for macOS, designed and developed in Swift. It was purposefully built for personal use and to share with a friend, making it easier to manage book collections and track reading progress.
-
-![Screenshot](./assets/img01.png)
-
 ![Platform](https://img.shields.io/badge/platform-macOS-blue?style=flat)
 ![Requirements](https://img.shields.io/badge/requirements-macOS%2014%2B-fa4e49?style=flat)
 [![Download Latest](https://img.shields.io/badge/download-latest-brightgreen?style=flat)](https://github.com/chippokiddo/reader/releases/latest)
 ![Downloads](https://img.shields.io/github/downloads/chippokiddo/reader/total)
-![License](https://img.shields.io/github/license/chippokiddo/reader)
+[![License](https://img.shields.io/github/license/chippokiddo/reader)](../LICENSE)
+
+reader is a simple book library and reading tracker app for macOS, designed and developed in Swift. It was purposefully built for personal use and to share with a friend, making it easier to manage book collections and track reading progress.
+
+![Screenshot](./assets/img01.png)
 
 ## Features
 
