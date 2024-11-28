@@ -75,7 +75,13 @@ struct BookActionButton: View {
     private func handleBackspaceKey() {
         if let selectedBook = viewModel.selectedBook {
             bookToDelete = selectedBook
-            showSoftDeleteConfirmation = true
+            if selectedBook.status == .deleted {
+                // Trigger permanent delete confirmation
+                showPermanentDeleteConfirmation = true
+            } else {
+                // Trigger soft delete confirmation
+                showSoftDeleteConfirmation = true
+            }
         }
     }
     
