@@ -5,9 +5,10 @@ struct MiddlePanelView: View {
     
     @EnvironmentObject var appState: AppState
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.colorScheme) private var colorScheme
     
-    @State private var localSelectedBook: BookData?
     @State private var isHovered = false
+    @State private var localSelectedBook: BookData?
     
     var body: some View {
         VStack(spacing: 0) {
@@ -73,7 +74,10 @@ struct MiddlePanelView: View {
                 .font(.system(size: 16, weight: .medium))
                 .frame(width: 24, height: 24)
                 .contentShape(Rectangle())
-                .brightness(isHovered ? 0.5 : 0)
+                .foregroundColor(buttonForegroundColor)
+                .brightness(buttonBrightness)
+                .scaleEffect(isHovered ? 1.1 : 1.0)
+                .animation(.easeInOut(duration: 0.2), value: isHovered)
         }
         .buttonStyle(.borderless)
         .accessibilityLabel("Add Book")
@@ -81,6 +85,16 @@ struct MiddlePanelView: View {
         .onHover { hovering in
             isHovered = hovering
         }
+    }
+    
+    // Determine the button's foreground color based on hover state and color scheme
+    private var buttonForegroundColor: Color {
+        isHovered && colorScheme == .light ? .accentColor : .primary
+    }
+    
+    // Determine the button's brightness based on hover state and color scheme
+    private var buttonBrightness: Double {
+        isHovered ? (colorScheme == .dark ? 0.5 : 0) : 0
     }
     
     // MARK: - Book List
