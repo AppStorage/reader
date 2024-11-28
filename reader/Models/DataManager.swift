@@ -12,12 +12,12 @@ final class DataManager: ObservableObject {
         }
         return key
     }()
-
+    
     init(modelContainer: ModelContainer) {
         self.modelContainer = modelContainer
         fetchBooks()
     }
-
+    
     func fetchBooks() {
         do {
             books = try modelContainer.mainContext.fetch(FetchDescriptor<BookData>())
@@ -25,7 +25,7 @@ final class DataManager: ObservableObject {
             books = []
         }
     }
-
+    
     func fetchBookData(
         title: String,
         author: String,
@@ -33,65 +33,115 @@ final class DataManager: ObservableObject {
         inputISBN: String? = nil,
         publisher: String? = nil
     ) async -> BookData? {
-        let queryParameters: [String: String] = [
+        // Build query parameters for Google Books
+        var queryParameters: [String: String] = [
             "intitle": title,
-            "inauthor": author,
-            "inpublishedDate": publishedDate ?? "",
-            "isbn": inputISBN ?? ""
+            "inauthor": author
         ]
-
-        guard let url = constructQueryURL(apiKey: apiKey, queryParameters: queryParameters) else {
-            print("Failed to construct query URL.")
+        
+        if let inputISBN = inputISBN?.trimmingCharacters(in: .whitespacesAndNewlines), !inputISBN.isEmpty {
+            queryParameters["isbn"] = inputISBN
+        }
+        if let publisher = publisher?.trimmingCharacters(in: .whitespacesAndNewlines), !publisher.isEmpty {
+            queryParameters["publisher"] = publisher
+        }
+        
+        // Try Google Books API first
+        if let url = constructQueryURL(apiKey: apiKey, queryParameters: queryParameters) {
+            do {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                let result = try JSONDecoder().decode(GoogleBooksResponse.self, from: data)
+                if let items = result.items, !items.isEmpty {
+                    // Find the most relevant match
+                    let exactMatches = items.filter {
+                        matchBook(
+                            bookInfo: $0.volumeInfo,
+                            title: title,
+                            author: author,
+                            publishedDate: publishedDate,
+                            inputISBN: inputISBN,
+                            publisher: publisher
+                        )
+                    }
+                    
+                    // Return the best match or the first result
+                    if let bestMatch = exactMatches.first ?? items.first {
+                        return constructBookData(from: bestMatch.volumeInfo, userInputISBN: inputISBN)
+                    }
+                }
+            } catch {
+                print("Failed to fetch or parse Google Books data: \(error)")
+            }
+        }
+        
+        // Fallback to Open Library if Google Books fails
+        return await fetchBookFromOpenLibrary(title: title, author: author, inputISBN: inputISBN)
+    }
+    
+    func fetchBookFromOpenLibrary(
+        title: String? = nil,
+        author: String? = nil,
+        inputISBN: String? = nil
+    ) async -> BookData? {
+        // Construct the query for Open Library
+        var query = ""
+        if let isbn = inputISBN {
+            query = "bibkeys=ISBN:\(isbn)"
+        } else if let title = title, let author = author {
+            query = "q=\(title.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")+\(author.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+        } else {
+            print("Open Library requires at least a title or an ISBN.")
             return nil
         }
-
+        
+        let urlString = inputISBN != nil
+        ? "https://openlibrary.org/api/books?\(query)&format=json&jscmd=data"
+        : "https://openlibrary.org/search.json?\(query)"
+        
+        guard let url = URL(string: urlString) else {
+            print("Invalid Open Library URL.")
+            return nil
+        }
+        
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
-            if let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) {
-                print("API Response: \(jsonResponse)")
+            
+            if inputISBN != nil {
+                // Parse the response for ISBN queries
+                if let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any],
+                   let bookData = jsonResponse["ISBN:\(inputISBN!)"] as? [String: Any] {
+                    return parseOpenLibraryBookData(bookData, isbn: inputISBN)
+                }
+            } else {
+                // Parse the response for title/author queries
+                let result = try JSONDecoder().decode(OpenLibrarySearchResponse.self, from: data)
+                if let doc = result.docs.first {
+                    return parseOpenLibrarySearchResult(doc)
+                }
             }
-
-            let result = try JSONDecoder().decode(GoogleBooksResponse.self, from: data)
-            guard let items = result.items, !items.isEmpty else {
-                print("No matching books found in the API response.")
-                return nil
-            }
-
-            guard let matchedBook = items.first(where: {
-                matchBook(
-                    bookInfo: $0.volumeInfo,
-                    title: title,
-                    author: author,
-                    publishedDate: publishedDate,
-                    inputISBN: inputISBN,
-                    publisher: publisher
-                )
-            }) else {
-                print("No books matched all input parameters.")
-                return nil
-            }
-
-            return constructBookData(from: matchedBook.volumeInfo)
         } catch {
-            print("Failed to fetch or decode data: \(error)")
-            return nil
+            print("Failed to fetch or parse Open Library data: \(error)")
         }
+        return nil
     }
-
-    private func constructBookData(from bookInfo: VolumeInfo) -> BookData {
+    
+    private func constructBookData(from bookInfo: VolumeInfo, userInputISBN: String?) -> BookData {
+        let selectedISBN = bookInfo.industryIdentifiers?.first(where: { $0.identifier == userInputISBN })?.identifier
+        ?? bookInfo.primaryISBN(userInputISBN: userInputISBN)
+        
         return BookData(
             title: bookInfo.fullTitle,
             author: bookInfo.authors?.joined(separator: ", ") ?? "",
-            published: bookInfo.parsedPublishedDate ?? Date(),
+            published: bookInfo.parsedPublishedDate,
             publisher: bookInfo.publisher,
             genre: bookInfo.primaryCategory,
             series: bookInfo.series,
-            isbn: bookInfo.primaryISBN,
+            isbn: selectedISBN,
             bookDescription: bookInfo.sanitizedDescription,
             status: .unread
         )
     }
-
+    
     func sanitizeExistingDescriptions() {
         books.forEach { book in
             if let description = book.bookDescription {
@@ -100,7 +150,7 @@ final class DataManager: ObservableObject {
         }
         saveChanges()
     }
-
+    
     func addBook(
         title: String,
         author: String,
@@ -126,17 +176,17 @@ final class DataManager: ObservableObject {
         modelContainer.mainContext.insert(newBook)
         saveChanges()
     }
-
+    
     func permanentlyDeleteBook(_ book: BookData) {
         modelContainer.mainContext.delete(book)
         saveChanges()
     }
-
+    
     func updateBookStatus(_ book: BookData, to status: ReadingStatus) {
         book.status = status
         saveChanges()
     }
-
+    
     private func saveChanges() {
         do {
             try modelContainer.mainContext.save()
