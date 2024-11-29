@@ -8,6 +8,7 @@ struct PageInputHelper: View {
         HStack(alignment: .center, spacing: 8) {
             Image(systemName: "number")
                 .frame(width: 20, height: 20)
+                .foregroundColor(.secondary)
             TextField("Page no. (e.g., 11 or 11-15)", text: Binding(
                 get: { pageNumber },
                 set: { pageNumber = filterPageNumberInput($0) }
