@@ -27,7 +27,7 @@ struct NotesSection: View {
                 title: "Notes",
                 onToggleCollapse: { isCollapsed.toggle() },
                 onEditToggle: { isEditing.toggle() },
-                isEditingDisabled: book.status == .deleted
+                isEditingDisabled: book.status == .deleted || (book.notes.isEmpty)
             )
             if !isCollapsed {
                 content
@@ -36,24 +36,34 @@ struct NotesSection: View {
         .padding(16)
         .cornerRadius(12)
         .animation(.easeInOut(duration: 0.25), value: isEditing)
+        .onChange(of: book.quotes) {
+            if notesArray.isEmpty {
+                isEditing = false
+            }
+        }
     }
     
     // MARK: Content
     private var content: some View {
         VStack(alignment: .leading, spacing: 8) {
-            ForEach(sortedNotesArray, id: \.self) { note in
-                let components = note.components(separatedBy: " [p. ")
-                let text = components.first ?? note
-                let pageNumber = components.count > 1 ? components.last?.replacingOccurrences(of: "]", with: "") : nil
-                
-                ItemDisplayRow(
-                    text: text,
-                    secondaryText: pageNumber.map { "\(PageInputHelper.pagePrefix(for: $0)) \($0)" },
-                    isEditing: isEditing,
-                    includeQuotes: false,
-                    customFont: nil,
-                    onRemove: { removeNote(note) }
-                )
+            if notesArray.isEmpty {
+                emptyStateView
+                    .transition(.opacity)
+            } else {
+                ForEach(sortedNotesArray, id: \.self) { note in
+                    let components = note.components(separatedBy: " [p. ")
+                    let text = components.first ?? note
+                    let pageNumber = components.count > 1 ? components.last?.replacingOccurrences(of: "]", with: "") : nil
+                    
+                    ItemDisplayRow(
+                        text: text,
+                        secondaryText: pageNumber.map { "\(PageInputHelper.pagePrefix(for: $0)) \($0)" },
+                        isEditing: isEditing,
+                        includeQuotes: false,
+                        customFont: nil,
+                        onRemove: { removeNote(note) }
+                    )
+                }
             }
             if isAddingNote {
                 addNoteForm
@@ -62,6 +72,21 @@ struct NotesSection: View {
                 addNoteButton
             }
         }
+        .animation(.easeInOut(duration: 0.25), value: notesArray.isEmpty)
+    }
+    
+    private var emptyStateView: some View {
+        VStack {
+            Image(systemName: "note")
+                .foregroundColor(.secondary)
+                .imageScale(.large)
+                .padding(.bottom, 8)
+            Text("No notes exist here yet.")
+                .foregroundColor(.secondary)
+                .font(.callout)
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding()
     }
     
     
@@ -92,12 +117,15 @@ struct NotesSection: View {
     private var addNoteForm: some View {
         ItemForm(
             text: $newNote,
-            supplementaryField: $newPageNumber,
-            textLabel: "Note Text",
-            supplementaryLabel: "Page no. (e.g., 11 or 11-15)",
+            supplementaryField: Binding<String?>(
+                get: { newPageNumber },
+                set: { newPageNumber = $0 ?? "" }
+            ),
+            textLabel: "Enter a note here",
             iconName: "note.text",
             onSave: saveNote,
-            onCancel: resetAddNoteForm
+            onCancel: resetAddNoteForm,
+            isSingleLine: false
         )
     }
     

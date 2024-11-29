@@ -27,7 +27,7 @@ struct QuotesSection: View {
                 title: "Quotes",
                 onToggleCollapse: { isCollapsed.toggle() },
                 onEditToggle: { isEditing.toggle() },
-                isEditingDisabled: book.status == .deleted
+                isEditingDisabled: book.status == .deleted || (book.quotes.isEmpty)
             )
             if !isCollapsed {
                 content
@@ -36,25 +36,36 @@ struct QuotesSection: View {
         .padding(16)
         .cornerRadius(12)
         .animation(.easeInOut(duration: 0.25), value: isEditing)
+        .onChange(of: book.quotes) {
+            if quotesArray.isEmpty {
+                isEditing = false
+            }
+        }
     }
     
     // MARK: Content
     private var content: some View {
         VStack(alignment: .leading, spacing: 8) {
-            ForEach(sortedQuotesArray, id: \.self) { quote in
-                let components = quote.components(separatedBy: " [p. ")
-                let text = components.first ?? quote
-                let pageNumber = components.count > 1 ? components.last?.replacingOccurrences(of: "]", with: "") : nil
-                
-                ItemDisplayRow(
-                    text: text,
-                    secondaryText: pageNumber.map { "\(PageInputHelper.pagePrefix(for: $0)) \($0)" },
-                    isEditing: isEditing,
-                    includeQuotes: true,
-                    customFont: .custom("Merriweather-Regular", size: 12, relativeTo: .body),
-                    onRemove: { removeQuote(quote) }
-                )
+            if quotesArray.isEmpty {
+                emptyStateView
+                    .transition(.opacity)
+            } else {
+                ForEach(sortedQuotesArray, id: \.self) { quote in
+                    let components = quote.components(separatedBy: " [p. ")
+                    let text = components.first ?? quote
+                    let pageNumber = components.count > 1 ? components.last?.replacingOccurrences(of: "]", with: "") : nil
+                    
+                    ItemDisplayRow(
+                        text: text,
+                        secondaryText: pageNumber.map { "\(PageInputHelper.pagePrefix(for: $0)) \($0)" },
+                        isEditing: isEditing,
+                        includeQuotes: true,
+                        customFont: .custom("Merriweather-Regular", size: 12, relativeTo: .body),
+                        onRemove: { removeQuote(quote) }
+                    )
+                }
             }
+            
             if isAddingQuote {
                 addQuoteForm
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
@@ -62,6 +73,21 @@ struct QuotesSection: View {
                 addQuoteButton
             }
         }
+        .animation(.easeInOut(duration: 0.25), value: quotesArray.isEmpty)
+    }
+    
+    private var emptyStateView: some View {
+        VStack {
+            Image(systemName: "quote.opening")
+                .foregroundColor(.secondary)
+                .imageScale(.large)
+                .padding(.bottom, 8)
+            Text("No quotes exist here yet.")
+                .foregroundColor(.secondary)
+                .font(.callout)
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding()
     }
     
     private var addQuoteButton: some View {
@@ -79,12 +105,15 @@ struct QuotesSection: View {
     private var addQuoteForm: some View {
         ItemForm(
             text: $newQuote,
-            supplementaryField: $newPageNumber,
-            textLabel: "Quote Text",
-            supplementaryLabel: "Page no. (e.g., 11 or 11-15)",
+            supplementaryField: Binding<String?>(
+                get: { newPageNumber },
+                set: { newPageNumber = $0 ?? "" }
+            ),
+            textLabel: "Enter a quote here",
             iconName: "text.quote",
             onSave: saveQuote,
-            onCancel: resetAddQuoteForm
+            onCancel: resetAddQuoteForm,
+            isSingleLine: false
         )
     }
     
