@@ -23,13 +23,26 @@ class BookData: Identifiable {
     var quotes: String
     var notes: String = ""
     var bookDescription: String?
-
+    
     @Attribute private var statusRawValue: String
     var status: ReadingStatus {
         get { ReadingStatus(rawValue: statusRawValue) ?? .unread }
         set { statusRawValue = newValue.rawValue }
     }
+    
+    @Attribute private var tagsData: Data?
 
+    // Computed property for working with tags as [String]
+    var tags: [String] {
+        get {
+            guard let data = tagsData else { return [] }
+            return (try? JSONDecoder().decode([String].self, from: data)) ?? []
+        }
+        set {
+            tagsData = try? JSONEncoder().encode(newValue)
+        }
+    }
+    
     init(
         title: String,
         author: String,
@@ -41,7 +54,8 @@ class BookData: Identifiable {
         bookDescription: String? = nil,
         status: ReadingStatus = .unread,
         quotes: String = "",
-        notes: String = ""
+        notes: String = "",
+        tags: [String] = []
     ) {
         self.title = title
         self.author = author
@@ -54,8 +68,9 @@ class BookData: Identifiable {
         self.statusRawValue = status.rawValue
         self.quotes = quotes
         self.notes = notes
+        self.tags = tags
     }
-
+    
     func updateDates(for newStatus: ReadingStatus) {
         switch newStatus {
         case .reading:
