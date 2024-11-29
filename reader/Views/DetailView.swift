@@ -16,6 +16,8 @@ struct DetailView: View {
                 bookStatusSection
                 bookDateInfoSection
                 Divider()
+                tagsSection
+                Divider()
                 quotesSection
                 Divider()
                 notesSection
@@ -72,6 +74,10 @@ struct DetailView: View {
             .foregroundColor(.secondary)
     }
     
+    private var tagsSection: some View {
+        TagsSection(book: book)
+    }
+    
     private var quotesSection: some View {
         QuotesSection(
             book: book,
@@ -87,7 +93,6 @@ struct DetailView: View {
             modelContext: modelContext
         )
     }
-    
     
     // MARK: - Helper Methods
     
