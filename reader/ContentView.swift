@@ -3,9 +3,9 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var dataManager: DataManager
+    @EnvironmentObject var viewModel: ContentViewModel
+
     @Environment(\.openWindow) private var openWindow
-    
-    @ObservedObject var viewModel: ContentViewModel
     
     @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
     

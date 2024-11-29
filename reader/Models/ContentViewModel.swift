@@ -10,23 +10,32 @@ final class ContentViewModel: ObservableObject {
     @Published var sortOption: SortOption = .title
     @Published var sortOrder: SortOrder = .ascending
     @Published var selectedBook: BookData?
+    @Published var selectedTags: Set<String> = []
     
     private var dataManager: DataManager
-
+    
     // Directly observe books from `DataManager`
     var books: [BookData] {
         dataManager.books
     }
-
+    
     init(dataManager: DataManager) {
         self.dataManager = dataManager
     }
-
+    
     // Computed property to apply filters and sorting
     var displayedBooks: [BookData] {
-        let filteredBooks = FilterHelper.applyStatusFilter(to: books, status: selectedStatus)
-        let searchedBooks = FilterHelper.applySearchFilter(to: filteredBooks, query: searchQuery)
-        return FilterHelper.applySorting(to: searchedBooks, option: sortOption, order: sortOrder)
+        let filteredByStatus = FilterHelper.applyStatusFilter(to: books, status: selectedStatus)
+        let filteredBySearch = FilterHelper.applySearchFilter(to: filteredByStatus, query: searchQuery)
+        
+        // Filter by selected tags
+        let filteredByTags = selectedTags.isEmpty
+        ? filteredBySearch
+        : filteredBySearch.filter { book in
+            !selectedTags.isDisjoint(with: book.tags)
+        }
+        
+        return FilterHelper.applySorting(to: filteredByTags, option: sortOption, order: sortOrder)
     }
     
     func bookCount(for status: StatusFilter) -> Int {
@@ -37,7 +46,7 @@ final class ContentViewModel: ObservableObject {
         dataManager.updateBookStatus(book, to: .deleted)
         book.updateDates(for: .deleted)
     }
-
+    
     func recoverBook(_ book: BookData) {
         dataManager.updateBookStatus(book, to: .unread)
         book.updateDates(for: .unread)

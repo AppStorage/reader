@@ -55,3 +55,9 @@ struct FilterHelper {
         return applyStatusFilter(to: books, status: status).count
     }
 }
+
+extension FilterHelper {
+    static func applyTagFilter(to books: [BookData], tag: String) -> [BookData] {
+        books.filter { $0.tags.contains(tag) }
+    }
+}
