@@ -7,6 +7,8 @@ struct readerApp: App {
     
     @StateObject private var appState = AppState()
     @StateObject private var dataManager: DataManager
+    @StateObject private var viewModel: ContentViewModel
+    
     @Environment(\.openWindow) private var openWindow
     
     @State private var isCheckingForUpdates = false
@@ -22,7 +24,9 @@ struct readerApp: App {
         guard let container = readerApp.sharedModelContainer else {
             fatalError("ModelContainer is not available.")
         }
-        _dataManager = StateObject(wrappedValue: DataManager(modelContainer: container))
+        let dataManager = DataManager(modelContainer: container)
+        _dataManager = StateObject(wrappedValue: dataManager)
+        _viewModel = StateObject(wrappedValue: ContentViewModel(dataManager: dataManager))
     }
     
     var body: some Scene {
@@ -35,7 +39,8 @@ struct readerApp: App {
     // MARK: - Main Window
     private var mainWindow: some Scene {
         WindowGroup {
-            ContentView(viewModel: ContentViewModel(dataManager: dataManager))
+            ContentView()
+                .environmentObject(viewModel)
                 .environmentObject(appState)
                 .environmentObject(dataManager)
                 .environment(\.modelContainer, readerApp.sharedModelContainer!)
