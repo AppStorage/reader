@@ -1,6 +1,13 @@
 import SwiftUI
 import Foundation
 
+enum ReadingStatus: String {
+    case unread
+    case reading
+    case read
+    case deleted
+}
+
 enum SortOption {
     case title
     case author
@@ -10,11 +17,6 @@ enum SortOption {
 enum SortOrder {
     case ascending
     case descending
-}
-
-enum ToolbarMode {
-    case standardMode
-    case editMode
 }
 
 enum Field: Hashable {

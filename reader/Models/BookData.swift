@@ -1,13 +1,6 @@
 import SwiftData
 import Foundation
 
-enum ReadingStatus: String {
-    case unread
-    case reading
-    case read
-    case deleted
-}
-
 @Model
 class BookData: Identifiable {
     @Attribute(.unique) var id: UUID = UUID()
