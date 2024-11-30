@@ -16,7 +16,7 @@ struct ItemForm: View {
             VStack(spacing: 12) {
                 textInputSection
                 if supplementaryField != nil {
-                    PageInputHelper(pageNumber: Binding(
+                    PageNumberInput(pageNumber: Binding(
                         get: { supplementaryField ?? "" },
                         set: { supplementaryField = $0.isEmpty ? nil : $0 }
                     ))

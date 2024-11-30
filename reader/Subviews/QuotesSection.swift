@@ -57,7 +57,7 @@ struct QuotesSection: View {
                     
                     ItemDisplayRow(
                         text: text,
-                        secondaryText: pageNumber.map { "\(PageInputHelper.pagePrefix(for: $0)) \($0)" },
+                        secondaryText: pageNumber.map { "\(PageNumberInput.pagePrefix(for: $0)) \($0)" },
                         isEditing: isEditing,
                         includeQuotes: true,
                         customFont: .custom("Merriweather-Regular", size: 12, relativeTo: .body),
@@ -142,8 +142,8 @@ struct QuotesSection: View {
     
     private var sortedQuotesArray: [String] {
         quotesArray.sorted { quote1, quote2 in
-            let page1 = PageInputHelper.extractPageNumber(from: quote1) ?? Int.max
-            let page2 = PageInputHelper.extractPageNumber(from: quote2) ?? Int.max
+            let page1 = PageNumberInput.extractPageNumber(from: quote1) ?? Int.max
+            let page2 = PageNumberInput.extractPageNumber(from: quote2) ?? Int.max
             return page1 < page2
         }
     }

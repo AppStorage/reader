@@ -57,7 +57,7 @@ struct NotesSection: View {
                     
                     ItemDisplayRow(
                         text: text,
-                        secondaryText: pageNumber.map { "\(PageInputHelper.pagePrefix(for: $0)) \($0)" },
+                        secondaryText: pageNumber.map { "\(PageNumberInput.pagePrefix(for: $0)) \($0)" },
                         isEditing: isEditing,
                         includeQuotes: false,
                         customFont: nil,
@@ -154,8 +154,8 @@ struct NotesSection: View {
     
     private var sortedNotesArray: [String] {
         notesArray.sorted { note1, note2 in
-            let page1 = PageInputHelper.extractPageNumber(from: note1) ?? Int.max
-            let page2 = PageInputHelper.extractPageNumber(from: note2) ?? Int.max
+            let page1 = PageNumberInput.extractPageNumber(from: note1) ?? Int.max
+            let page2 = PageNumberInput.extractPageNumber(from: note2) ?? Int.max
             return page1 < page2
         }
     }

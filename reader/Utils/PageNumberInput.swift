@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct PageInputHelper: View {
+struct PageNumberInput: View {
     @Binding var pageNumber: String
     @FocusState private var isFocused: Bool
 
