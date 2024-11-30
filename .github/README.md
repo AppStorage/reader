@@ -5,9 +5,9 @@
 
 ![Platform](https://img.shields.io/badge/platform-macOS-blue?style=flat)
 ![Requirements](https://img.shields.io/badge/requirements-macOS%2014%2B-fa4e49?style=flat)
-[![Download Latest](https://img.shields.io/badge/download-latest-brightgreen?style=flat)](https://github.com/chippokiddo/reader/releases/latest)
-![Downloads](https://img.shields.io/github/downloads/chippokiddo/reader/total)
+[![Downloads](https://img.shields.io/github/downloads/chippokiddo/reader/total)](https://github.com/chippokiddo/reader/releases/latest)
 [![License](https://img.shields.io/github/license/chippokiddo/reader)](../LICENSE)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?&logo=buy-me-a-coffee&logoColor=0D0C22)](https://buymeacoffee.com/chippo)
 
 reader is a simple book library and reading tracker app for macOS, designed and developed in Swift. It was purposefully built for personal use and to share with a friend, making it easier to manage book collections and track reading progress.
 
@@ -78,17 +78,18 @@ If you'd like to compile the app yourself, follow these steps:
    .
    └── reader/
        ├── Assets.xcassets
-       ├── Configurations
+       ├── Components/
+       ├── Configurations/
        ├── ContentView.swift
-       ├── Helpers
+       ├── Helpers/
        ├── Info.plist
        ├── Merriweather
-       ├── Models
+       ├── Models/
        ├── Preview Content
        ├── reader.entitlements
-       ├── Subviews
-       ├── Utils
-       └── Views
+       ├── Subviews/
+       ├── Utils/
+       └── Views/
    ```
 
 5. Add Your Google Books API Key
