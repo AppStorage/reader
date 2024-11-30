@@ -56,10 +56,23 @@ final class ContentViewModel: ObservableObject {
     
     func permanentlyDeleteBook(_ book: BookData) {
         let wasDeletedFilter = selectedStatus == .deleted  // Check if current filter is deleted
+        
+        // Remove the book from the local list (update the in-memory collection)
+        if let index = books.firstIndex(where: { $0.id == book.id }) {
+            books.remove(at: index)
+        }
+        
+        // Call DataManager to handle permanent deletion from storage
         dataManager.permanentlyDeleteBook(book)
+        
         // Reapply the deleted filter if it was previously selected
         if wasDeletedFilter {
             selectedStatus = .deleted
+        }
+        
+        // Clear the selection if the book was being viewed in DetailView
+        if let selectedBook = self.selectedBook, selectedBook.id == book.id {
+            self.selectedBook = nil
         }
     }
 }
