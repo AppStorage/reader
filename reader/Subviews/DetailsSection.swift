@@ -7,11 +7,9 @@ struct DetailsSection: View {
     @Binding var series: String
     @Binding var isbn: String
     @Binding var publisher: String
-    @Binding var month: String
-    @Binding var day: String
-    @Binding var year: String
+    @Binding var formattedDate: String
     @Binding var description: String
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
@@ -41,18 +39,19 @@ struct DetailsSection: View {
                     .font(.subheadline)
                     .foregroundColor(.gray)
             }
-            if !month.isEmpty || !day.isEmpty || !year.isEmpty {
-                Text("Published: \(month)\(day.isEmpty ? "" : "/\(day)")\(year.isEmpty ? "" : "/\(year)")")
+            if !formattedDate.isEmpty {
+                Text("Published: \(formattedDate)")
                     .font(.subheadline)
                     .foregroundColor(.gray)
             }
-            if !description.isEmpty {  // Display description if not empty
+            if !description.isEmpty {
                 Text(description)
                     .font(.body)
                     .foregroundColor(.primary)
                     .multilineTextAlignment(.leading)
                     .lineSpacing(4)
                     .padding(.top, 10)
+                
             }
         }
     }

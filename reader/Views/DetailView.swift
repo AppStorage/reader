@@ -2,10 +2,11 @@ import SwiftUI
 import SwiftData
 
 struct DetailView: View {
+    @Bindable var book: BookData
+    
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
     
-    @Bindable var book: BookData
     @State private var newQuote: String = ""
     @State private var newNote: String = ""
     
@@ -36,10 +37,11 @@ struct DetailView: View {
             series: .constant(book.series ?? ""),
             isbn: .constant(book.isbn ?? ""),
             publisher: .constant(book.publisher ?? ""),
-            month: .constant(DetailHelper.formattedMonth(from: book)),
-            day: .constant(DetailHelper.formattedDay(from: book)),
-            year: .constant(DetailHelper.formattedYear(from: book)),
-            description: .constant(book.bookDescription ?? "")
+            formattedDate: .constant(formattedDate),
+            description: Binding(
+                get: { book.bookDescription ?? "" },
+                set: { book.bookDescription = $0 }
+            )
         )
     }
     
@@ -52,7 +54,7 @@ struct DetailView: View {
                     handleStatusChange(newStatus)
                 }
             ),
-            statusColor: DetailHelper.statusColor(for: book.status)
+            statusColor: statusColor(for: book.status)
         )
     }
     
@@ -96,10 +98,29 @@ struct DetailView: View {
     
     // MARK: - Helper Methods
     
+    private var formattedDate: String {
+        guard let published = book.published else { return "" }
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium // User's locale preferences
+        dateFormatter.timeStyle = .none  // Only show the date
+
+        return dateFormatter.string(from: published)
+    }
+    
     private func handleStatusChange(_ newStatus: ReadingStatus) {
         DispatchQueue.main.async {
             updateBookDates(for: newStatus)
             saveBookStatusChange()
+        }
+    }
+    
+    private func statusColor(for status: ReadingStatus) -> Color {
+        switch status {
+        case .unread: return .gray
+        case .reading: return .blue
+        case .read: return .green
+        case .deleted: return .red
         }
     }
     
