@@ -11,16 +11,18 @@ final class ContentViewModel: ObservableObject {
     @Published var sortOrder: SortOrder = .ascending
     @Published var selectedBook: BookData?
     @Published var selectedTags: Set<String> = []
+    @Published private(set) var books: [BookData] = []
     
+    private var cancellables = Set<AnyCancellable>()
     private var dataManager: DataManager
-    
-    // Directly observe books from `DataManager`
-    var books: [BookData] {
-        dataManager.books
-    }
     
     init(dataManager: DataManager) {
         self.dataManager = dataManager
+        
+        // Observe books in DataManager and update local books property
+        dataManager.$books
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$books)
     }
     
     // Computed property to apply filters and sorting
