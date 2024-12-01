@@ -16,15 +16,28 @@ func parseDate(_ dateString: String?) -> Date? {
     return nil
 }
 
-// Sanitizes a description by removing basic HTML-like elements
 func sanitizeDescription(_ description: String?) -> String? {
     guard let description = description else { return nil }
-    return description
+    
+    var sanitized = description
         .replacingOccurrences(of: "<br>", with: "\n")
         .replacingOccurrences(of: "</p>", with: "\n")
         .replacingOccurrences(of: "<p>", with: "")
         .replacingOccurrences(of: "&nbsp;", with: " ")
         .replacingOccurrences(of: "&amp;", with: "&")
+        .replacingOccurrences(of: "&quot;", with: "\"")
+        .replacingOccurrences(of: "&#39;", with: "'")
+    
+    if let regex = try? NSRegularExpression(pattern: "<[^>]+>", options: []) {
+        sanitized = regex.stringByReplacingMatches(
+            in: sanitized,
+            options: [],
+            range: NSRange(location: 0, length: sanitized.utf16.count),
+            withTemplate: ""
+        )
+    }
+    
+    return sanitized.trimmingCharacters(in: .whitespacesAndNewlines)
 }
 
 // Constructs a Google Books API query URL from query parameters
