@@ -4,7 +4,7 @@ struct ContentView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var dataManager: DataManager
     @EnvironmentObject var viewModel: ContentViewModel
-
+    
     @Environment(\.openWindow) private var openWindow
     
     @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
@@ -13,7 +13,6 @@ struct ContentView: View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             SidebarView(viewModel: viewModel)
                 .frame(width: 200)
-                .layoutPriority(0)
         } content: {
             MiddlePanelView(viewModel: viewModel)
                 .frame(minWidth: 400, maxWidth: .infinity)
@@ -30,10 +29,10 @@ struct ContentView: View {
     private var detailView: some View {
         if let selectedBook = viewModel.selectedBook {
             DetailView(book: selectedBook)
-                .frame(width: 450)
+                .frame(minWidth: 450, maxWidth: .infinity)
         } else {
             EmptyDetailView()
-                .frame(width: 450)
+                .frame(minWidth: 450, maxWidth: .infinity)
         }
     }
     
