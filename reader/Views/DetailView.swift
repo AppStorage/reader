@@ -27,8 +27,7 @@ struct DetailView: View {
         }
     }
     
-    // MARK: - Subviews
-    
+    // MARK: - Details Section
     private var bookDetailsSection: some View {
         DetailsSection(
             title: .constant(book.title),
@@ -37,14 +36,17 @@ struct DetailView: View {
             series: .constant(book.series ?? ""),
             isbn: .constant(book.isbn ?? ""),
             publisher: .constant(book.publisher ?? ""),
-            formattedDate: .constant(formattedDate),
+            formattedDate: .constant(formatDate(book.published)),
             description: Binding(
-                get: { book.bookDescription ?? "" },
-                set: { book.bookDescription = $0 }
+                get: { sanitizeDescription(book.bookDescription) ?? "" },
+                set: { newDescription in
+                    book.bookDescription = sanitizeDescription(newDescription)
+                }
             )
         )
     }
     
+    // MARK: - Status Section
     private var bookStatusSection: some View {
         StatusSection(
             status: Binding<ReadingStatus>(
@@ -71,15 +73,17 @@ struct DetailView: View {
     }
     
     private func dateTextView(label: String, date: Date) -> some View {
-        Text("\(label): \(formattedDate(date))")
+        Text("\(label): \(formatDate(date))")
             .font(.subheadline)
             .foregroundColor(.secondary)
     }
     
+    // MARK: - Tags Section
     private var tagsSection: some View {
         TagsSection(book: book)
     }
     
+    // MARK: - Quotes Section
     private var quotesSection: some View {
         QuotesSection(
             book: book,
@@ -88,6 +92,7 @@ struct DetailView: View {
         )
     }
     
+    // MARK: - Notes Section
     private var notesSection: some View {
         NotesSection(
             book: book,
@@ -96,18 +101,7 @@ struct DetailView: View {
         )
     }
     
-    // MARK: - Helper Methods
-    
-    private var formattedDate: String {
-        guard let published = book.published else { return "" }
-
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .medium // User's locale preferences
-        dateFormatter.timeStyle = .none  // Only show the date
-
-        return dateFormatter.string(from: published)
-    }
-    
+    // MARK: - Helper Functions
     private func handleStatusChange(_ newStatus: ReadingStatus) {
         DispatchQueue.main.async {
             updateBookDates(for: newStatus)
@@ -127,20 +121,31 @@ struct DetailView: View {
     private func updateBookDates(for newStatus: ReadingStatus) {
         switch newStatus {
         case .unread:
-            book.dateStarted = nil
-            book.dateFinished = nil
+            resetBookDates()
         case .reading:
-            book.dateStarted = book.dateStarted ?? Date()
-            book.dateFinished = nil
+            startReading()
         case .read:
-            if book.dateStarted == nil {
-                book.dateStarted = Date()
-            }
-            book.dateFinished = Date()
+            finishReading()
         case .deleted:
-            book.dateStarted = nil
-            book.dateFinished = nil
+            resetBookDates()
         }
+    }
+    
+    private func resetBookDates() {
+        book.dateStarted = nil
+        book.dateFinished = nil
+    }
+    
+    private func startReading() {
+        book.dateStarted = book.dateStarted ?? Date()
+        book.dateFinished = nil
+    }
+    
+    private func finishReading() {
+        if book.dateStarted == nil {
+            book.dateStarted = Date()
+        }
+        book.dateFinished = Date()
     }
     
     private func saveBookStatusChange() {
@@ -152,9 +157,13 @@ struct DetailView: View {
         }
     }
     
-    private func formattedDate(_ date: Date) -> String {
+    private func formatDate(_ date: Date?) -> String {
+        guard let date = date else { return "" }
+        
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        
         return formatter.string(from: date)
     }
 }
