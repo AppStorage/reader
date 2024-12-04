@@ -29,7 +29,7 @@ struct ItemDisplayRow: View {
             .font(customFont ?? .body)
             .multilineTextAlignment(.leading)
             .padding(10)
-            .frame(width: 275, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.gray.opacity(0.1))
