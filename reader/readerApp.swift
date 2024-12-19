@@ -3,8 +3,6 @@ import SwiftData
 
 @main
 struct readerApp: App {
-    private static let sharedModelContainer = createModelContainer()
-    
     @StateObject private var appState = AppState()
     @StateObject private var dataManager: DataManager
     @StateObject private var viewModel: ContentViewModel
@@ -16,9 +14,14 @@ struct readerApp: App {
     @State private var downloadURL: URL?
     @State private var alertType: AlertType? = nil
     
-    @AppStorage("checkForUpdatesAutomatically") private var checkForUpdatesAutomatically: Bool = false
-    
-    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    private static let sharedModelContainer: ModelContainer? = {
+        let schema = Schema([BookData.self])
+        do {
+            return try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)])
+        } catch {
+            return nil
+        }
+    }()
     
     init() {
         guard let container = readerApp.sharedModelContainer else {
@@ -41,7 +44,6 @@ struct readerApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(viewModel)
-                .environmentObject(appState)
                 .environmentObject(dataManager)
                 .environment(\.modelContainer, readerApp.sharedModelContainer!)
                 .alert(item: $alertType, content: createAlert)
@@ -62,11 +64,13 @@ struct readerApp: App {
                 Button("Check for Updates") {
                     checkForAppUpdates(isUserInitiated: true)
                 }
+                .disabled(isCheckingForUpdates)
             }
             CommandGroup(after: .appInfo) {
-                Button("Settings") {
+                Button("Settings...") {
                     openWindow(id: "settingsWindow")
                 }
+                .keyboardShortcut(",", modifiers: .command)
             }
         }
     }
@@ -75,6 +79,9 @@ struct readerApp: App {
     private var aboutWindow: some Scene {
         Window("About reader", id: "aboutWindow") {
             AboutView()
+                .onDisappear {
+                    releaseAboutWindowResources()
+                }
         }
         .windowStyle(HiddenTitleBarWindowStyle())
         .windowResizability(.contentSize)
@@ -87,6 +94,9 @@ struct readerApp: App {
                 checkForAppUpdates(isUserInitiated: true)
             })
             .environmentObject(appState)
+            .onDisappear {
+                releaseSettingsWindowResources()
+            }
         }
         .windowStyle(HiddenTitleBarWindowStyle())
         .windowResizability(.contentSize)
@@ -98,6 +108,9 @@ struct readerApp: App {
             AddView()
                 .environmentObject(dataManager)
                 .environmentObject(appState)
+                .onDisappear {
+                    releaseAddBookWindowResources()
+                }
         }
         .windowStyle(HiddenTitleBarWindowStyle())
         .windowResizability(.contentSize)
@@ -123,6 +136,12 @@ struct readerApp: App {
                 message: Text("You are already on the latest version."),
                 dismissButton: .default(Text("OK"))
             )
+        case .error(let errorDetails):
+            return Alert(
+                title: Text("Error"),
+                message: Text(errorDetails),
+                dismissButton: .default(Text("OK"))
+            )
         }
     }
     
@@ -133,7 +152,7 @@ struct readerApp: App {
     }
     
     private func scheduleDailyUpdateCheck() {
-        guard checkForUpdatesAutomatically else { return }
+        guard appState.checkForUpdatesAutomatically else { return }
         
         let lastUpdateCheck = UserDefaults.standard.object(forKey: "lastUpdateCheck") as? Date ?? .distantPast
         let now = Date()
@@ -144,19 +163,9 @@ struct readerApp: App {
         }
     }
     
-    private static func createModelContainer() -> ModelContainer? {
-        let schema = Schema([BookData.self])
-        do {
-            return try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)])
-        } catch {
-            print("Error: Could not create ModelContainer - \(error)")
-            return nil
-        }
-    }
-    
-    // Consolidated Update Check
+    // MARK: - Update Check
     private func checkForAppUpdates(isUserInitiated: Bool) {
-        appState.isCheckingForUpdates = true
+        isCheckingForUpdates = true
         
         Task {
             do {
@@ -171,10 +180,12 @@ struct readerApp: App {
                     alertType = .upToDate
                 }
             } catch {
-                print("Failed to check for updates: \(error.localizedDescription)")
+                if isUserInitiated {
+                    alertType = .error("Update Check Failed: \(error.localizedDescription)")
+                }
             }
             
-            appState.isCheckingForUpdates = false
+            isCheckingForUpdates = false
         }
     }
     
@@ -188,5 +199,31 @@ struct readerApp: App {
         }
         
         return newComponents.count > currentComponents.count
+    }
+    
+    // MARK: - Cleanup Functions
+    private func releaseAddBookWindowResources() {
+        appState.cleanupAddBookTemporaryState()
+        dataManager.clearTemporaryData()
+    }
+    
+    private func releaseSettingsWindowResources() {
+        appState.cleanupTemporarySettings()
+    }
+    
+    private func releaseAboutWindowResources() {
+    }
+}
+
+extension AppState {
+    func cleanupAddBookTemporaryState() {
+    }
+
+    func cleanupTemporarySettings() {
+    }
+}
+
+extension DataManager {
+    func clearTemporaryData() {
     }
 }
