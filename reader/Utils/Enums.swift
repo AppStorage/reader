@@ -32,11 +32,13 @@ enum Field: Hashable {
 enum AlertType: Identifiable {
     case newUpdateAvailable
     case upToDate
+    case error(String)
     
-    var id: Int {
+    var id: String {
         switch self {
-        case .newUpdateAvailable: return 1
-        case .upToDate: return 2
+        case .newUpdateAvailable: return "newUpdateAvailable"
+        case .upToDate: return "upToDate"
+        case .error: return "error"
         }
     }
 }
@@ -87,4 +89,10 @@ enum StatusFilter: String, CaseIterable, Identifiable {
             return .red.opacity(0.7)
         }
     }
+}
+
+enum GitHubReleaseError: Error {
+    case noAssetsAvailable
+    case invalidResponse
+    case decodingError(String)
 }
