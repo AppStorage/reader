@@ -19,7 +19,7 @@ struct readerApp: App {
         do {
             return try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)])
         } catch {
-            return nil
+            fatalError("Failed to initialize ModelContainer: \(error)")
         }
     }()
     
@@ -203,8 +203,7 @@ struct readerApp: App {
     
     // MARK: - Cleanup Functions
     private func releaseAddBookWindowResources() {
-        appState.cleanupAddBookTemporaryState()
-        dataManager.clearTemporaryData()
+        dataManager.clearTemporaryAddBookData()
     }
     
     private func releaseSettingsWindowResources() {
@@ -212,18 +211,6 @@ struct readerApp: App {
     }
     
     private func releaseAboutWindowResources() {
-    }
-}
-
-extension AppState {
-    func cleanupAddBookTemporaryState() {
-    }
-
-    func cleanupTemporarySettings() {
-    }
-}
-
-extension DataManager {
-    func clearTemporaryData() {
+        appState.clearAboutCache()
     }
 }

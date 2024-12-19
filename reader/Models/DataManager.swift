@@ -12,12 +12,15 @@ final class DataManager: ObservableObject {
         }
         return key
     }()
-    
+
+    // Temporary data for adding books
+    var temporaryAddBookData: [String: Any] = [:]
+
     init(modelContainer: ModelContainer) {
         self.modelContainer = modelContainer
         fetchBooks()
     }
-    
+
     func fetchBooks() {
         do {
             books = try modelContainer.mainContext.fetch(FetchDescriptor<BookData>())
@@ -25,7 +28,7 @@ final class DataManager: ObservableObject {
             books = []
         }
     }
-    
+
     func fetchBookData(
         title: String,
         author: String,
@@ -38,14 +41,14 @@ final class DataManager: ObservableObject {
             "intitle": title,
             "inauthor": author
         ]
-        
+
         if let inputISBN = inputISBN?.trimmingCharacters(in: .whitespacesAndNewlines), !inputISBN.isEmpty {
             queryParameters["isbn"] = inputISBN
         }
         if let publisher = publisher?.trimmingCharacters(in: .whitespacesAndNewlines), !publisher.isEmpty {
             queryParameters["publisher"] = publisher
         }
-        
+
         // Try Google Books API first
         if let url = constructQueryURL(apiKey: apiKey, queryParameters: queryParameters) {
             do {
@@ -63,7 +66,7 @@ final class DataManager: ObservableObject {
                             publisher: publisher
                         )
                     }
-                    
+
                     // Return the best match or the first result
                     if let bestMatch = exactMatches.first ?? items.first {
                         return constructBookData(from: bestMatch.volumeInfo, userInputISBN: inputISBN)
@@ -73,11 +76,11 @@ final class DataManager: ObservableObject {
                 print("Failed to fetch or parse Google Books data: \(error)")
             }
         }
-        
+
         // Fallback to Open Library if Google Books fails
         return await fetchBookFromOpenLibrary(title: title, author: author, inputISBN: inputISBN)
     }
-    
+
     func fetchBookFromOpenLibrary(
         title: String? = nil,
         author: String? = nil,
@@ -93,19 +96,19 @@ final class DataManager: ObservableObject {
             print("Open Library requires at least a title or an ISBN.")
             return nil
         }
-        
+
         let urlString = inputISBN != nil
         ? "https://openlibrary.org/api/books?\(query)&format=json&jscmd=data"
         : "https://openlibrary.org/search.json?\(query)"
-        
+
         guard let url = URL(string: urlString) else {
             print("Invalid Open Library URL.")
             return nil
         }
-        
+
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
-            
+
             if inputISBN != nil {
                 // Parse the response for ISBN queries
                 if let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any],
@@ -124,11 +127,11 @@ final class DataManager: ObservableObject {
         }
         return nil
     }
-    
+
     private func constructBookData(from bookInfo: VolumeInfo, userInputISBN: String?) -> BookData {
         let selectedISBN = bookInfo.industryIdentifiers?.first(where: { $0.identifier == userInputISBN })?.identifier
         ?? bookInfo.primaryISBN(userInputISBN: userInputISBN)
-        
+
         return BookData(
             title: bookInfo.fullTitle,
             author: bookInfo.authors?.joined(separator: ", ") ?? "",
@@ -141,7 +144,7 @@ final class DataManager: ObservableObject {
             status: .unread
         )
     }
-    
+
     func sanitizeExistingDescriptions() {
         books.forEach { book in
             if let description = book.bookDescription {
@@ -150,7 +153,7 @@ final class DataManager: ObservableObject {
         }
         saveChanges()
     }
-    
+
     func addBook(
         title: String,
         author: String,
@@ -176,17 +179,21 @@ final class DataManager: ObservableObject {
         modelContainer.mainContext.insert(newBook)
         saveChanges()
     }
-    
+
     func permanentlyDeleteBook(_ book: BookData) {
         modelContainer.mainContext.delete(book)
         saveChanges()
     }
-    
+
     func updateBookStatus(_ book: BookData, to status: ReadingStatus) {
         book.status = status
         saveChanges()
     }
-    
+
+    func clearTemporaryAddBookData() {
+        temporaryAddBookData.removeAll()
+    }
+
     private func saveChanges() {
         do {
             try modelContainer.mainContext.save()

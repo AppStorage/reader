@@ -14,6 +14,10 @@ class AppState: ObservableObject {
     
     @Published var isCheckingForUpdates: Bool = false
     
+    // Temporary states
+    var temporarySettings: [String: Any] = [:]
+    var aboutCache: [String: Any] = [:]
+
     init() {
         DispatchQueue.main.async {
             self.selectedTheme = Theme(rawValue: self.storedTheme) ?? .system
@@ -30,5 +34,13 @@ class AppState: ObservableObject {
         case .light:
             NSApp.appearance = NSAppearance(named: .aqua)
         }
+    }
+
+    func cleanupTemporarySettings() {
+        temporarySettings.removeAll()
+    }
+
+    func clearAboutCache() {
+        aboutCache.removeAll()
     }
 }
