@@ -2,8 +2,11 @@ import SwiftUI
 
 struct SidebarView: View {
     @ObservedObject var viewModel: ContentViewModel
+    @StateObject private var appState = AppState()
+    
     @Environment(\.openWindow) private var openWindow
     @Environment(\.colorScheme) private var colorScheme
+    
     @State private var isHovered = false
     
     var body: some View {
@@ -35,7 +38,11 @@ struct SidebarView: View {
     
     // Settings button at the bottom
     private var SettingsButton: some View {
-        Button(action: { openWindow(id: "settingsWindow") }) {
+        Button(action: {
+            readerApp.showSettingsWindow(appState: appState) {
+                appState.checkForAppUpdates(isUserInitiated: true)
+            }
+        }) {
             Image(systemName: "gear")
                 .font(.system(size: 16, weight: .regular))
                 .frame(width: 24, height: 24)
@@ -47,8 +54,8 @@ struct SidebarView: View {
         }
         .buttonStyle(.borderless)
         .padding([.leading, .bottom], 10)
-        .accessibilityLabel("Settings")
-        .help("Settings")
+        .accessibilityLabel(Text("Preferences"))
+        .help(Text("Preferences"))
         .onHover { hovering in
             isHovered = hovering
         }
