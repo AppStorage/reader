@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Settings
 
 @main
 struct readerApp: App {
@@ -9,10 +10,9 @@ struct readerApp: App {
     
     @Environment(\.openWindow) private var openWindow
     
-    @State private var isCheckingForUpdates = false
-    @State private var latestVersion: String = ""
-    @State private var downloadURL: URL?
     @State private var alertType: AlertType? = nil
+    
+    private static var preferencesWindow: SettingsWindowController?
     
     private static let sharedModelContainer: ModelContainer? = {
         let schema = Schema([BookData.self])
@@ -24,6 +24,9 @@ struct readerApp: App {
     }()
     
     init() {
+        // Disable tabs
+        NSWindow.allowsAutomaticWindowTabbing = false
+        
         guard let container = readerApp.sharedModelContainer else {
             fatalError("ModelContainer is not available.")
         }
@@ -34,8 +37,6 @@ struct readerApp: App {
     
     var body: some Scene {
         mainWindow
-        aboutWindow
-        settingsWindow
         addBookWindow
     }
     
@@ -46,7 +47,9 @@ struct readerApp: App {
                 .environmentObject(viewModel)
                 .environmentObject(dataManager)
                 .environment(\.modelContainer, readerApp.sharedModelContainer!)
-                .alert(item: $alertType, content: createAlert)
+                .alert(item: $appState.alertType) { alertType in
+                    alertType.createAlert(appState: appState)
+                }
                 .onAppear {
                     handleOnAppear()
                 }
@@ -55,51 +58,80 @@ struct readerApp: App {
                 }
         }
         .commands {
-            CommandGroup(replacing: .appInfo) {
-                Button("About reader") {
-                    openWindow(id: "aboutWindow")
-                }
-            }
+            CommandGroup(replacing: .newItem) { }
+            CommandGroup(replacing: .appInfo) { }
             CommandGroup(after: .appInfo) {
                 Button("Check for Updates") {
-                    checkForAppUpdates(isUserInitiated: true)
+                    appState.checkForAppUpdates(isUserInitiated: true)
                 }
-                .disabled(isCheckingForUpdates)
+                .disabled(appState.isCheckingForUpdates)
             }
-            CommandGroup(after: .appInfo) {
-                Button("Settings...") {
-                    openWindow(id: "settingsWindow")
+            CommandGroup(replacing: .appSettings) {
+                Button("Preferences...") {
+                    readerApp.showSettingsWindow(appState: appState) {
+                        appState.checkForAppUpdates(isUserInitiated: true)
+                    }
                 }
                 .keyboardShortcut(",", modifiers: .command)
             }
         }
     }
     
-    // MARK: - About Window
-    private var aboutWindow: some Scene {
-        Window("About reader", id: "aboutWindow") {
-            AboutView()
-                .onDisappear {
-                    releaseAboutWindowResources()
-                }
+    // MARK: - Preferences Window
+    static func showSettingsWindow(appState: AppState, checkForUpdates: @escaping () -> Void) {
+        if preferencesWindow == nil {
+            let settingsView = SettingsView(checkForUpdates: {
+                checkForUpdates()
+            }).environmentObject(appState)
+            
+            let aboutView = AboutView().environmentObject(appState)
+            
+            preferencesWindow = SettingsWindowController(
+                panes: [
+                    Settings.Pane(
+                        identifier: Settings.PaneIdentifier("general"),
+                        title: "General",
+                        toolbarIcon: {
+                            let originalImage = NSImage(named: "squareGear")!
+                            let paddedSize = NSSize(width: 24, height: 24)
+                            let innerSize = NSSize(width: 18, height: 18)
+                            
+                            let paddedImage = NSImage(size: paddedSize)
+                            paddedImage.lockFocus()
+                            
+                            let xOffset = (paddedSize.width - innerSize.width) / 2
+                            let yOffset = (paddedSize.height - innerSize.height) / 2
+                            originalImage.draw(
+                                in: NSRect(x: xOffset, y: yOffset, width: innerSize.width, height: innerSize.height),
+                                from: .zero,
+                                operation: .sourceOver,
+                                fraction: 1.0
+                            )
+                            
+                            paddedImage.unlockFocus()
+                            paddedImage.isTemplate = true
+                            return paddedImage
+                        }()
+                    ) {
+                        settingsView
+                    },
+                    Settings.Pane(
+                        identifier: Settings.PaneIdentifier("about"),
+                        title: "About",
+                        toolbarIcon: {
+                            let config = NSImage.SymbolConfiguration(pointSize: 24, weight: .regular)
+                            return NSImage(
+                                systemSymbolName: "info.square.fill",
+                                accessibilityDescription: nil
+                            )!.withSymbolConfiguration(config)!
+                        }()
+                    ) {
+                        aboutView
+                    }
+                ]
+            )
         }
-        .windowStyle(HiddenTitleBarWindowStyle())
-        .windowResizability(.contentSize)
-    }
-    
-    // MARK: - Settings Window
-    private var settingsWindow: some Scene {
-        Window("Settings", id: "settingsWindow") {
-            SettingsView(checkForUpdates: {
-                checkForAppUpdates(isUserInitiated: true)
-            })
-            .environmentObject(appState)
-            .onDisappear {
-                releaseSettingsWindowResources()
-            }
-        }
-        .windowStyle(HiddenTitleBarWindowStyle())
-        .windowResizability(.contentSize)
+        preferencesWindow?.show()
     }
     
     // MARK: - Add Book Window
@@ -116,101 +148,14 @@ struct readerApp: App {
         .windowResizability(.contentSize)
     }
     
-    // MARK: - Update Alerts
-    private func createAlert(for alertType: AlertType) -> Alert {
-        switch alertType {
-        case .newUpdateAvailable:
-            return Alert(
-                title: Text("New Update Available"),
-                message: Text("reader \(latestVersion) is available. Would you like to download it?"),
-                primaryButton: .default(Text("Download")) {
-                    if let downloadURL = downloadURL {
-                        NSWorkspace.shared.open(downloadURL)
-                    }
-                },
-                secondaryButton: .cancel(Text("Later"))
-            )
-        case .upToDate:
-            return Alert(
-                title: Text("No Updates Available"),
-                message: Text("You are already on the latest version."),
-                dismissButton: .default(Text("OK"))
-            )
-        case .error(let errorDetails):
-            return Alert(
-                title: Text("Error"),
-                message: Text(errorDetails),
-                dismissButton: .default(Text("OK"))
-            )
-        }
-    }
-    
-    // MARK: - Helper Functions
+    // MARK: Helper Functions
     private func handleOnAppear() {
         appState.applyTheme(appState.selectedTheme)
-        scheduleDailyUpdateCheck()
-    }
-    
-    private func scheduleDailyUpdateCheck() {
-        guard appState.checkForUpdatesAutomatically else { return }
-        
-        let lastUpdateCheck = UserDefaults.standard.object(forKey: "lastUpdateCheck") as? Date ?? .distantPast
-        let now = Date()
-        
-        if !Calendar.current.isDate(now, inSameDayAs: lastUpdateCheck) {
-            checkForAppUpdates(isUserInitiated: false)
-            UserDefaults.standard.set(now, forKey: "lastUpdateCheck")
-        }
-    }
-    
-    // MARK: - Update Check
-    private func checkForAppUpdates(isUserInitiated: Bool) {
-        isCheckingForUpdates = true
-        
-        Task {
-            do {
-                let (latestVersionFound, downloadURLFound) = try await fetchLatestRelease()
-                let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
-                
-                if isNewerVersion(latestVersionFound, than: currentVersion) {
-                    latestVersion = latestVersionFound
-                    downloadURL = downloadURLFound
-                    alertType = .newUpdateAvailable
-                } else if isUserInitiated {
-                    alertType = .upToDate
-                }
-            } catch {
-                if isUserInitiated {
-                    alertType = .error("Update Check Failed: \(error.localizedDescription)")
-                }
-            }
-            
-            isCheckingForUpdates = false
-        }
-    }
-    
-    private func isNewerVersion(_ newVersion: String, than currentVersion: String) -> Bool {
-        let newComponents = newVersion.split(separator: ".").compactMap { Int($0) }
-        let currentComponents = currentVersion.split(separator: ".").compactMap { Int($0) }
-        
-        for (new, current) in zip(newComponents, currentComponents) {
-            if new > current { return true }
-            if new < current { return false }
-        }
-        
-        return newComponents.count > currentComponents.count
+        appState.scheduleDailyUpdateCheck()
     }
     
     // MARK: - Cleanup Functions
     private func releaseAddBookWindowResources() {
         dataManager.clearTemporaryAddBookData()
-    }
-    
-    private func releaseSettingsWindowResources() {
-        appState.cleanupTemporarySettings()
-    }
-    
-    private func releaseAboutWindowResources() {
-        appState.clearAboutCache()
     }
 }

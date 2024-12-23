@@ -13,6 +13,10 @@ reader is a simple book library and reading tracker app for macOS, designed and 
 
 ![Screenshot](./assets/img01.png)
 
+## Dependencies
+
+- [Settings](https://github.com/sindresorhus/Settings)
+
 ## Features
 
 - Add and organize books in your personal library
@@ -45,7 +49,7 @@ reader requires network access to fetch book data via the Google Books API.
 > - Scroll down and locate the prompt for `reader.app`
 > - Click 'open anyway'
 
-## Compiling reader
+## Compile
 
 If you'd like to compile the app yourself, follow these steps:
 
