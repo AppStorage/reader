@@ -2,6 +2,8 @@ import SwiftUI
 import Foundation
 
 struct AboutView: View {
+    @EnvironmentObject var appState: AppState
+    
     var body: some View {
         VStack(spacing: 20) {
             // App Icon
@@ -10,12 +12,12 @@ struct AboutView: View {
                 .frame(width: 100, height: 100)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .shadow(radius: 5)
-
+            
             Text("reader")
                 .font(.largeTitle)
                 .bold()
                 .padding(.top, 10)
-
+            
             VStack(spacing: 5) {
                 Text("Version \(Bundle.main.appVersion)")
                     .font(.subheadline)
@@ -24,7 +26,7 @@ struct AboutView: View {
                     .font(.footnote)
                     .foregroundColor(.secondary)
             }
-
+            
             // Buttons
             HStack(spacing: 20) {
                 AboutButton(
@@ -39,7 +41,7 @@ struct AboutView: View {
                 )
             }
             .padding(.top, 10)
-
+            
             Spacer()
         }
         .padding(30)
@@ -50,6 +52,14 @@ struct AboutView: View {
                 window.canHide = false
             }
         }
+        .onDisappear {
+            releaseSettingsWindowResources()
+        }
+    }
+    
+    // MARK: Cleanup
+    private func releaseSettingsWindowResources() {
+        appState.cleanupPreferencesCache()
     }
 }
 
@@ -58,7 +68,7 @@ struct AboutButton: View {
     let systemImage: String
     let url: String
     @State private var isHovered: Bool = false
-
+    
     var body: some View {
         Link(destination: URL(string: url)!) {
             HStack {

@@ -45,11 +45,8 @@ class AppState: ObservableObject {
     }
     
     // MARK: Cleanup
-    func cleanupTemporarySettings() {
+    func cleanupPreferencesCache() {
         temporarySettings.removeAll()
-    }
-    
-    func clearAboutCache() {
         aboutCache.removeAll()
     }
     

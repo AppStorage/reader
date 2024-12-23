@@ -13,6 +13,9 @@ struct SettingsView: View {
         .alert(item: $appState.alertType) { alertType in
             alertType.createAlert(appState: appState)
         }
+        .onDisappear {
+            releaseSettingsWindowResources()
+        }
     }
     
     // MARK: Settings Form
@@ -86,5 +89,10 @@ struct SettingsView: View {
             }
             .pickerStyle(SegmentedPickerStyle())
         }
+    }
+    
+    // MARK: Cleanup
+    private func releaseSettingsWindowResources() {
+        appState.cleanupPreferencesCache()
     }
 }
