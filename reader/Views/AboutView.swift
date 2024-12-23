@@ -43,7 +43,7 @@ struct AboutView: View {
             Spacer()
         }
         .padding(30)
-        .frame(width: 320, height: 320)
+        .frame(width: 400, height: 320)
         .onAppear {
             if let window = NSApp.windows.first(where: { $0.title == "About reader" }) {
                 window.styleMask.remove(.miniaturizable)
