@@ -32,10 +32,6 @@ reader is a simple book library and reading tracker app for macOS, designed and 
     <figcaption>reader in light mode</figcaption>
 </figure>
 
-## Permissions
-
-reader requires network access to fetch book data via the Google Books API.
-
 ## Install
 
 - Download the `reader.zip` file from the [latest release](https://github.com/chippokiddo/reader/releases/latest)
@@ -48,6 +44,8 @@ reader requires network access to fetch book data via the Google Books API.
 > - Go to System Settings > Privacy & Security
 > - Scroll down and locate the prompt for `reader.app`
 > - Click 'open anyway'
+>
+> The app requires network access to fetch book data via the Google Books API and Opeen Library
 
 ## Compile
 
