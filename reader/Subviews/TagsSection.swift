@@ -8,6 +8,7 @@ struct TagsSection: View {
     @State private var isEditing: Bool = false
     @State private var newTag: String = ""
     @State private var isAddingTag: Bool = false
+    @State private var localTags: [String] = []
     
     @FocusState private var isFocused: Bool
     
@@ -19,17 +20,18 @@ struct TagsSection: View {
                 title: "Tags",
                 onToggleCollapse: { isCollapsed.toggle() },
                 onEditToggle: { isEditing.toggle() },
-                isEditingDisabled: (book.tags.isEmpty && !isEditing) || book.status == .deleted
+                isEditingDisabled: book.status == .deleted || localTags.isEmpty
             )
             
             if !isCollapsed {
                 VStack(alignment: .leading, spacing: 16) {
+                    // Selected tags view
                     if !viewModel.selectedTags.isEmpty {
                         selectedTagsView
                     }
                     
                     Group {
-                        if book.tags.isEmpty {
+                        if localTags.isEmpty {
                             emptyStateView
                                 .transition(.opacity.combined(with: .move(edge: .top)))
                         } else {
@@ -38,22 +40,32 @@ struct TagsSection: View {
                         }
                     }
                     
+                    // Tag input form
                     if isAddingTag {
                         tagForm
                             .transition(.opacity.combined(with: .move(edge: .bottom)))
                     } else {
                         addTagButton
+                            .disabled(book.status == .deleted) // Only disabled if deleted
                     }
                 }
-                .animation(.easeInOut(duration: 0.3), value: book.tags.isEmpty)
+                .animation(.easeInOut(duration: 0.3), value: localTags.isEmpty)
             }
         }
         .padding(16)
         .cornerRadius(12)
         .animation(.easeInOut(duration: 0.3), value: isCollapsed)
+        .onChange(of: localTags) { oldTags, newTags in
+            if newTags.isEmpty {
+                isEditing = false
+            }
+        }
+        .onAppear {
+            loadTags()
+        }
     }
     
-    // MARK: - Subviews
+    // MARK: Subviews
     private var selectedTagsView: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 8)], alignment: .leading, spacing: 8) {
             ForEach(Array(viewModel.selectedTags), id: \.self) { tag in
@@ -119,7 +131,7 @@ struct TagsSection: View {
         .disabled(book.status == .deleted)
     }
     
-    // MARK: - Helper Functions
+    // MARK: Helpers
     private func toggleTagSelection(_ tag: String) {
         viewModel.toggleTagSelection(tag)
     }
@@ -129,32 +141,24 @@ struct TagsSection: View {
     }
     
     private func removeTag(_ tag: String) {
-        book.tags.removeAll { $0 == tag }
-        viewModel.selectedTags.remove(tag)
+        localTags.removeAll { $0 == tag }
+        saveTags()
     }
     
     private func handleAddTag() {
         let trimmedTag = newTag.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedTag.isEmpty, !book.tags.contains(trimmedTag) else { return }
-        book.tags.append(trimmedTag)
+        guard !trimmedTag.isEmpty, !localTags.contains(trimmedTag) else { return }
+        localTags.append(trimmedTag)
+        saveTags()
         newTag = ""
         withAnimation { isAddingTag = false }
     }
-}
-
-
-extension ContentViewModel {
-    // Toggles the selection state of a tag
-    func toggleTagSelection(_ tag: String) {
-        if selectedTags.contains(tag) {
-            selectedTags.remove(tag)
-        } else {
-            selectedTags.insert(tag)
-        }
+    
+    private func saveTags() {
+        book.tags = localTags
     }
     
-    // Clears a specific tag from the selectedTags set
-    func clearTag(_ tag: String) {
-        selectedTags.remove(tag)
+    private func loadTags() {
+        localTags = book.tags
     }
 }

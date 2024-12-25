@@ -5,17 +5,17 @@ class AppState: ObservableObject {
     @AppStorage("selectedTheme") private var storedTheme: String = "system"
     @AppStorage("checkForUpdatesAutomatically") var checkForUpdatesAutomatically: Bool = false
     
+    @Published var isCheckingForUpdates: Bool = false
+    @Published var alertType: AlertType?
+    @Published var latestVersion: String?
+    @Published var downloadURL: URL?
+    
     @Published var selectedTheme: Theme = .system {
         didSet {
             storedTheme = selectedTheme.rawValue
             applyTheme(selectedTheme)
         }
     }
-    
-    @Published var isCheckingForUpdates: Bool = false
-    @Published var alertType: AlertType?
-    @Published var latestVersion: String?
-    @Published var downloadURL: URL?
     
     // Temporary States
     var temporarySettings: [String: Any] = [:]

@@ -1,38 +1,110 @@
 import SwiftUI
+import SwiftData
 
 struct StatusSection: View {
-    @Binding var status: ReadingStatus
-    let statusColor: Color
+    let book: BookData
+    let modelContext: ModelContext
     
     var body: some View {
-        HStack {
-            Text("Status:")
-                .font(.headline)
+        VStack(alignment: .leading, spacing: 8) {
+            // Status Display
+            HStack(spacing: 8) {
+                Text("Status:")
+                    .font(.headline)
+                
+                Label {
+                    Text(book.status.displayText)
+                        .font(.subheadline)
+                        .bold()
+                } icon: {
+                    Image(systemName: book.status.iconName)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .frame(height: 30)
+                .background(book.status.statusColor.opacity(0.2))
+                .foregroundColor(book.status.statusColor)
+                .clipShape(Capsule())
+                
+                Spacer()
+            }
+            .padding(.vertical, 8)
             
-            Text(status.rawValue.capitalized)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(statusColor.opacity(0.2))
-                .foregroundColor(statusColor)
-                .cornerRadius(8)
+            // Date Information
+            if let dateStarted = book.dateStarted {
+                StatusSection.dateTextView(label: "Date Started", date: dateStarted)
+            }
             
-            Spacer()
-            
-            // Show the picker only if the status is not deleted
-            if status != .deleted {
-                pickerView
+            if let dateFinished = book.dateFinished {
+                StatusSection.dateTextView(label: "Date Finished", date: dateFinished)
             }
         }
     }
+}
+
+// MARK: Helpers
+extension StatusSection {
+    // Display
+    static func dateTextView(label: String, date: Date) -> some View {
+        Text("\(label): \(formatDate(date))")
+            .font(.subheadline)
+            .foregroundColor(.secondary)
+    }
     
-    @ViewBuilder
-    var pickerView: some View {
-        Picker("", selection: $status) {
-            Text("Unread").tag(ReadingStatus.unread)
-            Text("Reading").tag(ReadingStatus.reading)
-            Text("Read").tag(ReadingStatus.read)
+    static func formatDate(_ date: Date?) -> String {
+        guard let date = date else { return "" }
+        return DateFormatter.cachedMediumFormatter.string(from: date)
+    }
+    
+    // Handlers
+    static func handleStatusChange(for book: BookData, to newStatus: ReadingStatus, modelContext: ModelContext) {
+        DispatchQueue.main.async {
+            updateBookDates(for: book, newStatus: newStatus)
+            saveBookStatusChange(for: book, modelContext: modelContext)
         }
-        .pickerStyle(SegmentedPickerStyle())
-        .frame(width: 180)
+    }
+    
+    static func updateBookDates(for book: BookData, newStatus: ReadingStatus) {
+        switch newStatus {
+        case .unread:
+            resetBookDates(for: book)
+        case .reading:
+            startReading(for: book)
+        case .read:
+            finishReading(for: book)
+        case .deleted:
+            resetBookDates(for: book)
+        }
+    }
+    
+    static func resetBookDates(for book: BookData) {
+        book.dateStarted = nil
+        book.dateFinished = nil
+    }
+    
+    static func startReading(for book: BookData) {
+        book.dateStarted = book.dateStarted ?? Date()
+        book.dateFinished = nil
+    }
+    
+    static func finishReading(for book: BookData) {
+        if book.dateStarted == nil {
+            book.dateStarted = Date()
+        }
+        book.dateFinished = Date()
+    }
+    
+    static func saveBookStatusChange(for book: BookData, modelContext: ModelContext) {
+        Task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            do {
+                try await MainActor.run {
+                    try modelContext.save()
+                    print("Book status change saved successfully.")
+                }
+            } catch {
+                print("Failed to save book status change: \(error)")
+            }
+        }
     }
 }

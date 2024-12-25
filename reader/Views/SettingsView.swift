@@ -21,10 +21,7 @@ struct SettingsView: View {
     // MARK: Settings Form
     private var SettingsForm: some View {
         Form {
-            // Update settings section
             updateSection
-            
-            // Appearance settings section
             appearanceSection
         }
         .formStyle(.grouped)
@@ -95,4 +92,12 @@ struct SettingsView: View {
     private func releaseSettingsWindowResources() {
         appState.cleanupPreferencesCache()
     }
+}
+
+enum Theme: String, CaseIterable, Identifiable {
+    case light
+    case dark
+    case system
+    
+    var id: String { rawValue }
 }

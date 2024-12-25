@@ -13,41 +13,47 @@ struct BookActionButton: View {
     
     var body: some View {
         VStack {
-            if let selectedBook = viewModel.selectedBook {
-                HStack(spacing: 12) {
+            HStack(spacing: 12) {
+                if let selectedBook = viewModel.selectedBook {
                     if selectedBook.status == .deleted {
                         recoverButton(for: selectedBook)
                         permanentDeleteButton(for: selectedBook)
                     } else {
                         softDeleteButton(for: selectedBook)
                     }
+                } else {
+                    Button(action: {}) {
+                        Image(systemName: "trash")
+                    }
+                    .disabled(true)
                 }
-                .alert("This will move the book to deleted.", isPresented: $showSoftDeleteConfirmation) {
-                    Button("Cancel", role: .cancel) {}
-                    Button("Delete") {
-                        if let book = bookToDelete {
-                            viewModel.softDeleteBook(book)
-                        }
+            }
+            .alert("This will move the book to deleted.", isPresented: $showSoftDeleteConfirmation) {
+                Button("Cancel", role: .cancel) {}
+                Button("Delete") {
+                    if let book = bookToDelete {
+                        viewModel.softDeleteBook(book)
                     }
                 }
-                .alert("This will permanently delete the book. You can't undo this action.", isPresented: $showPermanentDeleteConfirmation) {
-                    Button("Cancel", role: .cancel) {}
-                    Button("Delete") {
-                        if let book = bookToDelete {
-                            viewModel.permanentlyDeleteBook(book)
-                        }
+            }
+            .alert("This will permanently delete the book. You can't undo this action.", isPresented: $showPermanentDeleteConfirmation) {
+                Button("Cancel", role: .cancel) {}
+                Button("Delete") {
+                    if let book = bookToDelete {
+                        viewModel.permanentlyDeleteBook(book)
                     }
                 }
-                .onAppear {
-                    addKeyboardListener()
-                }
-                .onDisappear {
-                    removeKeyboardListener()
-                }
+            }
+            .onAppear {
+                addKeyboardListener()
+            }
+            .onDisappear {
+                removeKeyboardListener()
             }
         }
     }
     
+    // MARK: Keyboard Shortcut
     private func addKeyboardListener() {
         keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             if event.keyCode == 51 { // Backspace key code on macOS
@@ -85,17 +91,17 @@ struct BookActionButton: View {
         }
     }
     
-    // Recover button for deleted books
+    // MARK: Delete buttons
     private func recoverButton(for book: BookData) -> some View {
         Button(action: {
             viewModel.recoverBook(book)
         }) {
             Image(systemName: "return")
         }
-        .accessibilityLabel("Recover")
+        .help("Recover Book")
+        .accessibilityLabel("Recover Book")
     }
     
-    // Permanent delete button for deleted books
     private func permanentDeleteButton(for book: BookData) -> some View {
         Button(action: {
             bookToDelete = book
@@ -103,10 +109,10 @@ struct BookActionButton: View {
         }) {
             Image(systemName: "trash")
         }
-        .accessibilityLabel("Delete")
+        .help("Permanently Delete Book")
+        .accessibilityLabel("Permanently Delete Book")
     }
     
-    // Soft delete button for active books
     private func softDeleteButton(for book: BookData) -> some View {
         Button(action: {
             bookToDelete = book
@@ -114,6 +120,7 @@ struct BookActionButton: View {
         }) {
             Image(systemName: "trash")
         }
-        .accessibilityLabel("Delete")
+        .help("Move Book to Deleted")
+        .accessibilityLabel("Move Book to Deleted")
     }
 }

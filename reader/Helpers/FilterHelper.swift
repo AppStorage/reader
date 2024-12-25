@@ -1,11 +1,12 @@
 import SwiftUI
 
-struct FilterHelper {
-    static func applyStatusFilter(to books: [BookData], status: StatusFilter) -> [BookData] {
-        books.filter { book in
+extension Array where Element == BookData {
+    
+    // Filter books by status
+    func filtered(by status: StatusFilter) -> [BookData] {
+        self.filter { book in
             switch status {
             case .all:
-                // Include all books except those with a `deleted` status
                 return book.status != .deleted
             case .unread:
                 return book.status == .unread
@@ -19,31 +20,26 @@ struct FilterHelper {
         }
     }
     
-    static func applySearchFilter(to books: [BookData], query: String) -> [BookData] {
-        // Return all books if the search query is empty
-        guard !query.isEmpty else { return books }
-        
-        // Filter books by title or author using localized case-insensitive search
-        return books.filter { book in
+    // Filter books by search query
+    func searched(with query: String) -> [BookData] {
+        guard !query.isEmpty else { return self }
+        return self.filter { book in
             book.title.localizedCaseInsensitiveContains(query) ||
             book.author.localizedCaseInsensitiveContains(query)
         }
     }
     
-    static func applySorting(to books: [BookData], option: SortOption, order: SortOrder) -> [BookData] {
-        // Sort books based on the selected sort option and order
-        books.sorted { book1, book2 in
+    // Sort books based on selected option and order
+    func sorted(by option: SortOption, order: SortOrder) -> [BookData] {
+        self.sorted { book1, book2 in
             switch option {
             case .title:
-                // Compare titles using localized comparison
-                let titleComparison = book1.title.localizedCompare(book2.title)
-                return order == .ascending ? titleComparison == .orderedAscending : titleComparison == .orderedDescending
+                let comparison = book1.title.localizedCompare(book2.title)
+                return order == .ascending ? comparison == .orderedAscending : comparison == .orderedDescending
             case .author:
-                // Compare authors using localized comparison
-                let authorComparison = book1.author.localizedCompare(book2.author)
-                return order == .ascending ? authorComparison == .orderedAscending : authorComparison == .orderedDescending
+                let comparison = book1.author.localizedCompare(book2.author)
+                return order == .ascending ? comparison == .orderedAscending : comparison == .orderedDescending
             case .published:
-                // Use distant past as a fallback for missing publication dates
                 let date1 = book1.published ?? Date.distantPast
                 let date2 = book2.published ?? Date.distantPast
                 return order == .ascending ? date1 < date2 : date1 > date2
@@ -51,13 +47,16 @@ struct FilterHelper {
         }
     }
     
-    static func countBooks(for status: StatusFilter, in books: [BookData]) -> Int {
-        return applyStatusFilter(to: books, status: status).count
+    // Count books based on status
+    func count(for status: StatusFilter) -> Int {
+        self.filtered(by: status).count
     }
-}
-
-extension FilterHelper {
-    static func applyTagFilter(to books: [BookData], tag: String) -> [BookData] {
-        books.filter { $0.tags.contains(tag) }
+    
+    // Filter by tags
+    func filtered(byTags tags: Set<String>) -> [BookData] {
+        guard !tags.isEmpty else { return self }
+        return self.filter { book in
+            !tags.isDisjoint(with: book.tags) // Matches at least one tag
+        }
     }
 }

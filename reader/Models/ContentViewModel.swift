@@ -27,21 +27,25 @@ final class ContentViewModel: ObservableObject {
     
     // Computed property to apply filters and sorting
     var displayedBooks: [BookData] {
-        let filteredByStatus = FilterHelper.applyStatusFilter(to: books, status: selectedStatus)
-        let filteredBySearch = FilterHelper.applySearchFilter(to: filteredByStatus, query: searchQuery)
+        // Filter by status first
+        let filteredByStatus = books.filtered(by: selectedStatus)
         
-        // Filter by selected tags
+        // Filter by search query
+        let filteredBySearch = filteredByStatus.searched(with: searchQuery)
+        
+        // Filter by tags
         let filteredByTags = selectedTags.isEmpty
         ? filteredBySearch
         : filteredBySearch.filter { book in
             !selectedTags.isDisjoint(with: book.tags)
         }
         
-        return FilterHelper.applySorting(to: filteredByTags, option: sortOption, order: sortOrder)
+        // Sort and return
+        return filteredByTags.sorted(by: sortOption, order: sortOrder)
     }
     
     func bookCount(for status: StatusFilter) -> Int {
-        return FilterHelper.countBooks(for: status, in: books)
+        return books.count(for: status)
     }
     
     func softDeleteBook(_ book: BookData) {

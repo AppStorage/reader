@@ -4,14 +4,7 @@ struct AddView: View {
     @EnvironmentObject var dataManager: DataManager
     @Environment(\.dismiss) private var dismiss
 
-    @State private var title = ""
-    @State private var author = ""
-    @State private var genre = ""
-    @State private var series = ""
-    @State private var isbn = ""
-    @State private var publisher = ""
-    @State private var published: Date? = nil
-    @State private var bookDescription = ""
+    @State private var form = BookForm()
     
     @FocusState private var focusedField: Field?
 
@@ -35,13 +28,7 @@ struct AddView: View {
     }
     
     private func resetForm() {
-        title = ""
-        author = ""
-        genre = ""
-        series = ""
-        isbn = ""
-        publisher = ""
-        published = nil
+        form = BookForm()
     }
 
     private var header: some View {
@@ -58,17 +45,24 @@ struct AddView: View {
 
     private var formFields: some View {
         VStack(alignment: .leading, spacing: 16) {
-            fieldRow(label: "Title ", placeholder: "Enter book title", text: $title, field: .title, required: true)
-            fieldRow(label: "Author ", placeholder: "Enter author name", text: $author, field: .author, required: true)
-            fieldRow(label: "Genre", placeholder: "Enter genre", text: $genre, field: .genre)
-            fieldRow(label: "Series", placeholder: "Enter series name", text: $series, field: .series)
-            fieldRow(label: "ISBN", placeholder: "Enter ISBN", text: $isbn, field: .isbn)
-                .onChange(of: isbn) {
-                    isbn = isbn.filter { $0.isNumber }
-                }
-            fieldRow(label: "Publisher", placeholder: "Enter publisher name", text: $publisher, field: .publisher)
+            // Title (required)
+            fieldRow(label: "Title", placeholder: "Enter book title", text: $form.title, field: .title, required: true)
 
-            dateField(label: "Published Date", date: $published)
+            // Author (required)
+            fieldRow(label: "Author", placeholder: "Enter author name", text: $form.author, field: .author, required: true)
+
+            // Optional fields
+            fieldRow(label: "Genre", placeholder: "Enter genre", text: $form.genre, field: .genre)
+            fieldRow(label: "Series", placeholder: "Enter series name", text: $form.series, field: .series)
+
+            // ISBN with Validation
+            fieldRow(label: "ISBN", placeholder: "Enter ISBN", text: $form.isbn, field: .isbn)
+                .onSubmit { form.isbn = form.isbn.filter { $0.isNumber } }
+
+            fieldRow(label: "Publisher", placeholder: "Enter publisher name", text: $form.publisher, field: .publisher)
+
+            // Published Date
+            dateField(label: "Published Date", date: $form.published)
         }
     }
 
@@ -79,10 +73,14 @@ struct AddView: View {
                 fetchAndAddBook()
             }
             .buttonStyle(.borderedProminent)
-            .disabled(title.isEmpty || author.isEmpty)
+            .disabled(!canAddBook) // Use a reusable computed property
             Spacer()
         }
         .padding(.bottom)
+    }
+    
+    private var canAddBook: Bool {
+        !form.title.isEmpty && !form.author.isEmpty
     }
 
     private func fieldRow(label: String, placeholder: String, text: Binding<String>, field: Field, required: Bool = false) -> some View {
@@ -156,49 +154,50 @@ struct AddView: View {
     }
     
     private func fetchAndAddBook() {
-        let capturedTitle = title
-        let capturedAuthor = author
-        let capturedGenre = genre
-        let capturedSeries = series
-        let capturedIsbn = isbn
-        let capturedPublisher = publisher
-        let capturedDescription = bookDescription
-
         Task {
+            // Fetch book data asynchronously
             let fetchedBook = await dataManager.fetchBookData(
-                title: capturedTitle,
-                author: capturedAuthor,
-                publishedDate: published != nil ? DateFormatter().string(from: published!) : nil
+                title: form.title,
+                author: form.author,
+                isbn: form.isbn
             )
 
-            await MainActor.run {
-                let finalPublished = fetchedBook?.published ?? published
+            // Prepare book data (fallback to manual entry if fetch fails)
+            let finalBook = fetchedBook ?? BookData(
+                title: form.title,
+                author: form.author,
+                published: form.published,
+                publisher: form.publisher,
+                genre: form.genre,
+                series: form.series,
+                isbn: form.isbn,
+                bookDescription: form.description
+            )
 
-                if let book = fetchedBook {
-                    dataManager.addBook(
-                        title: book.title,
-                        author: book.author,
-                        genre: book.genre ?? capturedGenre,
-                        series: book.series ?? capturedSeries,
-                        isbn: book.isbn ?? capturedIsbn,
-                        publisher: book.publisher ?? capturedPublisher,
-                        published: finalPublished,
-                        description: book.bookDescription ?? capturedDescription
-                    )
-                } else {
-                    dataManager.addBook(
-                        title: capturedTitle,
-                        author: capturedAuthor,
-                        genre: capturedGenre,
-                        series: capturedSeries,
-                        isbn: capturedIsbn,
-                        publisher: capturedPublisher,
-                        published: finalPublished,
-                        description: capturedDescription
-                    )
-                }
+            // Add the book and dismiss the view
+            await MainActor.run {
+                dataManager.addBook(book: finalBook)
                 dismiss()
             }
         }
     }
+    
+    private func formattedDate(_ date: Date?) -> String? {
+        guard let date = date else { return nil }
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter.string(from: date)
+    }
+}
+
+struct BookForm {
+    var title = ""
+    var author = ""
+    var genre = ""
+    var series = ""
+    var isbn = ""
+    var publisher = ""
+    var published: Date? = nil
+    var description = ""
 }

@@ -1,58 +1,56 @@
 import SwiftUI
 
 struct DetailsSection: View {
-    @Binding var title: String
-    @Binding var author: String
-    @Binding var genre: String
-    @Binding var series: String
-    @Binding var isbn: String
-    @Binding var publisher: String
-    @Binding var formattedDate: String
-    @Binding var description: String
+    let title: String
+    let author: String
+    let genre: String
+    let series: String
+    let isbn: String
+    let publisher: String
+    let formattedDate: String
+    let description: String
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
+            // Title
             Text(title)
                 .font(.custom("Merriweather-Regular", size: 24))
+                .foregroundStyle(.primary)
             
+            // Author
             Text("by \(author)")
                 .font(.system(size: 16))
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
             
-            if !genre.isEmpty {
-                Text("Genre: \(genre)")
+            // Info Rows
+            ForEach(infoRows, id: \.label) { row in
+                Text("\(row.label): \(row.value)")
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.secondary)
             }
-            if !series.isEmpty {
-                Text("Series: \(series)")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-            }
-            if !isbn.isEmpty {
-                Text("ISBN: \(isbn)")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-            }
-            if !publisher.isEmpty {
-                Text("Publisher: \(publisher)")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-            }
-            if !formattedDate.isEmpty {
-                Text("Published: \(formattedDate)")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-            }
+            
+            // Description with ScrollView
             if !description.isEmpty {
-                Text(description)
-                    .font(.body)
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.leading)
-                    .lineSpacing(4)
-                    .padding(.top, 10)
-                
+                ScrollView {
+                    Text(description)
+                        .font(.body)
+                        .foregroundStyle(.primary)
+                        .multilineTextAlignment(.leading)
+                        .lineSpacing(4)
+                        .padding(.top, 10)
+                }
+                .frame(maxHeight: 200)
             }
         }
+    }
+    
+    private var infoRows: [(label: String, value: String)] {
+        [
+            ("Genre", genre),
+            ("Series", series),
+            ("ISBN", isbn),
+            ("Publisher", publisher),
+            ("Published", formattedDate)
+        ].filter { !$0.value.isEmpty } // Only show non-empty rows
     }
 }

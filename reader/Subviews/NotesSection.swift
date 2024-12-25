@@ -9,15 +9,13 @@ struct NotesSection: View {
     @State private var isEditing: Bool = false
     @State private var isAddingNote: Bool = false
     @State private var isCollapsed: Bool = false
+    @State private var localNotes: [String] = []
+    @State private var saveTask: Task<Void, Never>?
     
     @FocusState private var isFocusedOnNote: Bool
     @FocusState private var isFocusedOnPage: Bool
     
     var modelContext: ModelContext
-    
-    private var notesArray: [String] {
-        book.notes.components(separatedBy: "|||").filter { !$0.isEmpty }
-    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -36,17 +34,19 @@ struct NotesSection: View {
         .padding(16)
         .cornerRadius(12)
         .animation(.easeInOut(duration: 0.25), value: isEditing)
-        .onChange(of: book.quotes) {
-            if notesArray.isEmpty {
+        .onChange(of: localNotes) { oldNotes, newNotes in
+            if newNotes.isEmpty {
                 isEditing = false
             }
         }
+        .onAppear {
+            loadNotes()
+        }
     }
     
-    // MARK: Content
     private var content: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if notesArray.isEmpty {
+            if localNotes.isEmpty {
                 emptyStateView
                     .transition(.opacity)
             } else {
@@ -72,7 +72,7 @@ struct NotesSection: View {
                 addNoteButton
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: notesArray.isEmpty)
+        .animation(.easeInOut(duration: 0.25), value: localNotes.isEmpty)
     }
     
     private var emptyStateView: some View {
@@ -137,13 +137,28 @@ struct NotesSection: View {
     }
     
     private func addNote(_ note: String) {
-        book.notes = (notesArray + [note]).joined(separator: "|||")
-        try? modelContext.save()
+        localNotes.append(note)
+        saveNotes()
     }
     
     private func removeNote(_ note: String) {
-        book.notes = notesArray.filter { $0 != note }.joined(separator: "|||")
-        try? modelContext.save()
+        localNotes.removeAll { $0 == note }
+        saveNotes()
+    }
+    
+    private func saveNotes() {
+        saveTask?.cancel()
+        saveTask = Task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            await MainActor.run {
+                book.notes = localNotes.joined(separator: "|||")
+                try? modelContext.save()
+            }
+        }
+    }
+    
+    private func loadNotes() {
+        localNotes = book.notes.components(separatedBy: "|||").filter { !$0.isEmpty }
     }
     
     private func resetAddNoteForm() {
@@ -153,7 +168,7 @@ struct NotesSection: View {
     }
     
     private var sortedNotesArray: [String] {
-        notesArray.sorted { note1, note2 in
+        localNotes.sorted { note1, note2 in
             let page1 = PageNumberInput.extractPageNumber(from: note1) ?? Int.max
             let page2 = PageNumberInput.extractPageNumber(from: note2) ?? Int.max
             return page1 < page2

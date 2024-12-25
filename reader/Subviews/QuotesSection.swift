@@ -9,15 +9,13 @@ struct QuotesSection: View {
     @State private var isEditing: Bool = false
     @State private var isAddingQuote: Bool = false
     @State private var isCollapsed: Bool = false
+    @State private var localQuotes: [String] = []
+    @State private var saveTask: Task<Void, Never>?
     
     @FocusState private var isFocusedOnQuote: Bool
     @FocusState private var isFocusedOnPage: Bool
     
     var modelContext: ModelContext
-    
-    private var quotesArray: [String] {
-        book.quotes.components(separatedBy: "|||").filter { !$0.isEmpty }
-    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -36,17 +34,19 @@ struct QuotesSection: View {
         .padding(16)
         .cornerRadius(12)
         .animation(.easeInOut(duration: 0.25), value: isEditing)
-        .onChange(of: book.quotes) {
-            if quotesArray.isEmpty {
+        .onChange(of: localQuotes) { oldQuotes, newQuotes in
+            if newQuotes.isEmpty {
                 isEditing = false
             }
         }
+        .onAppear {
+            loadQuotes()
+        }
     }
     
-    // MARK: Content
     private var content: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if quotesArray.isEmpty {
+            if localQuotes.isEmpty {
                 emptyStateView
                     .transition(.opacity)
             } else {
@@ -73,7 +73,7 @@ struct QuotesSection: View {
                 addQuoteButton
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: quotesArray.isEmpty)
+        .animation(.easeInOut(duration: 0.25), value: localQuotes.isEmpty)
     }
     
     private var emptyStateView: some View {
@@ -125,13 +125,28 @@ struct QuotesSection: View {
     }
     
     private func addQuote(_ quote: String) {
-        book.quotes = (quotesArray + [quote]).joined(separator: "|||")
-        try? modelContext.save()
+        localQuotes.append(quote)
+        saveQuotes()
     }
     
     private func removeQuote(_ quote: String) {
-        book.quotes = quotesArray.filter { $0 != quote }.joined(separator: "|||")
-        try? modelContext.save()
+        localQuotes.removeAll { $0 == quote }
+        saveQuotes()
+    }
+    
+    private func saveQuotes() {
+        saveTask?.cancel()
+        saveTask = Task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            await MainActor.run {
+                book.notes = localQuotes.joined(separator: "|||")
+                try? modelContext.save()
+            }
+        }
+    }
+    
+    private func loadQuotes() {
+        localQuotes = book.quotes.components(separatedBy: "|||").filter { !$0.isEmpty }
     }
     
     private func resetAddQuoteForm() {
@@ -141,7 +156,7 @@ struct QuotesSection: View {
     }
     
     private var sortedQuotesArray: [String] {
-        quotesArray.sorted { quote1, quote2 in
+        localQuotes.sorted { quote1, quote2 in
             let page1 = PageNumberInput.extractPageNumber(from: quote1) ?? Int.max
             let page2 = PageNumberInput.extractPageNumber(from: quote2) ?? Int.max
             return page1 < page2

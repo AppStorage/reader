@@ -48,3 +48,9 @@ func fetchLatestRelease() async throws -> (String, URL) {
         throw GitHubReleaseError.decodingError(error.localizedDescription)
     }
 }
+
+enum GitHubReleaseError: Error {
+    case noAssetsAvailable
+    case invalidResponse
+    case decodingError(String)
+}

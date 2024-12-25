@@ -27,9 +27,12 @@ struct readerApp: App {
         // Disable tabs
         NSWindow.allowsAutomaticWindowTabbing = false
         
+        // Initialize ModelContainer
         guard let container = readerApp.sharedModelContainer else {
             fatalError("ModelContainer is not available.")
         }
+        
+        // Create DataManager and ViewModel
         let dataManager = DataManager(modelContainer: container)
         _dataManager = StateObject(wrappedValue: dataManager)
         _viewModel = StateObject(wrappedValue: ContentViewModel(dataManager: dataManager))
@@ -40,7 +43,7 @@ struct readerApp: App {
         addBookWindow
     }
     
-    // MARK: - Main Window
+    // MARK: Main Window
     private var mainWindow: some Scene {
         WindowGroup {
             ContentView()
@@ -58,7 +61,12 @@ struct readerApp: App {
                 }
         }
         .commands {
-            CommandGroup(replacing: .newItem) { }
+            CommandGroup(replacing: .newItem) {
+                Button("Add Book") {
+                    openWindow(id: "addBookWindow")
+                }
+                .keyboardShortcut("n", modifiers: .command)
+            }
             CommandGroup(replacing: .appInfo) { }
             CommandGroup(after: .appInfo) {
                 Button("Check for Updates") {
@@ -77,7 +85,7 @@ struct readerApp: App {
         }
     }
     
-    // MARK: - Preferences Window
+    // MARK: Preferences Window
     static func showSettingsWindow(appState: AppState, checkForUpdates: @escaping () -> Void) {
         if preferencesWindow == nil {
             let settingsView = SettingsView(checkForUpdates: {
@@ -134,15 +142,12 @@ struct readerApp: App {
         preferencesWindow?.show()
     }
     
-    // MARK: - Add Book Window
+    // MARK: Add Book Window
     private var addBookWindow: some Scene {
         Window("Add Book", id: "addBookWindow") {
             AddView()
                 .environmentObject(dataManager)
                 .environmentObject(appState)
-                .onDisappear {
-                    releaseAddBookWindowResources()
-                }
         }
         .windowStyle(HiddenTitleBarWindowStyle())
         .windowResizability(.contentSize)
@@ -152,10 +157,5 @@ struct readerApp: App {
     private func handleOnAppear() {
         appState.applyTheme(appState.selectedTheme)
         appState.scheduleDailyUpdateCheck()
-    }
-    
-    // MARK: - Cleanup Functions
-    private func releaseAddBookWindowResources() {
-        dataManager.clearTemporaryAddBookData()
     }
 }

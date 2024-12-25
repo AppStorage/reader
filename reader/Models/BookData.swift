@@ -4,6 +4,7 @@ import Foundation
 @Model
 class BookData: Identifiable {
     @Attribute(.unique) var id: UUID = UUID()
+    
     var title: String
     var author: String
     var published: Date?
@@ -14,7 +15,7 @@ class BookData: Identifiable {
     var dateStarted: Date?
     var dateFinished: Date?
     var quotes: String
-    var notes: String = ""
+    var notes: String
     var bookDescription: String?
     
     @Attribute private var statusRawValue: String
@@ -24,15 +25,12 @@ class BookData: Identifiable {
     }
     
     @Attribute private var tagsData: Data?
-
-    // Computed property for working with tags as [String]
     var tags: [String] {
         get {
-            guard let data = tagsData else { return [] }
-            return (try? JSONDecoder().decode([String].self, from: data)) ?? []
+            decodeTags() ?? [] // Default to empty array
         }
         set {
-            tagsData = try? JSONEncoder().encode(newValue)
+            tagsData = encodeTags(newValue)
         }
     }
     
@@ -76,5 +74,38 @@ class BookData: Identifiable {
             dateStarted = nil
             dateFinished = nil
         }
+    }
+    
+    // Encodes tags into JSON
+    private func encodeTags(_ tags: [String]) -> Data? {
+        try? JSONEncoder().encode(tags)
+    }
+    
+    // Decodes tags from JSON
+    private func decodeTags() -> [String]? {
+        guard let data = tagsData else { return nil }
+        return try? JSONDecoder().decode([String].self, from: data)
+    }
+    
+    // Formats dates consistently
+    static func formatDate(_ date: Date?) -> String {
+        guard let date = date else { return "N/A" }
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter.string(from: date)
+    }
+    
+    // Checks if the book has any notes or quotes
+    var hasNotesOrQuotes: Bool {
+        !notes.isEmpty || !quotes.isEmpty
+    }
+    
+    func addTag(_ tag: String) {
+        var updatedTags = tags
+        if !updatedTags.contains(tag) {
+            updatedTags.append(tag)
+        }
+        tags = updatedTags
     }
 }

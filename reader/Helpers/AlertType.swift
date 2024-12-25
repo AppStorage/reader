@@ -29,3 +29,17 @@ extension AlertType {
         }
     }
 }
+
+enum AlertType: Identifiable {
+    case newUpdateAvailable
+    case upToDate
+    case error(String)
+    
+    var id: String {
+        switch self {
+        case .newUpdateAvailable: return "newUpdateAvailable"
+        case .upToDate: return "upToDate"
+        case .error(let message): return "error-\(message)"
+        }
+    }
+}
