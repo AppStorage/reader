@@ -44,7 +44,7 @@ reader is a simple book library and reading tracker app for macOS, designed and 
 > - Go to System Settings > Privacy & Security
 > - Scroll down and locate the prompt for `reader.app`
 > - Click 'open anyway'
->
+> 
 > The app requires network access to fetch book data via the Google Books API and Opeen Library
 
 ## Compile

@@ -49,11 +49,13 @@ struct readerApp: App {
             ContentView()
                 .environmentObject(viewModel)
                 .environmentObject(dataManager)
+                .environmentObject(appState)
                 .environment(\.modelContainer, readerApp.sharedModelContainer!)
                 .alert(item: $appState.alertType) { alertType in
                     alertType.createAlert(appState: appState)
                 }
                 .onAppear {
+                    appState.viewModel = viewModel
                     handleOnAppear()
                 }
                 .onDisappear {
@@ -61,27 +63,10 @@ struct readerApp: App {
                 }
         }
         .commands {
-            CommandGroup(replacing: .newItem) {
-                Button("Add Book") {
-                    openWindow(id: "addBookWindow")
-                }
-                .keyboardShortcut("n", modifiers: .command)
-            }
-            CommandGroup(replacing: .appInfo) { }
-            CommandGroup(after: .appInfo) {
-                Button("Check for Updates") {
-                    appState.checkForAppUpdates(isUserInitiated: true)
-                }
-                .disabled(appState.isCheckingForUpdates)
-            }
-            CommandGroup(replacing: .appSettings) {
-                Button("Preferences...") {
-                    readerApp.showSettingsWindow(appState: appState) {
-                        appState.checkForAppUpdates(isUserInitiated: true)
-                    }
-                }
-                .keyboardShortcut(",", modifiers: .command)
-            }
+            AppCommands.fileCommands { openWindow(id: $0) }
+            AppCommands.appInfoCommands(appState: appState)
+            AppCommands.settingsCommands(appState: appState)
+            AppCommands.deleteCommands(appState: appState, viewModel: viewModel)
         }
     }
     

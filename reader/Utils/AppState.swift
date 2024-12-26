@@ -9,6 +9,8 @@ class AppState: ObservableObject {
     @Published var alertType: AlertType?
     @Published var latestVersion: String?
     @Published var downloadURL: URL?
+    @Published var showSoftDeleteConfirmation = false
+    @Published var showPermanentDeleteConfirmation = false
     
     @Published var selectedTheme: Theme = .system {
         didSet {
@@ -17,6 +19,7 @@ class AppState: ObservableObject {
         }
     }
     
+    var viewModel: ContentViewModel?
     // Temporary States
     var temporarySettings: [String: Any] = [:]
     var aboutCache: [String: Any] = [:]
@@ -104,5 +107,14 @@ class AppState: ObservableObject {
             checkForAppUpdates(isUserInitiated: false)
             UserDefaults.standard.set(now, forKey: "lastUpdateCheck")
         }
+    }
+    
+    // MARK: Delete Actions
+    func showSoftDeleteConfirmation(for book: BookData) {
+        alertType = .softDelete(book)
+    }
+    
+    func showPermanentDeleteConfirmation(for book: BookData) {
+        alertType = .permanentDelete(book)
     }
 }
