@@ -31,6 +31,7 @@ struct BookActionButton: View {
             Image(systemName: "return")
         }
         .help("Recover Book")
+        .accessibilityLabel("Recover Book")
     }
     
     private func permanentDeleteButton(for book: BookData) -> some View {
@@ -40,6 +41,7 @@ struct BookActionButton: View {
             Image(systemName: "trash")
         }
         .help("Permanently Delete Book")
+        .accessibilityLabel("Permanently Delete Book")
     }
     
     private func softDeleteButton(for book: BookData) -> some View {
@@ -48,6 +50,7 @@ struct BookActionButton: View {
         }) {
             Image(systemName: "trash")
         }
-        .help("Move Book to Deleted")
+        .help("Delete")
+        .accessibilityLabel("Move Book to Deleted")
     }
 }
