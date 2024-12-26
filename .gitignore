@@ -1,5 +1,14 @@
-# macOS system files
+# Ignore macOS system files
 .DS_Store
 
-# Configuration files
+# Ignore the entire Assets.xcassets folder
+Assets.xcassets/
+
+# Ignore build products and output
+build/
+
+# Ignore Xcode configuration files
 Config.xcconfig
+
+# Ignore DerivedData directory (Xcode build artifacts)
+DerivedData/
