@@ -12,3 +12,6 @@ Config.xcconfig
 
 # Ignore DerivedData directory (Xcode build artifacts)
 DerivedData/
+
+# Ignore Xcode project
+reader.xcodeproj
