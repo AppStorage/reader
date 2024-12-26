@@ -15,3 +15,8 @@ DerivedData/
 
 # Ignore Xcode project
 reader.xcodeproj
+
+# Ignore symbolic links
+github-visible
+gitignore-visible
+
