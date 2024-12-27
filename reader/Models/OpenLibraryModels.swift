@@ -13,4 +13,5 @@ struct OpenLibraryDoc: Codable {
     let first_publish_year: Int?
     let isbn: [String]?
     let subject: [String]?
+    let key: String?
 }

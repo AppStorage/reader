@@ -38,26 +38,8 @@ final class DataManager: ObservableObject {
         saveChanges()
     }
     
-    func fetchBookData(title: String, author: String, isbn: String? = nil) async -> BookData? {
-        guard let dto = await apiService.fetchBookData(title: title, author: author, isbn: isbn) else {
-            return nil
-        }
-        
-        let book = BookData(
-            title: dto.title,
-            author: dto.author,
-            published: dto.published,
-            publisher: dto.publisher,
-            genre: dto.genre,
-            series: dto.series,
-            isbn: dto.isbn,
-            bookDescription: dto.bookDescription,
-            status: dto.status,
-            quotes: dto.quotes,
-            notes: dto.notes,
-            tags: dto.tags
-        )
-        return book
+    func fetchBookData(title: String, author: String, isbn: String? = nil) async -> [BookTransferData] {
+        return await apiService.fetchBookData(title: title, author: author, isbn: isbn)
     }
     
     private func saveChanges() {

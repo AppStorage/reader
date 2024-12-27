@@ -26,7 +26,12 @@ extension AlertType {
                 message: Text(errorDetails),
                 dismissButton: .default(Text("OK"))
             )
-            
+        case .noResults(_):
+            return Alert(
+                title: Text("No Results Found"),
+                message: Text("No books found. Please check the details and try again."),
+                dismissButton: .default(Text("OK"))
+            )
         case .softDelete(let book):
             return Alert(
                 title: Text("Move to Deleted?"),
@@ -36,7 +41,6 @@ extension AlertType {
                 },
                 secondaryButton: .cancel(Text("Cancel"))
             )
-            
         case .permanentDelete(let book):
             return Alert(
                 title: Text("Permanently Delete?"),
@@ -54,6 +58,7 @@ enum AlertType: Identifiable {
     case newUpdateAvailable
     case upToDate
     case error(String)
+    case noResults(String)
     case softDelete(BookData)
     case permanentDelete(BookData)
     
@@ -62,6 +67,7 @@ enum AlertType: Identifiable {
         case .newUpdateAvailable: return "newUpdateAvailable"
         case .upToDate: return "upToDate"
         case .error(let message): return "error-\(message)"
+        case .noResults(let message): return "noResults-\(message)"
         case .softDelete(let book): return "softDelete-\(book.id)"
         case .permanentDelete(let book): return "permanentDelete-\(book.id)"
         }

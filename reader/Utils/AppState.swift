@@ -117,4 +117,9 @@ class AppState: ObservableObject {
     func showPermanentDeleteConfirmation(for book: BookData) {
         alertType = .permanentDelete(book)
     }
+    
+    // MARK: Book Results
+    func showNoResults() {
+        alertType = .noResults("")
+    }
 }

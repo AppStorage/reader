@@ -1,32 +1,44 @@
 import Foundation
 
 struct OpenLibraryParser {
-    // Parses Open Library API response into BookData
-    static func parseResponse(_ data: Data, isbn: String?) throws -> BookData? {
+    static func parseMultipleResponses(_ data: Data, isbn: String?) async throws -> [BookTransferData] {
         let result = try JSONDecoder().decode(OpenLibrarySearchResponse.self, from: data)
         
-        // Ensure we have at least one result
-        guard let doc = result.docs.first else {
-            return nil
+        guard !result.docs.isEmpty else {
+            print("No results found in Open Library response.")
+            return []
         }
         
-        // Construct and return the BookData object
-        return constructBookData(from: doc, isbn: isbn)
+        // Process documents asynchronously
+        var books = [BookTransferData]()
+        for doc in result.docs {
+            let book = await constructBookTransferData(from: doc, isbn: isbn) // Updated function call
+            books.append(book)
+        }
+        return books
     }
     
-    // Constructs BookData from Open Library API response
-    private static func constructBookData(from doc: OpenLibraryDoc, isbn: String?) -> BookData {
-        return BookData(
+    static func constructBookTransferData(from doc: OpenLibraryDoc, isbn: String?) async -> BookTransferData { // Updated to return BookTransferData
+        let description: String? = if let olid = doc.key {
+            await BooksAPIService.shared.fetchDescription(olid: olid)
+        } else {
+            nil
+        }
+        
+        return BookTransferData( // Return BookTransferData instead of BookData
             title: doc.title,
             author: doc.author_name?.joined(separator: ", ") ?? "Unknown Author",
             published: doc.first_publish_year != nil
-            ? DateFormatter().date(from: "\(doc.first_publish_year!)")
+            ? Calendar.current.date(from: DateComponents(year: doc.first_publish_year!))
             : nil,
             publisher: doc.publisher?.first,
             genre: doc.subject?.joined(separator: ", "),
             series: nil,
-            isbn: doc.isbn?.first ?? isbn,
-            bookDescription: nil,
+            isbn: doc.isbn?.first ?? isbn, // Use API ISBN or fallback
+            bookDescription: description, // Populate description
+            quotes: "",
+            notes: "",
+            tags: [],
             status: .unread
         )
     }

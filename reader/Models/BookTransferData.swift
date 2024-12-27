@@ -1,7 +1,6 @@
 import Foundation
 
-struct BookDTO: Sendable {
-    let id: UUID
+struct BookTransferData: Sendable, Equatable {
     let title: String
     let author: String
     let published: Date?
@@ -10,10 +9,8 @@ struct BookDTO: Sendable {
     let series: String?
     let isbn: String?
     let bookDescription: String?
-    let status: ReadingStatus
     let quotes: String
     let notes: String
     let tags: [String]
-    let dateStarted: Date?
-    let dateFinished: Date?
+    let status: ReadingStatus
 }

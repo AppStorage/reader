@@ -31,18 +31,24 @@ struct AppCommands {
     }
     
     @MainActor static func deleteCommands(appState: AppState, viewModel: ContentViewModel) -> some Commands {
-        CommandGroup(replacing: CommandGroupPlacement.pasteboard) {
+        CommandGroup(after: CommandGroupPlacement.pasteboard) {
             // Soft Delete
-            Button("Delete") {
+            Button("Delete Book") {
                 if let selectedBook = viewModel.selectedBook {
-                    appState.showSoftDeleteConfirmation(for: selectedBook)
+                    if selectedBook.status == .deleted {
+                        // Already deleted? Show permanent delete prompt
+                        appState.showPermanentDeleteConfirmation(for: selectedBook)
+                    } else {
+                        // Otherwise, show soft delete prompt
+                        appState.showSoftDeleteConfirmation(for: selectedBook)
+                    }
                 }
             }
             .keyboardShortcut(.delete, modifiers: [])
             .disabled(viewModel.selectedBook == nil)
             
             // Permanent Delete
-            Button("Permanently Delete") {
+            Button("Permanently Delete Book") {
                 if let selectedBook = viewModel.selectedBook {
                     appState.showPermanentDeleteConfirmation(for: selectedBook)
                 }
