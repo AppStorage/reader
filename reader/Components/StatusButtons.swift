@@ -1,50 +1,38 @@
 import SwiftUI
-import SwiftData
 
 struct StatusButtons: View {
-    let book: BookData
-    let updateStatus: (ReadingStatus) -> Void
+    let books: [BookData]
+    let dataManager: DataManager
     
     var body: some View {
-        HStack(spacing: 12) {
-            statusButton(for: .unread, icon: "book.closed", label: "Mark as Unread")
-            statusButton(for: .reading, icon: "book", label: "Mark as Reading")
-            statusButton(for: .read, icon: "checkmark.circle", label: "Mark as Read")
-        }
-    }
-    
-    private func statusButton(for status: ReadingStatus, icon: String, label: String) -> some View {
         Button(action: {
-            updateStatus(status)
-        }) {
-            Image(systemName: icon)
-        }
-        .help(label)
-        .accessibilityLabel(label)
-    }
-    
-    // MARK: Helpers
-    static func handleStatusChange(for book: BookData, newStatus: ReadingStatus) {
-        if newStatus == .unread {
-            book.dateStarted = nil
-            book.dateFinished = nil
-        } else if newStatus == .reading {
-            book.dateStarted = book.dateStarted ?? Date()
-            book.dateFinished = nil
-        } else if newStatus == .read {
-            if book.dateStarted == nil {
-                book.dateStarted = Date()
+            for book in books {
+                dataManager.updateBookStatus(book, to: .unread)
             }
-            book.dateFinished = Date()
+        }) {
+            Label("Unread", systemImage: "book.closed")
         }
-    }
-    
-    static func saveChanges(_ book: BookData, modelContext: ModelContext) {
-        do {
-            try modelContext.save()
-            print("Status updated successfully")
-        } catch {
-            print("Failed to save status change: \(error)")
+        .help("Mark as Unread")
+        .accessibilityLabel("Mark as Unread")
+        
+        Button(action: {
+            for book in books {
+                dataManager.updateBookStatus(book, to: .reading)
+            }
+        }) {
+            Label("Reading", systemImage: "book")
         }
+        .help("Mark as Reading")
+        .accessibilityLabel("Mark as Reading")
+        
+        Button(action: {
+            for book in books {
+                dataManager.updateBookStatus(book, to: .read)
+            }
+        }) {
+            Label("Read", systemImage: "checkmark.circle")
+        }
+        .help("Mark as Read")
+        .accessibilityLabel("Mark as Read")
     }
 }

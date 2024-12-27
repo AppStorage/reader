@@ -79,4 +79,10 @@ final class ContentViewModel: ObservableObject {
             self.selectedBook = nil
         }
     }
+    
+    func updateBookStatus(for books: [BookData], to status: ReadingStatus) {
+        for book in books {
+            dataManager.updateBookStatus(book, to: status)
+        }
+    }
 }

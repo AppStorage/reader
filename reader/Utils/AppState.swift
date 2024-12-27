@@ -109,13 +109,22 @@ class AppState: ObservableObject {
         }
     }
     
-    // MARK: Delete Actions
+    // MARK: Delete Actions - Single Books
     func showSoftDeleteConfirmation(for book: BookData) {
-        alertType = .softDelete(book)
+        alertType = .softDeleteSingle(book)
     }
     
     func showPermanentDeleteConfirmation(for book: BookData) {
-        alertType = .permanentDelete(book)
+        alertType = .permanentDeleteSingle(book)
+    }
+    
+    // MARK: Delete Actions - Multiple Books
+    func showSoftDeleteConfirmation(for books: [BookData]) {
+        alertType = .softDeleteMultiple(books)
+    }
+    
+    func showPermanentDeleteConfirmation(for books: [BookData]) {
+        alertType = .permanentDeleteMultiple(books)
     }
     
     // MARK: Book Results
