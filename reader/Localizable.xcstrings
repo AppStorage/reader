@@ -300,7 +300,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Derechos de autor © 2024 chip"
+            "value" : "Derechos de Autor © 2024 chip"
           }
         }
       }
@@ -321,25 +321,21 @@
         }
       }
     },
-    "Delete Book" : {
-      "extractionState" : "stale",
+    "Delete Book(s)" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Delete Book"
+            "value" : "Delete Book(s)"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eliminar Libro"
+            "value" : "Eliminar Libro(s)"
           }
         }
       }
-    },
-    "Delete Book(s)" : {
-
     },
     "Dismiss" : {
       "localizations" : {
@@ -480,7 +476,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Marcar como leído"
+            "value" : "Marcar como Leído"
           }
         }
       }
@@ -496,7 +492,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Marcar como leyendo"
+            "value" : "Marcar como Leyendo"
           }
         }
       }
@@ -512,7 +508,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Marcar como no leído"
+            "value" : "Marcar como No Leído"
           }
         }
       }
@@ -560,7 +556,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nueva actualización disponible"
+            "value" : "Nueva Actualización Disponible"
           }
         }
       }
@@ -741,25 +737,21 @@
         }
       }
     },
-    "Permanently Delete Book" : {
-      "extractionState" : "stale",
+    "Permanently Delete Book(s)" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Permanently Delete Book"
+            "value" : "Permanently Delete Book(s)"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eliminar libro permanentemente"
+            "value" : "Eliminar Permanentemente Libro(s)"
           }
         }
       }
-    },
-    "Permanently Delete Book(s)" : {
-
     },
     "Permanently Delete Books" : {
       "localizations" : {
@@ -772,7 +764,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eliminar libros permanentemente"
+            "value" : "Eliminar Libros Permanentemente"
           }
         }
       }
@@ -788,7 +780,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Eliminar permanentemente?"
+            "value" : "¿Eliminar Permanentemente?"
           }
         }
       }
@@ -1012,7 +1004,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seleccionar edición"
+            "value" : "Seleccionar Edición"
           }
         }
       }
