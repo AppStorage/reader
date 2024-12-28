@@ -48,35 +48,24 @@ final class ContentViewModel: ObservableObject {
         return books.count(for: status)
     }
     
-    func softDeleteBook(_ book: BookData) {
-        dataManager.updateBookStatus(book, to: .deleted)
-        book.updateDates(for: .deleted)
-    }
-    
     func recoverBook(_ book: BookData) {
         dataManager.updateBookStatus(book, to: .unread)
         book.updateDates(for: .unread)
     }
     
-    func permanentlyDeleteBook(_ book: BookData) {
-        let wasDeletedFilter = selectedStatus == .deleted  // Check if current filter is deleted
-        
-        // Remove the book from the local list (update the in-memory collection)
-        if let index = books.firstIndex(where: { $0.id == book.id }) {
-            books.remove(at: index)
+    func softDeleteBooks(_ books: [BookData]) {
+        for book in books {
+            dataManager.updateBookStatus(book, to: .deleted)
+            book.updateDates(for: .deleted)
         }
-        
-        // Call DataManager to handle permanent deletion from storage
-        dataManager.permanentlyDeleteBook(book)
-        
-        // Reapply the deleted filter if it was previously selected
-        if wasDeletedFilter {
-            selectedStatus = .deleted
+    }
+    
+    func permanentlyDeleteBooks(_ booksToDelete: [BookData]) {
+        for book in booksToDelete {
+            dataManager.permanentlyDeleteBook(book)
         }
-        
-        // Clear the selection if the book was being viewed in DetailView
-        if let selectedBook = self.selectedBook, selectedBook.id == book.id {
-            self.selectedBook = nil
+        self.books.removeAll { book in
+            booksToDelete.contains(where: { $0.id == book.id })
         }
     }
     

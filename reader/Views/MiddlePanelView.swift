@@ -111,7 +111,7 @@ struct MiddlePanelView: View {
     
     // MARK: Empty State Views
     private var emptyStateView: some View {
-        EmptyStateView(type: emptyStateType)
+        EmptyStateView(type: emptyStateType, viewModel: viewModel)
     }
     
     private var emptyStateType: EmptyStateType {

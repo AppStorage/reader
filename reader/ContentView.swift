@@ -20,42 +20,20 @@ struct ContentView: View {
                 .frame(minWidth: 400, maxWidth: .infinity)
         } detail: {
             if selectedBookIDs.count > 1 {
-                // Multiple Selection View
                 let selectedBooks = viewModel.displayedBooks.filter { selectedBookIDs.contains($0.id) }
-                MultipleSelectionView(
-                    count: selectedBooks.count,
-                    selectedBooks: selectedBooks,
-                    viewModel: viewModel,
-                    dataManager: dataManager
-                )
-                .frame(minWidth: 450, maxWidth: .infinity)
+                MultipleSelectionView(count: selectedBooks.count, selectedBooks: selectedBooks, viewModel: viewModel, dataManager: dataManager)
+                    .frame(minWidth: 450, maxWidth: .infinity)
             } else if let selectedID = selectedBookIDs.first,
                       let selectedBook = viewModel.displayedBooks.first(where: { $0.id == selectedID }) {
                 DetailView(book: selectedBook)
                     .frame(minWidth: 450, maxWidth: .infinity)
-                    .toolbar {
-                        ToolbarItemGroup(placement: .automatic) {
-                            StatusButtons(books: [selectedBook], dataManager: dataManager)
-                        }
-                        ToolbarItem(placement: .automatic) {
-                            Spacer()
-                        }
-                        ToolbarItem(placement: .automatic) {
-                            BookActionButton(viewModel: viewModel, selectedBooks: [selectedBook])
-                        }
-                    }
             } else {
-                EmptyStateView(type: .detail)
+                EmptyStateView(type: .detail, viewModel: viewModel)
                     .frame(minWidth: 450, maxWidth: .infinity)
-                    .toolbar {
-                        ToolbarItem(placement: .automatic) {
-                            Spacer()
-                        }
-                        ToolbarItem(placement: .automatic) {
-                            BookActionButton(viewModel: viewModel, selectedBooks: [])
-                        }
-                    }
             }
+        }
+        .onChange(of: selectedBookIDs) { _, newSelection in
+            appState.selectedBooks = viewModel.displayedBooks.filter { newSelection.contains($0.id) }
         }
         .navigationSplitViewStyle(.balanced)
         .searchable(text: $viewModel.searchQuery, placement: .sidebar)

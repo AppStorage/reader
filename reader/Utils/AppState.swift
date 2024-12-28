@@ -11,6 +11,7 @@ class AppState: ObservableObject {
     @Published var downloadURL: URL?
     @Published var showSoftDeleteConfirmation = false
     @Published var showPermanentDeleteConfirmation = false
+    @Published var selectedBooks: [BookData] = []
     
     @Published var selectedTheme: Theme = .system {
         didSet {
@@ -109,22 +110,13 @@ class AppState: ObservableObject {
         }
     }
     
-    // MARK: Delete Actions - Single Books
-    func showSoftDeleteConfirmation(for book: BookData) {
-        alertType = .softDeleteSingle(book)
-    }
-    
-    func showPermanentDeleteConfirmation(for book: BookData) {
-        alertType = .permanentDeleteSingle(book)
-    }
-    
-    // MARK: Delete Actions - Multiple Books
+    // MARK: Delete Actions
     func showSoftDeleteConfirmation(for books: [BookData]) {
-        alertType = .softDeleteMultiple(books)
+        alertType = .softDelete(books: books)
     }
     
     func showPermanentDeleteConfirmation(for books: [BookData]) {
-        alertType = .permanentDeleteMultiple(books)
+        alertType = .permanentDelete(books: books)
     }
     
     // MARK: Book Results

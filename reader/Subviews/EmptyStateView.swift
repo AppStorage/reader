@@ -3,6 +3,8 @@ import SwiftUI
 struct EmptyStateView: View {
     let type: EmptyStateType
     var minWidth: CGFloat? = nil
+    var selectedBooks: [BookData] = []
+    var viewModel: ContentViewModel
     
     var body: some View {
         VStack(spacing: type.spacing) {
@@ -27,5 +29,13 @@ struct EmptyStateView: View {
             Spacer()
         }
         .frame(minWidth: minWidth)
+        .toolbar {
+            ToolbarItem(placement: .automatic) {
+                Spacer()
+            }
+            ToolbarItem(placement: .automatic) {
+                BookActionButton(viewModel: viewModel, selectedBooks: selectedBooks)
+            }
+        }
     }
 }

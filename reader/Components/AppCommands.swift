@@ -33,28 +33,29 @@ struct AppCommands {
     @MainActor static func deleteCommands(appState: AppState, viewModel: ContentViewModel) -> some Commands {
         CommandGroup(after: CommandGroupPlacement.pasteboard) {
             // Soft Delete
-            Button("Delete Book") {
-                if let selectedBook = viewModel.selectedBook {
-                    if selectedBook.status == .deleted {
-                        // Already deleted? Show permanent delete prompt
-                        appState.showPermanentDeleteConfirmation(for: selectedBook)
-                    } else {
-                        // Otherwise, show soft delete prompt
-                        appState.showSoftDeleteConfirmation(for: selectedBook)
-                    }
+            Button("Delete Book(s)") {
+                let selectedBooks = appState.selectedBooks
+                
+                guard !selectedBooks.isEmpty else { return }
+                
+                if selectedBooks.allSatisfy({ $0.status == .deleted }) {
+                    appState.showPermanentDeleteConfirmation(for: selectedBooks)
+                } else {
+                    appState.showSoftDeleteConfirmation(for: selectedBooks)
                 }
             }
             .keyboardShortcut(.delete, modifiers: [])
-            .disabled(viewModel.selectedBook == nil)
+            .disabled(appState.selectedBooks.isEmpty)
             
             // Permanent Delete
-            Button("Permanently Delete Book") {
-                if let selectedBook = viewModel.selectedBook {
-                    appState.showPermanentDeleteConfirmation(for: selectedBook)
-                }
+            Button("Permanently Delete Book(s)") {
+                let selectedBooks = appState.selectedBooks
+                
+                guard !selectedBooks.isEmpty else { return }
+                appState.showPermanentDeleteConfirmation(for: selectedBooks)
             }
             .keyboardShortcut(.delete, modifiers: .command)
-            .disabled(viewModel.selectedBook == nil)
+            .disabled(appState.selectedBooks.isEmpty)
         }
     }
 }

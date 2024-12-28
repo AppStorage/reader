@@ -33,46 +33,30 @@ extension AlertType {
                 dismissButton: .default(Text("OK"))
             )
             // Single Soft Delete
-        case .softDeleteSingle(let book):
+        case .softDelete(let books):
+            let message = books.count == 1
+            ? "This will move the book '\(books.first!.title)' to deleted."
+            : "This will move \(books.count) selected books to deleted."
+            
             return Alert(
                 title: Text("Move to Deleted?"),
-                message: Text("This will move the book '\(book.title)' to deleted."),
+                message: Text(message),
                 primaryButton: .default(Text("Delete")) {
-                    appState.viewModel?.softDeleteBook(book)
+                    appState.viewModel?.softDeleteBooks(books)
                 },
                 secondaryButton: .cancel(Text("Cancel"))
             )
-            // Single Permanent Delete
-        case .permanentDeleteSingle(let book):
+            
+        case .permanentDelete(let books):
+            let message = books.count == 1
+            ? "This will permanently delete the book '\(books.first!.title)'. You can't undo this action."
+            : "This will permanently delete \(books.count) selected books. You can't undo this action."
+            
             return Alert(
                 title: Text("Permanently Delete?"),
-                message: Text("This will permanently delete the book '\(book.title)'. You can't undo this action."),
+                message: Text(message),
                 primaryButton: .default(Text("Delete")) {
-                    appState.viewModel?.permanentlyDeleteBook(book)
-                },
-                secondaryButton: .cancel(Text("Cancel"))
-            )
-            // Multiple Soft Delete
-        case .softDeleteMultiple(let books):
-            return Alert(
-                title: Text("Move to Deleted?"),
-                message: Text("This will move \(books.count) selected books to deleted."),
-                primaryButton: .default(Text("Delete")) {
-                    for book in books {
-                        appState.viewModel?.softDeleteBook(book)
-                    }
-                },
-                secondaryButton: .cancel(Text("Cancel"))
-            )
-            // Multiple Permanent Delete
-        case .permanentDeleteMultiple(let books):
-            return Alert(
-                title: Text("Permanently Delete?"),
-                message: Text("This will permanently delete \(books.count) selected books. You can't undo this action."),
-                primaryButton: .default(Text("Delete")) {
-                    for book in books {
-                        appState.viewModel?.permanentlyDeleteBook(book)
-                    }
+                    appState.viewModel?.permanentlyDeleteBooks(books)
                 },
                 secondaryButton: .cancel(Text("Cancel"))
             )
@@ -85,10 +69,8 @@ enum AlertType: Identifiable {
     case upToDate
     case error(String)
     case noResults(String)
-    case softDeleteSingle(BookData)
-    case permanentDeleteSingle(BookData)
-    case softDeleteMultiple([BookData])
-    case permanentDeleteMultiple([BookData])
+    case softDelete(books: [BookData])
+    case permanentDelete(books: [BookData])
     
     var id: String {
         switch self {
@@ -96,10 +78,10 @@ enum AlertType: Identifiable {
         case .upToDate: return "upToDate"
         case .error(let message): return "error-\(message)"
         case .noResults(let message): return "noResults-\(message)"
-        case .softDeleteSingle(let book): return "softDelete-\(book.id)"
-        case .permanentDeleteSingle(let book): return "permanentDelete-\(book.id)"
-        case .softDeleteMultiple(let books): return "softDelete-multiple-\(books.count)"
-        case .permanentDeleteMultiple(let books): return "permanentDelete-multiple-\(books.count)"
+        case .softDelete(let books):
+            return "softDelete-\(books.map { $0.id.uuidString }.joined(separator: ","))"
+        case .permanentDelete(let books):
+            return "permanentDelete-\(books.map { $0.id.uuidString }.joined(separator: ","))"
         }
     }
 }

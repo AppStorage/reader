@@ -4,6 +4,7 @@ import SwiftData
 struct DetailView: View {
     @Bindable var book: BookData
     @EnvironmentObject var viewModel: ContentViewModel
+    @EnvironmentObject var dataManager: DataManager
     
     @Environment(\.modelContext) var modelContext
     
@@ -34,6 +35,17 @@ struct DetailView: View {
         }
         .onAppear {
             currentStatus = book.status
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .automatic) {
+                StatusButtons(books: [book], dataManager: dataManager)
+            }
+            ToolbarItem(placement: .automatic) {
+                Spacer()
+            }
+            ToolbarItem(placement: .automatic) {
+                BookActionButton(viewModel: viewModel, selectedBooks: [book])
+            }
         }
     }
     

@@ -92,7 +92,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld libros seleccionados"
+            "value" : "%lld Libros Seleccionados"
           }
         }
       }
@@ -124,7 +124,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Añadir libro"
+            "value" : "Añadir Libro"
           }
         }
       }
@@ -140,7 +140,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Añadir fecha"
+            "value" : "Añadir Fecha"
           }
         }
       }
@@ -156,7 +156,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Añadir nuevo libro"
+            "value" : "Añadir Nuevo Libro"
           }
         }
       }
@@ -204,7 +204,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Por %@"
+            "value" : "Por: %@"
           }
         }
       }
@@ -236,7 +236,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Buscar actualizaciones"
+            "value" : "Buscar Actualizaciones"
           }
         }
       }
@@ -252,7 +252,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Buscar actualizaciones automáticamente"
+            "value" : "Buscar Actualizaciones Automáticamente"
           }
         }
       }
@@ -322,6 +322,7 @@
       }
     },
     "Delete Book" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -332,10 +333,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eliminar libro"
+            "value" : "Eliminar Libro"
           }
         }
       }
+    },
+    "Delete Book(s)" : {
+
     },
     "Dismiss" : {
       "localizations" : {
@@ -428,7 +432,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Obtener libro"
+            "value" : "Obtener Libro"
           }
         }
       }
@@ -444,7 +448,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Obteniendo libros…"
+            "value" : "Obteniendo Libros…"
           }
         }
       }
@@ -524,7 +528,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mover libros a eliminados"
+            "value" : "Mover Libros a Eliminados"
           }
         }
       }
@@ -540,7 +544,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Mover a eliminados?"
+            "value" : "¿Mover a Eliminados?"
           }
         }
       }
@@ -738,6 +742,7 @@
       }
     },
     "Permanently Delete Book" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -752,6 +757,9 @@
           }
         }
       }
+    },
+    "Permanently Delete Book(s)" : {
+
     },
     "Permanently Delete Books" : {
       "localizations" : {
@@ -1036,7 +1044,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ordenar por"
+            "value" : "Ordenar Por"
           }
         }
       }
@@ -1052,7 +1060,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Opciones de orden"
+            "value" : "Opciones de Orden"
           }
         }
       }
@@ -1085,70 +1093,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tema"
-          }
-        }
-      }
-    },
-    "This will move %lld selected books to deleted." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This will move %lld selected books to deleted."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esto moverá %lld libros seleccionados a eliminados."
-          }
-        }
-      }
-    },
-    "This will move the book '%@' to deleted." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This will move the book '%@' to deleted."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esto moverá el libro ’%@’ a eliminados."
-          }
-        }
-      }
-    },
-    "This will permanently delete %lld selected books. You can't undo this action." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This will permanently delete %lld selected books. You can't undo this action."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esto eliminará permanentemente %lld libros seleccionados. No puedes deshacer esta acción."
-          }
-        }
-      }
-    },
-    "This will permanently delete the book '%@'. You can't undo this action." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This will permanently delete the book '%@'. You can't undo this action."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esto eliminará permanentemente el libro ’%@’. No puedes deshacer esta acción."
           }
         }
       }
