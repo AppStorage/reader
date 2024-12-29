@@ -84,14 +84,14 @@ struct readerApp: App {
                     Settings.Pane(
                         identifier: Settings.PaneIdentifier("general"),
                         title: "General",
-                        toolbarIcon: createToolbarIcon(named: "squareGear", size: 24)
+                        toolbarIcon: { gearToolbarIcon() }()
                     ) {
                         settingsView
                     },
                     Settings.Pane(
                         identifier: Settings.PaneIdentifier("about"),
                         title: "About",
-                        toolbarIcon: createToolbarIcon(systemSymbolName: "info.square.fill", size: 24)
+                        toolbarIcon: { infoToolbarIcon() }()
                     ) {
                         aboutView
                     }
@@ -119,14 +119,33 @@ struct readerApp: App {
         appState.scheduleDailyUpdateCheck()
     }
     
-    private static func createToolbarIcon(named: String? = nil, systemSymbolName: String? = nil, size: CGFloat) -> NSImage {
-        if let named = named, let image = NSImage(named: named) {
-            return image
-        }
-        if let systemSymbolName = systemSymbolName {
-            let config = NSImage.SymbolConfiguration(pointSize: size, weight: .regular)
-            return NSImage(systemSymbolName: systemSymbolName, accessibilityDescription: nil)?.withSymbolConfiguration(config) ?? NSImage()
-        }
-        return NSImage()
+    private static func gearToolbarIcon(size: CGFloat = 24, innerSize: CGFloat = 18) -> NSImage {
+        let originalImage = NSImage(named: "squareGear")!
+        let paddedSize = NSSize(width: size, height: size)
+        let innerSize = NSSize(width: innerSize, height: innerSize)
+        
+        let paddedImage = NSImage(size: paddedSize)
+        paddedImage.lockFocus()
+        
+        let xOffset = (paddedSize.width - innerSize.width) / 2
+        let yOffset = (paddedSize.height - innerSize.height) / 2
+        originalImage.draw(
+            in: NSRect(x: xOffset, y: yOffset, width: innerSize.width, height: innerSize.height),
+            from: .zero,
+            operation: .sourceOver,
+            fraction: 1.0
+        )
+        
+        paddedImage.unlockFocus()
+        paddedImage.isTemplate = true
+        return paddedImage
+    }
+    
+    private static func infoToolbarIcon(size: CGFloat = 24) -> NSImage {
+        let config = NSImage.SymbolConfiguration(pointSize: size, weight: .regular)
+        return NSImage(
+            systemSymbolName: "info.square.fill",
+            accessibilityDescription: nil
+        )!.withSymbolConfiguration(config)!
     }
 }
