@@ -161,6 +161,22 @@
         }
       }
     },
+    "Add New Collection" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add New Collection"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agregar Nueva Colección"
+          }
+        }
+      }
+    },
     "Appearance" : {
       "localizations" : {
         "en" : {
@@ -289,18 +305,34 @@
         }
       }
     },
-    "Copyright © 2024 chip" : {
+    "Collection Name" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Copyright © 2024 chip"
+            "value" : "Collection Name"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Derechos de Autor © 2024 chip"
+            "value" : "Nombre de la Colección"
+          }
+        }
+      }
+    },
+    "Collections" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collections"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colecciones"
           }
         }
       }
@@ -321,18 +353,18 @@
         }
       }
     },
-    "Delete Book(s)" : {
+    "Delete Collection" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Delete Book(s)"
+            "value" : "Delete Collection"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eliminar Libro(s)"
+            "value" : "Eliminar Colección"
           }
         }
       }
@@ -513,22 +545,6 @@
         }
       }
     },
-    "Move Books to Deleted" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Move Books to Deleted"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mover Libros a Eliminados"
-          }
-        }
-      }
-    },
     "Move to Deleted?" : {
       "localizations" : {
         "en" : {
@@ -541,6 +557,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "¿Mover a Eliminados?"
+          }
+        }
+      }
+    },
+    "New Collection" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Collection"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nueva Colección"
           }
         }
       }
@@ -732,39 +764,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eliminar permanentemente"
-          }
-        }
-      }
-    },
-    "Permanently Delete Book(s)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Permanently Delete Book(s)"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eliminar Permanentemente Libro(s)"
-          }
-        }
-      }
-    },
-    "Permanently Delete Books" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Permanently Delete Books"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eliminar Libros Permanentemente"
+            "value" : "Eliminar Permanentemente"
           }
         }
       }
@@ -908,7 +908,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estado de lectura"
+            "value" : "Estado de Lectura"
           }
         }
       }
@@ -929,18 +929,18 @@
         }
       }
     },
-    "Recover Books" : {
+    "Remove from Collection" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Recover Books"
+            "value" : "Remove from Collection"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Recuperar libros"
+            "value" : "Eliminar de la Colección"
           }
         }
       }
@@ -957,6 +957,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eliminar etiqueta %@"
+          }
+        }
+      }
+    },
+    "Rename Collection" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rename Collection"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renombrar Colección"
           }
         }
       }
@@ -1100,7 +1116,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No leído"
+            "value" : "No Leído"
           }
         }
       }

@@ -22,7 +22,7 @@ struct AboutView: View {
                 Text("Version \(Bundle.main.appVersion)")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                Text("Copyright © 2024 chip")
+                Text(Bundle.main.copyrightText)
                     .font(.footnote)
                     .foregroundColor(.secondary)
             }
@@ -99,5 +99,10 @@ struct AboutButton: View {
 extension Bundle {
     var appVersion: String {
         return infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+    }
+    var copyrightText: String {
+        let baseCopyright = object(forInfoDictionaryKey: "NSHumanReadableCopyright") as? String ?? ""
+        let currentYear = Calendar.current.component(.year, from: Date())
+        return baseCopyright.replacingOccurrences(of: "2024", with: "\(currentYear)")
     }
 }

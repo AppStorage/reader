@@ -10,9 +10,6 @@ struct SettingsView: View {
         }
         .padding()
         .frame(width: 400, height: 300)
-        .alert(item: $appState.alertType) { alertType in
-            alertType.createAlert(appState: appState)
-        }
         .onDisappear {
             releaseSettingsWindowResources()
         }

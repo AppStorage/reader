@@ -36,8 +36,27 @@ struct MiddlePanelView: View {
         }
     }
     
+    // MARK: Book List
     private var bookList: some View {
         List(viewModel.displayedBooks, id: \.id, selection: $selectedBookIDs) { book in
+            bookListItem(for: book)
+        }
+        .scrollContentBackground(.hidden)
+        .overlay { // Empty State View
+            if viewModel.displayedBooks.isEmpty {
+                emptyStateView
+            }
+        }
+        .onAppear { resetSelectedBooks() }
+        .onChange(of: selectedBookIDs) { _, newValue in
+            updateSelectedBook(with: newValue)
+        }
+    }
+    
+    private struct BookRow: View {
+        let book: BookData
+        
+        var body: some View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(book.title)
                     .font(.headline)
@@ -45,56 +64,82 @@ struct MiddlePanelView: View {
                     .font(.subheadline)
             }
             .padding(.vertical, 4)
-            .contextMenu { bookContextMenu() }
         }
-        .scrollContentBackground(.hidden)
-        .overlay {
-            if viewModel.displayedBooks.isEmpty {
-                emptyStateView
-            }
-        }
-        .onAppear { selectedBookIDs = [] }
-        .onChange(of: selectedBookIDs) { _, newValue in
-            if let selectedID = newValue.first,
-               let book = viewModel.displayedBooks.first(where: { $0.id == selectedID }) {
-                viewModel.selectedBook = book
-            } else {
-                viewModel.selectedBook = nil
-            }
+    }
+    
+    private func bookListItem(for book: BookData) -> some View {
+        BookRow(book: book)
+            .contextMenu { bookContextMenu(for: book) }
+            .draggable(makeTransferData(for: book))
+    }
+    
+    private func resetSelectedBooks() {
+        selectedBookIDs = []
+    }
+    
+    private func updateSelectedBook(with newSelection: Set<UUID>) {
+        if let selectedID = newSelection.first,
+           let book = viewModel.displayedBooks.first(where: { $0.id == selectedID }) {
+            viewModel.selectedBook = book
+        } else {
+            viewModel.selectedBook = nil
         }
     }
     
     // MARK: Context Menu
-    private func bookContextMenu() -> some View {
+    private func bookContextMenu(for book: BookData) -> some View {
         Group {
-            if selectedBooks.allSatisfy({ $0.status == .deleted }) {
-                // Deleted Books: Restore and Permanently Delete
-                Button("Restore") {
-                    for book in selectedBooks {
-                        viewModel.recoverBook(book)
-                    }
-                }
-                Button("Permanently Delete") {
-                    appState.showPermanentDeleteConfirmation(for: selectedBooks)
-                }
+            if let selectedCollection = viewModel.selectedCollection {
+                // Actions when viewing a collection
+                collectionActions(for: book, in: selectedCollection)
+            } else if allSelectedBooksAreDeleted() {
+                // Actions for deleted books
+                deletedBookActions(for: selectedBooks)
             } else {
-                // Active Books: Status Change Options
-                Button("Mark as Unread") {
-                    updateStatus(for: selectedBooks, to: .unread)
+                // Actions for active books
+                activeBookActions(for: selectedBooks)
+            }
+        }
+    }
+    
+    // Collection Actions
+    private func collectionActions(for book: BookData, in collection: BookCollection) -> some View {
+        Button("Remove from Collection") {
+            viewModel.removeBookFromSelectedCollection(book)
+        }
+    }
+    
+    // Deleted Book Actions
+    private func deletedBookActions(for books: [BookData]) -> some View {
+        Group {
+            Button("Restore") {
+                for book in books {
+                    viewModel.recoverBook(book)
                 }
-                Button("Mark as Reading") {
-                    updateStatus(for: selectedBooks, to: .reading)
-                }
-                Button("Mark as Read") {
-                    updateStatus(for: selectedBooks, to: .read)
-                }
-                
-                Divider()
-                
-                // Soft Delete
-                Button("Delete") {
-                    appState.showSoftDeleteConfirmation(for: selectedBooks)
-                }
+            }
+            Button("Permanently Delete") {
+                appState.showPermanentDeleteConfirmation(for: books)
+            }
+        }
+    }
+    
+    // Active Book Actions
+    private func activeBookActions(for books: [BookData]) -> some View {
+        Group {
+            Button("Mark as Unread") {
+                updateStatus(for: books, to: .unread)
+            }
+            Button("Mark as Reading") {
+                updateStatus(for: books, to: .reading)
+            }
+            Button("Mark as Read") {
+                updateStatus(for: books, to: .read)
+            }
+            
+            Divider()
+            
+            Button("Delete") {
+                appState.showSoftDeleteConfirmation(for: books)
             }
         }
     }
@@ -115,7 +160,9 @@ struct MiddlePanelView: View {
     }
     
     private var emptyStateType: EmptyStateType {
-        if viewModel.searchQuery.isEmpty {
+        if viewModel.selectedCollection != nil {
+            return .collection
+        } else if viewModel.searchQuery.isEmpty {
             switch viewModel.selectedStatus {
             case .deleted: return .deleted
             case .unread: return .unread
@@ -124,7 +171,30 @@ struct MiddlePanelView: View {
             default: return .list
             }
         } else {
+            // Show search empty state when there's a query
             return viewModel.selectedStatus == .deleted ? .deleted : .search
         }
+    }
+    
+    // MARK: Helpers
+    private func makeTransferData(for book: BookData) -> BookTransferData {
+        BookTransferData(
+            title: book.title,
+            author: book.author,
+            published: book.published,
+            publisher: book.publisher,
+            genre: book.genre,
+            series: book.series,
+            isbn: book.isbn,
+            bookDescription: book.bookDescription,
+            quotes: book.quotes,
+            notes: book.notes,
+            tags: book.tags,
+            status: book.status
+        )
+    }
+    
+    private func allSelectedBooksAreDeleted() -> Bool {
+        selectedBooks.allSatisfy { $0.status == .deleted }
     }
 }

@@ -1,6 +1,11 @@
-import Foundation
+import SwiftUI
+import UniformTypeIdentifiers
 
-struct BookTransferData: Sendable, Equatable {
+extension UTType {
+    static let bookTransferData = UTType.json
+}
+
+struct BookTransferData: Codable, Transferable, Sendable, Equatable {
     let title: String
     let author: String
     let published: Date?
@@ -13,4 +18,9 @@ struct BookTransferData: Sendable, Equatable {
     let notes: String
     let tags: [String]
     let status: ReadingStatus
+    
+    // MARK: - Transferable Conformance
+    static var transferRepresentation: some TransferRepresentation {
+        CodableRepresentation(for: BookTransferData.self, contentType: .bookTransferData)
+    }
 }

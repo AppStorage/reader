@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum ReadingStatus: String, CaseIterable {
+enum ReadingStatus: String, CaseIterable, Codable {
     case unread
     case reading
     case read

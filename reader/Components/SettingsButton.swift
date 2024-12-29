@@ -10,7 +10,7 @@ struct SettingsButton: View {
         Button(action: {
             action()
         }) {
-            Image(systemName: "gear")
+            Label("Preferences", systemImage: "gear")
                 .font(.system(size: 16, weight: .regular))
                 .frame(width: 24, height: 24)
                 .contentShape(Rectangle())

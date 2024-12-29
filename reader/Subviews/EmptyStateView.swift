@@ -33,9 +33,6 @@ struct EmptyStateView: View {
             ToolbarItem(placement: .automatic) {
                 Spacer()
             }
-            ToolbarItem(placement: .automatic) {
-                BookActionButton(viewModel: viewModel, selectedBooks: selectedBooks)
-            }
         }
     }
 }

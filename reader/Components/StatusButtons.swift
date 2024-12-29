@@ -6,9 +6,7 @@ struct StatusButtons: View {
     
     var body: some View {
         Button(action: {
-            for book in books {
-                dataManager.updateBookStatus(book, to: .unread)
-            }
+            updateStatus(for: .unread, label: "Unread")
         }) {
             Label("Unread", systemImage: "book.closed")
         }
@@ -16,9 +14,7 @@ struct StatusButtons: View {
         .accessibilityLabel("Mark as Unread")
         
         Button(action: {
-            for book in books {
-                dataManager.updateBookStatus(book, to: .reading)
-            }
+            updateStatus(for: .reading, label: "Reading")
         }) {
             Label("Reading", systemImage: "book")
         }
@@ -26,13 +22,18 @@ struct StatusButtons: View {
         .accessibilityLabel("Mark as Reading")
         
         Button(action: {
-            for book in books {
-                dataManager.updateBookStatus(book, to: .read)
-            }
+            updateStatus(for: .read, label: "Read")
         }) {
             Label("Read", systemImage: "checkmark.circle")
         }
         .help("Mark as Read")
         .accessibilityLabel("Mark as Read")
+    }
+    
+    // MARK: Overlay Feedback
+    private func updateStatus(for status: ReadingStatus, label: String) {
+        for book in books {
+            dataManager.updateBookStatus(book, to: status)
+        }
     }
 }

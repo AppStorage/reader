@@ -7,17 +7,19 @@ struct readerApp: App {
     @StateObject private var appState = AppState()
     @StateObject private var dataManager: DataManager
     @StateObject private var viewModel: ContentViewModel
+    @StateObject private var overlayManager = OverlayManager()
     
     @Environment(\.openWindow) private var openWindow
-    
-    @State private var alertType: AlertType? = nil
     
     private static var preferencesWindow: SettingsWindowController?
     
     private static let sharedModelContainer: ModelContainer? = {
-        let schema = Schema([BookData.self])
+        let schema = Schema([BookData.self, BookCollection.self])
         do {
-            return try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)])
+            return try ModelContainer(
+                for: schema,
+                configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)]
+            )
         } catch {
             fatalError("Failed to initialize ModelContainer: \(error)")
         }
@@ -32,7 +34,7 @@ struct readerApp: App {
             fatalError("ModelContainer is not available.")
         }
         
-        // Create DataManager and ViewModel
+        // Initialize DataManager and ViewModel
         let dataManager = DataManager(modelContainer: container)
         _dataManager = StateObject(wrappedValue: dataManager)
         _viewModel = StateObject(wrappedValue: ContentViewModel(dataManager: dataManager))
@@ -50,10 +52,8 @@ struct readerApp: App {
                 .environmentObject(viewModel)
                 .environmentObject(dataManager)
                 .environmentObject(appState)
+                .environmentObject(overlayManager)
                 .environment(\.modelContainer, readerApp.sharedModelContainer!)
-                .alert(item: $appState.alertType) { alertType in
-                    alertType.createAlert(appState: appState)
-                }
                 .onAppear {
                     appState.viewModel = viewModel
                     handleOnAppear()
@@ -84,40 +84,14 @@ struct readerApp: App {
                     Settings.Pane(
                         identifier: Settings.PaneIdentifier("general"),
                         title: "General",
-                        toolbarIcon: {
-                            let originalImage = NSImage(named: "squareGear")!
-                            let paddedSize = NSSize(width: 24, height: 24)
-                            let innerSize = NSSize(width: 18, height: 18)
-                            
-                            let paddedImage = NSImage(size: paddedSize)
-                            paddedImage.lockFocus()
-                            
-                            let xOffset = (paddedSize.width - innerSize.width) / 2
-                            let yOffset = (paddedSize.height - innerSize.height) / 2
-                            originalImage.draw(
-                                in: NSRect(x: xOffset, y: yOffset, width: innerSize.width, height: innerSize.height),
-                                from: .zero,
-                                operation: .sourceOver,
-                                fraction: 1.0
-                            )
-                            
-                            paddedImage.unlockFocus()
-                            paddedImage.isTemplate = true
-                            return paddedImage
-                        }()
+                        toolbarIcon: createToolbarIcon(named: "squareGear", size: 24)
                     ) {
                         settingsView
                     },
                     Settings.Pane(
                         identifier: Settings.PaneIdentifier("about"),
                         title: "About",
-                        toolbarIcon: {
-                            let config = NSImage.SymbolConfiguration(pointSize: 24, weight: .regular)
-                            return NSImage(
-                                systemSymbolName: "info.square.fill",
-                                accessibilityDescription: nil
-                            )!.withSymbolConfiguration(config)!
-                        }()
+                        toolbarIcon: createToolbarIcon(systemSymbolName: "info.square.fill", size: 24)
                     ) {
                         aboutView
                     }
@@ -133,14 +107,26 @@ struct readerApp: App {
             AddView()
                 .environmentObject(dataManager)
                 .environmentObject(appState)
+                .environmentObject(overlayManager)
         }
         .windowStyle(HiddenTitleBarWindowStyle())
         .windowResizability(.contentSize)
     }
     
-    // MARK: Helper Functions
+    // MARK: Helpers
     private func handleOnAppear() {
         appState.applyTheme(appState.selectedTheme)
         appState.scheduleDailyUpdateCheck()
+    }
+    
+    private static func createToolbarIcon(named: String? = nil, systemSymbolName: String? = nil, size: CGFloat) -> NSImage {
+        if let named = named, let image = NSImage(named: named) {
+            return image
+        }
+        if let systemSymbolName = systemSymbolName {
+            let config = NSImage.SymbolConfiguration(pointSize: size, weight: .regular)
+            return NSImage(systemSymbolName: systemSymbolName, accessibilityDescription: nil)?.withSymbolConfiguration(config) ?? NSImage()
+        }
+        return NSImage()
     }
 }

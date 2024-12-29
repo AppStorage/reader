@@ -21,18 +21,17 @@ class AppState: ObservableObject {
     }
     
     var viewModel: ContentViewModel?
-    // Temporary States
     var temporarySettings: [String: Any] = [:]
     var aboutCache: [String: Any] = [:]
     
     init() {
-        // Apply selected theme
+        selectedTheme = Theme(rawValue: storedTheme) ?? .system
+        applyTheme(selectedTheme)
+        
         DispatchQueue.main.async {
-            self.selectedTheme = Theme(rawValue: self.storedTheme) ?? .system
             self.applyTheme(self.selectedTheme)
         }
         
-        // Perform a daily update check if enabled
         scheduleDailyUpdateCheck()
     }
     
@@ -59,6 +58,8 @@ class AppState: ObservableObject {
         isCheckingForUpdates = true
         
         Task {
+            defer { isCheckingForUpdates = false }
+            
             do {
                 let (latestVersionFound, downloadURLFound) = try await fetchLatestRelease()
                 let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
@@ -75,14 +76,10 @@ class AppState: ObservableObject {
             } catch {
                 if isUserInitiated {
                     DispatchQueue.main.async {
-                        if isUserInitiated {
-                            self.alertType = .error("Update Check Failed: \(error.localizedDescription)")
-                        }
+                        self.alertType = .error("Update Check Failed: \(error.localizedDescription)")
                     }
                 }
             }
-            
-            isCheckingForUpdates = false
         }
     }
     

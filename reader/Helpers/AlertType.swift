@@ -32,7 +32,6 @@ extension AlertType {
                 message: Text("No books found. Please check the details and try again."),
                 dismissButton: .default(Text("OK"))
             )
-            // Single Soft Delete
         case .softDelete(let books):
             let message = books.count == 1
             ? "This will move the book '\(books.first!.title)' to deleted."

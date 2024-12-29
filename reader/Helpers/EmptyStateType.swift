@@ -8,6 +8,7 @@ enum EmptyStateType {
     case unread // No unread books
     case reading // No currently reading books
     case read // No completed books
+    case collection // No books in collection
     
     // Icons
     var imageName: String {
@@ -19,6 +20,7 @@ enum EmptyStateType {
         case .unread: return "questionmark"
         case .reading: return "questionmark"
         case .read: return "questionmark"
+        case .collection: return "questionmark.folder"
         }
     }
     
@@ -32,6 +34,7 @@ enum EmptyStateType {
         case .unread: return "No unread books"
         case .reading: return "No books currently being read"
         case .read: return "No completed books"
+        case .collection: return "No books in your collection"
         }
     }
     
@@ -45,6 +48,7 @@ enum EmptyStateType {
         case .unread: return "It's empty here. Add a new book to get started."
         case .reading: return "Start reading a book to track it here."
         case .read: return "No books read yet? Maybe it’s time to change that."
+        case .collection: return "It's empty here. Add some books into your collection."
         }
     }
     

@@ -3,7 +3,7 @@ import SwiftUI
 struct SelectEditionSheet: View {
     @Binding var selectedBook: BookTransferData?
     var addBook: (BookTransferData) -> Void
-    var cancel: () -> Void // New cancel closure
+    var cancel: () -> Void
     let searchResults: [BookTransferData]
     
     var body: some View {
@@ -51,12 +51,12 @@ struct SelectEditionSheet: View {
             
             HStack {
                 Spacer()
-                Button("Cancel") { cancel() } // Uses the cancel closure
+                Button("Cancel") { cancel() }
                     .buttonStyle(.bordered)
                 
                 Button("Add") {
                     if let selectedBook = selectedBook {
-                        addBook(selectedBook) // Handles addition
+                        addBook(selectedBook)
                     }
                 }
                 .buttonStyle(.borderedProminent)

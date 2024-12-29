@@ -21,8 +21,8 @@ func sanitizeDescription(_ description: String?) -> String? {
     
     // Define reusable regex patterns and replacements
     let replacements: [String: String] = [
-        "<br>": "\n",
-        "</p>": "\n",
+        "<br>": "\n\n",
+        "</p>": "\n\n",
         "<p>": "",
         "&nbsp;": " ",
         "&amp;": "&",

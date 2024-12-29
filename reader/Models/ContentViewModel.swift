@@ -11,6 +11,7 @@ final class ContentViewModel: ObservableObject {
     @Published var sortOrder: SortOrder = .ascending
     @Published var selectedBook: BookData?
     @Published var selectedTags: Set<String> = []
+    @Published var selectedCollection: BookCollection?
     @Published private(set) var books: [BookData] = []
     
     private var cancellables = Set<AnyCancellable>()
@@ -27,21 +28,26 @@ final class ContentViewModel: ObservableObject {
     
     // Computed property to apply filters and sorting
     var displayedBooks: [BookData] {
-        // Filter by status first
-        let filteredByStatus = books.filtered(by: selectedStatus)
-        
-        // Filter by search query
-        let filteredBySearch = filteredByStatus.searched(with: searchQuery)
-        
-        // Filter by tags
-        let filteredByTags = selectedTags.isEmpty
-        ? filteredBySearch
-        : filteredBySearch.filter { book in
-            !selectedTags.isDisjoint(with: book.tags)
+        if let collection = selectedCollection {
+            // Return only books in the selected collection
+            return collection.books.sorted(by: sortOption, order: sortOrder)
+        } else {
+            // Filter by status if no collection is selected
+            let filteredByStatus = books.filtered(by: selectedStatus)
+            
+            // Filter by search query
+            let filteredBySearch = filteredByStatus.searched(with: searchQuery)
+            
+            // Filter by tags
+            let filteredByTags = selectedTags.isEmpty
+            ? filteredBySearch
+            : filteredBySearch.filter { book in
+                !selectedTags.isDisjoint(with: book.tags)
+            }
+            
+            // Return sorted results
+            return filteredByTags.sorted(by: sortOption, order: sortOrder)
         }
-        
-        // Sort and return
-        return filteredByTags.sorted(by: sortOption, order: sortOrder)
     }
     
     func bookCount(for status: StatusFilter) -> Int {
@@ -54,24 +60,45 @@ final class ContentViewModel: ObservableObject {
     }
     
     func softDeleteBooks(_ books: [BookData]) {
-        for book in books {
-            dataManager.updateBookStatus(book, to: .deleted)
-            book.updateDates(for: .deleted)
-        }
+        dataManager.softDeleteBooks(books)
     }
     
     func permanentlyDeleteBooks(_ booksToDelete: [BookData]) {
-        for book in booksToDelete {
-            dataManager.permanentlyDeleteBook(book)
-        }
-        self.books.removeAll { book in
-            booksToDelete.contains(where: { $0.id == book.id })
-        }
+        dataManager.permanentlyDeleteBooks(booksToDelete)
     }
     
     func updateBookStatus(for books: [BookData], to status: ReadingStatus) {
         for book in books {
             dataManager.updateBookStatus(book, to: status)
+        }
+    }
+    
+    // MARK: Tags
+    func toggleTagSelection(_ tag: String) {
+        if selectedTags.contains(tag) {
+            selectedTags.remove(tag)
+        } else {
+            selectedTags.insert(tag)
+        }
+    }
+    
+    func clearTag(_ tag: String) {
+        selectedTags.remove(tag)
+    }
+    
+    // MARK: Collections
+    func renameSelectedCollection(to newName: String) {
+        guard let collection = selectedCollection else { return }
+        dataManager.renameCollection(collection, to: newName)
+    }
+    
+    func removeCollection(_ collection: BookCollection) {
+        dataManager.removeCollection(collection)
+    }
+    
+    func removeBookFromSelectedCollection(_ book: BookData) {
+        if let collection = selectedCollection {
+            dataManager.removeBookFromCollection(book, from: collection)
         }
     }
 }

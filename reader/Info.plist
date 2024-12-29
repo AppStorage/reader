@@ -10,7 +10,5 @@
 		<string>Merriweather-Italic.ttf</string>
 		<string>Merriweather-Bold.ttf</string>
 	</array>
-	<key>URLSession</key>
-	<string>https://api.github.com/repos/chippokiddo/reader/releases/latest</string>
 </dict>
 </plist>

@@ -5,6 +5,7 @@ struct MultipleSelectionView: View {
     let selectedBooks: [BookData]
     let viewModel: ContentViewModel
     let dataManager: DataManager
+    let selectedCollection: BookCollection?
     
     var body: some View {
         VStack(spacing: 12) {
@@ -25,7 +26,7 @@ struct MultipleSelectionView: View {
                 Spacer()
             }
             ToolbarItem(placement: .automatic) {
-                BookActionButton(viewModel: viewModel, selectedBooks: selectedBooks)
+                BookActionButton(books: selectedBooks, dataManager: dataManager)
             }
         }
     }

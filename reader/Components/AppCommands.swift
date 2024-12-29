@@ -32,10 +32,14 @@ struct AppCommands {
     
     @MainActor static func deleteCommands(appState: AppState, viewModel: ContentViewModel) -> some Commands {
         CommandGroup(after: CommandGroupPlacement.pasteboard) {
+            let selectedBooks = appState.selectedBooks
+            let bookCount = selectedBooks.count
+            
+            let deleteLabel = bookCount == 1 ? "Delete Book" : "Delete Books"
+            let permanentDeleteLabel = bookCount == 1 ? "Permanently Delete Book" : "Permanently Delete Books"
+            
             // Soft Delete
-            Button("Delete Book(s)") {
-                let selectedBooks = appState.selectedBooks
-                
+            Button(deleteLabel) {
                 guard !selectedBooks.isEmpty else { return }
                 
                 if selectedBooks.allSatisfy({ $0.status == .deleted }) {
@@ -45,17 +49,15 @@ struct AppCommands {
                 }
             }
             .keyboardShortcut(.delete, modifiers: [])
-            .disabled(appState.selectedBooks.isEmpty)
+            .disabled(selectedBooks.isEmpty)
             
             // Permanent Delete
-            Button("Permanently Delete Book(s)") {
-                let selectedBooks = appState.selectedBooks
-                
+            Button(permanentDeleteLabel) {
                 guard !selectedBooks.isEmpty else { return }
                 appState.showPermanentDeleteConfirmation(for: selectedBooks)
             }
             .keyboardShortcut(.delete, modifiers: .command)
-            .disabled(appState.selectedBooks.isEmpty)
+            .disabled(selectedBooks.isEmpty)
         }
     }
 }

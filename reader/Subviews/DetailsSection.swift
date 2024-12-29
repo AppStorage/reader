@@ -37,9 +37,13 @@ struct DetailsSection: View {
                         .foregroundStyle(.primary)
                         .multilineTextAlignment(.leading)
                         .lineSpacing(4)
-                        .padding(.top, 10)
+                        .padding(10)
                 }
                 .frame(maxHeight: 200)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.gray.opacity(0.1))
+                )
             }
         }
     }

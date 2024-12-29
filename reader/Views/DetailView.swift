@@ -44,7 +44,7 @@ struct DetailView: View {
                 Spacer()
             }
             ToolbarItem(placement: .automatic) {
-                BookActionButton(viewModel: viewModel, selectedBooks: [book])
+                BookActionButton(books: [book], dataManager: dataManager)
             }
         }
     }

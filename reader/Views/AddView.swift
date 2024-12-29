@@ -3,6 +3,8 @@ import SwiftUI
 struct AddView: View {
     @EnvironmentObject var dataManager: DataManager
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var overlayManager: OverlayManager
+    
     @Environment(\.dismiss) private var dismiss
     
     @State private var form = BookForm()
@@ -215,6 +217,8 @@ struct AddView: View {
     }
     
     private func addBook(_ bookTransferData: BookTransferData) {
+        overlayManager.showOverlay(message: "Adding book...")
+        // Create a new book instance
         let book = BookData(
             title: bookTransferData.title,
             author: bookTransferData.author,
@@ -229,10 +233,14 @@ struct AddView: View {
             notes: bookTransferData.notes,
             tags: bookTransferData.tags
         )
-        dataManager.addBook(book: book)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            dataManager.addBook(book: book)
+            overlayManager.showOverlay(message: "Added \"\(book.title)\"")
+        }
     }
     
     private func addManualBook() {
+        overlayManager.showOverlay(message: "Adding book...")
         let manualBook = BookData(
             title: form.title,
             author: form.author,
@@ -243,8 +251,11 @@ struct AddView: View {
             isbn: form.isbn,
             bookDescription: form.description
         )
-        dataManager.addBook(book: manualBook)
-        dismiss()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            dataManager.addBook(book: manualBook)
+            overlayManager.showOverlay(message: "Added \"\(manualBook.title)\"")
+            dismiss()
+        }
     }
     
     private func formattedDate(_ date: Date?) -> String? {

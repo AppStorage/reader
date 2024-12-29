@@ -1,60 +1,60 @@
 import SwiftUI
 
 struct BookActionButton: View {
-    @ObservedObject var viewModel: ContentViewModel
     @EnvironmentObject var appState: AppState
     
-    var selectedBooks: [BookData] = []
+    let books: [BookData]
+    let dataManager: DataManager
     
     var body: some View {
-        VStack {
-            HStack(spacing: 12) {
-                if selectedBooks.isEmpty {
-                    // No selection
-                    Button(action: {}) {
-                        Label("Delete", systemImage: "trash")
-                    }
-                    .disabled(true)
-                } else if allSelectedBooksAreDeleted() {
-                    // Already deleted books - Show recover and permanent delete options
-                    recoverButton(for: selectedBooks)
-                    deleteButton(for: selectedBooks, isPermanent: true)
-                } else {
-                    // Not deleted - Show soft delete
-                    deleteButton(for: selectedBooks, isPermanent: false)
-                }
+        HStack(spacing: 12) {
+            if allSelectedBooksAreDeleted() {
+                // Show recover and permanent delete buttons for deleted books
+                recoverButton(for: books)
+                deleteButton(for: books, isPermanent: true)
+            } else {
+                // Show soft delete for non-deleted books
+                deleteButton(for: books, isPermanent: false)
             }
         }
     }
     
     // Recover Button
     private func recoverButton(for books: [BookData]) -> some View {
-        Button(action: {
-            viewModel.updateBookStatus(for: books, to: .unread)
+        let label = books.count == 1 ? "Recover Book" : "Recover Books"
+        
+        return Button(action: {
+            for book in books {
+                dataManager.updateBookStatus(book, to: .unread)
+            }
         }) {
             Label("Recover", systemImage: "arrow.uturn.backward")
         }
-        .help("Recover Books")
-        .accessibilityLabel("Recover Books")
+        .help(label)
+        .accessibilityLabel(label)
     }
     
     // Delete Button
     private func deleteButton(for books: [BookData], isPermanent: Bool) -> some View {
-        Button(action: {
+        let label = isPermanent
+        ? (books.count == 1 ? "Permanently Delete Book" : "Permanently Delete Books")
+        : (books.count == 1 ? "Move Book to Deleted" : "Move Books to Deleted")
+        
+        return Button(action: {
             if isPermanent {
-                appState.showPermanentDeleteConfirmation(for: books)
+                dataManager.permanentlyDeleteBooks(books)
             } else {
-                appState.showSoftDeleteConfirmation(for: books)
+                dataManager.softDeleteBooks(books)
             }
         }) {
             Label(isPermanent ? "Permanently Delete" : "Delete", systemImage: "trash")
         }
-        .help(isPermanent ? "Permanently Delete Books" : "Move Books to Deleted")
-        .accessibilityLabel(isPermanent ? "Permanently Delete Books" : "Move Books to Deleted")
+        .help(label)
+        .accessibilityLabel(label)
     }
     
     // Check if all selected books are already deleted
     private func allSelectedBooksAreDeleted() -> Bool {
-        selectedBooks.allSatisfy { $0.status == .deleted }
+        books.allSatisfy { $0.status == .deleted }
     }
 }
