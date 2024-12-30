@@ -102,6 +102,17 @@ final class DataManager: ObservableObject {
     // MARK: State Changes
     func updateBookStatus(_ book: BookData, to status: ReadingStatus) {
         book.status = status
+        switch status {
+        case .reading:
+            if book.dateStarted == nil { book.dateStarted = Date() }
+            book.dateFinished = nil
+        case .read:
+            if book.dateStarted == nil { book.dateStarted = Date() }
+            book.dateFinished = Date()
+        case .unread, .deleted:
+            book.dateStarted = nil
+            book.dateFinished = nil
+        }
         saveChanges()
     }
     
