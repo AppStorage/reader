@@ -1,4 +1,5 @@
 import SwiftUI
+import Fuse
 
 extension Array where Element == BookData {
     
@@ -23,9 +24,14 @@ extension Array where Element == BookData {
     // Filter books by search query
     func searched(with query: String) -> [BookData] {
         guard !query.isEmpty else { return self }
+        
+        let fuse = Fuse()
+        
         return self.filter { book in
-            book.title.localizedCaseInsensitiveContains(query) ||
-            book.author.localizedCaseInsensitiveContains(query)
+            let titleResult = fuse.search(query, in: book.title)
+            let authorResult = fuse.search(query, in: book.author)
+            
+            return titleResult != nil || authorResult != nil
         }
     }
     
@@ -56,7 +62,7 @@ extension Array where Element == BookData {
     func filtered(byTags tags: Set<String>) -> [BookData] {
         guard !tags.isEmpty else { return self }
         return self.filter { book in
-            !tags.isDisjoint(with: book.tags) // Matches at least one tag
+            !tags.isDisjoint(with: book.tags)
         }
     }
 }

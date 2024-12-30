@@ -6,13 +6,13 @@ import Combine
 final class ContentViewModel: ObservableObject {
     @AppStorage("selectedStatus") var selectedStatus: StatusFilter = .all
     
+    @Published var books: [BookData] = []
     @Published var searchQuery: String = ""
     @Published var sortOption: SortOption = .title
     @Published var sortOrder: SortOrder = .ascending
     @Published var selectedBook: BookData?
     @Published var selectedTags: Set<String> = []
     @Published var selectedCollection: BookCollection?
-    @Published private(set) var books: [BookData] = []
     
     private var cancellables = Set<AnyCancellable>()
     private var dataManager: DataManager
@@ -26,32 +26,36 @@ final class ContentViewModel: ObservableObject {
             .assign(to: &$books)
     }
     
-    // Computed property to apply filters and sorting
+    // Filters and sorting
     var displayedBooks: [BookData] {
         if let collection = selectedCollection {
-            // Return only books in the selected collection
             return collection.books.sorted(by: sortOption, order: sortOrder)
         } else {
-            // Filter by status if no collection is selected
             let filteredByStatus = books.filtered(by: selectedStatus)
-            
-            // Filter by search query
+
             let filteredBySearch = filteredByStatus.searched(with: searchQuery)
-            
-            // Filter by tags
+
             let filteredByTags = selectedTags.isEmpty
-            ? filteredBySearch
-            : filteredBySearch.filter { book in
-                !selectedTags.isDisjoint(with: book.tags)
-            }
-            
-            // Return sorted results
+                ? filteredBySearch
+                : filteredBySearch.filter { book in
+                    let bookTags = Set(book.tags.map { $0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) })
+                    let selectedTagsLower = Set(selectedTags.map { $0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) })
+                    return !selectedTagsLower.isDisjoint(with: bookTags)
+                }
+
             return filteredByTags.sorted(by: sortOption, order: sortOrder)
         }
     }
     
+    // Status count
     func bookCount(for status: StatusFilter) -> Int {
         return books.count(for: status)
+    }
+    
+    // Collection count
+    func bookCount(for collection: BookCollection?) -> Int {
+        guard let collection = collection else { return 0 }
+        return collection.books.count
     }
     
     func recoverBook(_ book: BookData) {

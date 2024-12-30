@@ -26,6 +26,11 @@ struct AddCollectionSheet: View {
                         }
                     }
                 }
+                .onSubmit {
+                    if validateName() {
+                        onAdd()
+                    }
+                }
             
             if let errorMessage = errorMessage {
                 Label {

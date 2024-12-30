@@ -26,6 +26,11 @@ struct RenameCollectionSheet: View {
                         }
                     }
                 }
+                .onSubmit {
+                    if validateName() {
+                        onRename()
+                    }
+                }
             
             if let errorMessage = errorMessage {
                 Label {

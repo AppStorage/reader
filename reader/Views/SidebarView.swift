@@ -64,6 +64,43 @@ struct SidebarView: View {
         }
     }
     
+    // MARK: Sections
+    private var readingStatusSection: some View {
+        Section(header: Text("Reading Status")) {
+            ForEach(StatusFilter.allCases) { status in
+                Label(status.rawValue, systemImage: status.iconName)
+                    .badge(viewModel.bookCount(for: status))
+                    .tag(SidebarSelection.status(status))
+                    .dropDestination(for: BookTransferData.self) { items, _ in
+                        updateBookStatus(for: items, with: status)
+                    }
+            }
+        }
+    }
+    
+    private var collectionsSection: some View {
+        Section(header: Text("Collections")) {
+            ForEach(dataManager.collections) { collection in
+                Label(collection.name, systemImage: "folder")
+                    .badge(viewModel.bookCount(for: collection))
+                    .tag(SidebarSelection.collection(collection))
+                    .dropDestination(for: BookTransferData.self) { items, _ in
+                        addBookToCollection(items, collection: collection)
+                    }
+                    .contextMenu {
+                        Button("Rename Collection") {
+                            collectionToRename = collection
+                            newCollectionName = collection.name
+                            isRenamingCollection = true
+                        }
+                        Button("Delete Collection") {
+                            deleteCollection(collection)
+                        }
+                    }
+            }
+        }
+    }
+    
     private var settingsButton: some View {
         HStack {
             SettingsButton {
@@ -72,47 +109,6 @@ struct SidebarView: View {
                 }
             }
             Spacer()
-        }
-    }
-    
-    // MARK: Sections
-    private var readingStatusSection: some View {
-        Section(header: Text("Reading Status")) {
-            ForEach(StatusFilter.allCases) { status in
-                createSidebarLabel(
-                    title: status.rawValue,
-                    iconName: status.iconName,
-                    tag: .status(status),
-                    dropHandler: { items in
-                        updateBookStatus(for: items, with: status)
-                    }
-                )
-            }
-        }
-    }
-    
-    private var collectionsSection: some View {
-        Section(header: Text("Collections")) {
-            ForEach(dataManager.collections) { collection in
-                createSidebarLabel(
-                    title: collection.name,
-                    iconName: "folder",
-                    tag: .collection(collection),
-                    dropHandler: { items in
-                        addBookToCollection(items, collection: collection)
-                    }
-                )
-                .contextMenu {
-                    Button("Rename Collection") {
-                        collectionToRename = collection
-                        newCollectionName = collection.name
-                        isRenamingCollection = true
-                    }
-                    Button("Delete Collection") {
-                        deleteCollection(collection)
-                    }
-                }
-            }
         }
     }
     
@@ -168,19 +164,6 @@ struct SidebarView: View {
     }
     
     // MARK: Helpers
-    private func createSidebarLabel(
-        title: String,
-        iconName: String,
-        tag: SidebarSelection,
-        dropHandler: @escaping ([BookTransferData]) -> Bool
-    ) -> some View {
-        Label(title, systemImage: iconName)
-            .tag(tag)
-            .dropDestination(for: BookTransferData.self) { items, _ in
-                dropHandler(items)
-            }
-    }
-    
     private func handleSidebarSelection(_ selection: SidebarSelection?) {
         switch selection {
         case .status(let status):

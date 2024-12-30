@@ -16,14 +16,23 @@ reader is a simple book library and reading tracker app for macOS, designed and 
 ## Dependencies
 
 - [Settings](https://github.com/sindresorhus/Settings)
+- [Fuse](https://github.com/krisk/fuse-swift)
 
 ## Features
 
-- Add and organize books in your personal library
-- Notes section: jot down thoughts or annotations
-- Quotes section: save memorable excerpts
+- Add books by fetching from Google Books and Open Library, or entering them manually
+- Create collections and organize books into them
+- Filter books by reading status, tags ,or collections
+
+- Jot down thoughts or annotations in a dedicated notes section
+- Save memorable excerpts in the quotes section
+
+- Search through your added books
+
+- Sort your library by title, author, or published date, in ascending or descending order
+- Tag books 
+
 - Track reading statuses: unread, reading, or read
-- Sort, search, or filter your personal library with ease
 
 ## Screenshots
 
@@ -85,10 +94,12 @@ If you'd like to compile the app yourself, follow these steps:
        ├── ContentView.swift
        ├── Helpers/
        ├── Info.plist
-       ├── Merriweather
+       ├── Localizable.xcstrings
+       ├── Merriweather/
        ├── Models/
        ├── Preview Content
        ├── reader.entitlements
+       ├── readerDebug.entitlements
        ├── Subviews/
        ├── Utils/
        └── Views/

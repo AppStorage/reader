@@ -42,7 +42,7 @@ struct MiddlePanelView: View {
             bookListItem(for: book)
         }
         .scrollContentBackground(.hidden)
-        .overlay { // Empty State View
+        .overlay {
             if viewModel.displayedBooks.isEmpty {
                 emptyStateView
             }
