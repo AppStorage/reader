@@ -72,7 +72,9 @@ final class DataManager: ObservableObject {
     
     func removeCollection(_ collection: BookCollection) {
         if let index = collections.firstIndex(where: { $0.id == collection.id }) {
-            collections[index].books.removeAll()
+            collections[index].books.forEach { book in
+                removeBookFromCollection(book, from: collection)
+            }
         }
         modelContainer.mainContext.delete(collection)
         saveChanges()

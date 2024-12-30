@@ -13,7 +13,9 @@ struct MiddlePanelView: View {
         VStack(spacing: 0) {
             bookList
         }
-        .navigationTitle("\(viewModel.selectedStatus.rawValue)")
+        .navigationTitle(
+            viewModel.selectedCollection?.name ?? viewModel.selectedStatus.rawValue
+        )
         .navigationSubtitle(
             "\(viewModel.displayedBooks.count) " +
             (viewModel.displayedBooks.count == 1 ? "Book" : "Books")
