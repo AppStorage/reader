@@ -18,7 +18,20 @@
       }
     },
     "— %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— %@"
+          }
+        }
+      }
     },
     "*" : {
       "localizations" : {
@@ -181,7 +194,20 @@
       }
     },
     "Attributed to:" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attributed to:"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atribuido a:"
+          }
+        }
+      }
     },
     "by %@" : {
       "localizations" : {
@@ -728,7 +754,20 @@
       }
     },
     "p. %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "p. %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "p. %@"
+          }
+        }
+      }
     },
     "Page no. (e.g., 11 or 11-15)" : {
       "localizations" : {
