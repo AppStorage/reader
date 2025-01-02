@@ -4,7 +4,9 @@ struct ItemForm: View {
     @Binding var text: String
     @Binding var supplementaryField: String?
     @Binding var attributedField: String?
+    
     @FocusState private var isFocusedOnText: Bool
+    @FocusState private var isFocusedOnAttributedField: Bool
     
     let textLabel: String
     let iconName: String
@@ -28,7 +30,7 @@ struct ItemForm: View {
                             .frame(width: 20, height: 20)
                             .foregroundColor(.secondary)
                         
-                        TextField("Attributed to:", text: Binding(
+                        TextField("Attributed to", text: Binding(
                             get: { attributedField ?? "" },
                             set: { attributedField = $0.isEmpty ? nil : $0 }
                         ))
@@ -38,8 +40,10 @@ struct ItemForm: View {
                             .fill(Color(NSColor.controlBackgroundColor)))
                         .overlay(
                             RoundedRectangle(cornerRadius: 6)
-                                .stroke(Color(NSColor.separatorColor), lineWidth: 2)
+                                .stroke(isFocusedOnAttributedField ? Color.accentColor : Color(NSColor.separatorColor), lineWidth: 2)
                         )
+                        .focused($isFocusedOnAttributedField)
+                        .animation(.easeInOut(duration: 0.2), value: isFocusedOnAttributedField)
                     }
                 }
             }

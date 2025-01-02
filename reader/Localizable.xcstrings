@@ -193,18 +193,18 @@
         }
       }
     },
-    "Attributed to:" : {
+    "Attributed to" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Attributed to:"
+            "value" : "Attributed to"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Atribuido a:"
+            "value" : "Atribuido a"
           }
         }
       }
