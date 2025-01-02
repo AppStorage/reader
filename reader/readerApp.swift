@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import Settings
+import enum Settings.Settings
 
 @main
 struct readerApp: App {
@@ -11,7 +12,7 @@ struct readerApp: App {
     
     @Environment(\.openWindow) private var openWindow
     
-    private static var preferencesWindow: SettingsWindowController?
+    private static var preferencesWindow: SettingsWindowController? = nil
     
     private static let sharedModelContainer: ModelContainer? = {
         let schema = Schema([BookData.self, BookCollection.self])
@@ -21,20 +22,19 @@ struct readerApp: App {
                 configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)]
             )
         } catch {
-            fatalError("Failed to initialize ModelContainer: \(error)")
+            print("Failed to initialize ModelContainer: \(error.localizedDescription)")
+            return nil
         }
     }()
     
     init() {
-        // Disable tabs
         NSWindow.allowsAutomaticWindowTabbing = false
         
-        // Initialize ModelContainer
         guard let container = readerApp.sharedModelContainer else {
-            fatalError("ModelContainer is not available.")
+            print("ModelContainer is not available. Exiting application.")
+            exit(1)
         }
         
-        // Initialize DataManager and ViewModel
         let dataManager = DataManager(modelContainer: container)
         _dataManager = StateObject(wrappedValue: dataManager)
         _viewModel = StateObject(wrappedValue: ContentViewModel(dataManager: dataManager))
@@ -45,7 +45,6 @@ struct readerApp: App {
         addBookWindow
     }
     
-    // MARK: Main Window
     private var mainWindow: some Scene {
         WindowGroup {
             ContentView()
@@ -70,7 +69,7 @@ struct readerApp: App {
         }
     }
     
-    // MARK: Preferences Window
+    // MARK: Preferencees Window
     static func showSettingsWindow(appState: AppState, checkForUpdates: @escaping () -> Void) {
         if preferencesWindow == nil {
             let settingsView = SettingsView(checkForUpdates: {
@@ -101,7 +100,6 @@ struct readerApp: App {
         preferencesWindow?.show()
     }
     
-    // MARK: Add Book Window
     private var addBookWindow: some Scene {
         Window("Add Book", id: "addBookWindow") {
             AddView()
@@ -113,14 +111,14 @@ struct readerApp: App {
         .windowResizability(.contentSize)
     }
     
-    // MARK: Helpers
     private func handleOnAppear() {
         appState.applyTheme(appState.selectedTheme)
         appState.scheduleDailyUpdateCheck()
     }
     
+    // MARK: Preferences Icons
     private static func gearToolbarIcon(size: CGFloat = 24, innerSize: CGFloat = 18) -> NSImage {
-        let originalImage = NSImage(named: "squareGear")!
+        let originalImage = NSImage(named: "squareGear") ?? NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)!
         let paddedSize = NSSize(width: size, height: size)
         let innerSize = NSSize(width: innerSize, height: innerSize)
         

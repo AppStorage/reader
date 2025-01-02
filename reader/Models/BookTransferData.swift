@@ -14,8 +14,8 @@ struct BookTransferData: Codable, Transferable, Sendable, Equatable {
     let series: String?
     let isbn: String?
     let bookDescription: String?
-    let quotes: String
-    let notes: String
+    let quotes: [String]
+    let notes: [String]
     let tags: [String]
     let status: ReadingStatus
     

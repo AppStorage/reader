@@ -14,8 +14,6 @@ class BookData: Identifiable {
     var isbn: String?
     var dateStarted: Date?
     var dateFinished: Date?
-    var quotes: String
-    var notes: String
     var bookDescription: String?
     
     @Attribute private var statusRawValue: String
@@ -27,11 +25,24 @@ class BookData: Identifiable {
     @Attribute private var tagsData: Data?
     var tags: [String] {
         get {
-            decodeTags() ?? [] // Default to empty array
+            decodeTags() ?? []
         }
         set {
             tagsData = encodeTags(newValue)
         }
+    }
+    
+    @Attribute private var quotesData: Data?
+    @Attribute private var notesData: Data?
+    
+    var quotes: [String] {
+        get { decodeTextArray(from: quotesData) ?? [] }
+        set { quotesData = encodeTextArray(newValue) }
+    }
+    
+    var notes: [String] {
+        get { decodeTextArray(from: notesData) ?? [] }
+        set { notesData = encodeTextArray(newValue) }
     }
     
     init(
@@ -44,8 +55,8 @@ class BookData: Identifiable {
         isbn: String? = nil,
         bookDescription: String? = nil,
         status: ReadingStatus = .unread,
-        quotes: String = "",
-        notes: String = "",
+        quotes: [String] = [],
+        notes: [String] = [],
         tags: [String] = []
     ) {
         self.title = title
@@ -84,6 +95,17 @@ class BookData: Identifiable {
     // Decodes tags from JSON
     private func decodeTags() -> [String]? {
         guard let data = tagsData else { return nil }
+        return try? JSONDecoder().decode([String].self, from: data)
+    }
+    
+    // Encodes text arrays into JSON
+    private func encodeTextArray(_ texts: [String]) -> Data? {
+        try? JSONEncoder().encode(texts)
+    }
+    
+    // Decodes text arrays from JSON
+    private func decodeTextArray(from data: Data?) -> [String]? {
+        guard let data = data else { return nil }
         return try? JSONDecoder().decode([String].self, from: data)
     }
     

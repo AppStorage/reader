@@ -1,5 +1,3 @@
-import SwiftUI
-
 extension ReadingStatus {
     func toStatusFilter() -> StatusFilter {
         switch self {

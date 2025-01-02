@@ -3,6 +3,7 @@ import SwiftUI
 struct ItemForm: View {
     @Binding var text: String
     @Binding var supplementaryField: String?
+    @Binding var attributedField: String?
     @FocusState private var isFocusedOnText: Bool
     
     let textLabel: String
@@ -20,6 +21,26 @@ struct ItemForm: View {
                         get: { supplementaryField ?? "" },
                         set: { supplementaryField = $0.isEmpty ? nil : $0 }
                     ))
+                }
+                if attributedField != nil {
+                    HStack(alignment: .center, spacing: 8) {
+                        Image(systemName: "person.bubble")
+                            .frame(width: 20, height: 20)
+                            .foregroundColor(.secondary)
+                        
+                        TextField("Attributed to:", text: Binding(
+                            get: { attributedField ?? "" },
+                            set: { attributedField = $0.isEmpty ? nil : $0 }
+                        ))
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .padding(8)
+                        .background(RoundedRectangle(cornerRadius: 6)
+                            .fill(Color(NSColor.controlBackgroundColor)))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color(NSColor.separatorColor), lineWidth: 2)
+                        )
+                    }
                 }
             }
             

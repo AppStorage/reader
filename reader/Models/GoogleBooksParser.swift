@@ -18,8 +18,8 @@ struct GoogleBooksParser {
             series: bookInfo.series,
             isbn: bookInfo.industryIdentifiers?.first?.identifier,
             bookDescription: bookInfo.sanitizedDescription,
-            quotes: "",
-            notes: "",
+            quotes: [],
+            notes: [],
             tags: [],
             status: .unread
         )

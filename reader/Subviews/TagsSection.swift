@@ -95,6 +95,7 @@ struct TagsSection: View {
         ItemForm(
             text: $newTag,
             supplementaryField: .constant(nil),
+            attributedField: .constant(nil),
             textLabel: "Enter a tag here",
             iconName: "tag",
             onSave: handleAddTag,

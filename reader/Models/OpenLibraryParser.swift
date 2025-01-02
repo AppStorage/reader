@@ -18,14 +18,14 @@ struct OpenLibraryParser {
         return books
     }
     
-    static func constructBookTransferData(from doc: OpenLibraryDoc, isbn: String?) async -> BookTransferData { // Updated to return BookTransferData
+    static func constructBookTransferData(from doc: OpenLibraryDoc, isbn: String?) async -> BookTransferData {
         let description: String? = if let olid = doc.key {
             await BooksAPIService.shared.fetchDescription(olid: olid)
         } else {
             nil
         }
         
-        return BookTransferData( // Return BookTransferData instead of BookData
+        return BookTransferData(
             title: doc.title,
             author: doc.author_name?.joined(separator: ", ") ?? "Unknown Author",
             published: doc.first_publish_year != nil
@@ -34,10 +34,10 @@ struct OpenLibraryParser {
             publisher: doc.publisher?.first,
             genre: doc.subject?.joined(separator: ", "),
             series: nil,
-            isbn: doc.isbn?.first ?? isbn, // Use API ISBN or fallback
-            bookDescription: description, // Populate description
-            quotes: "",
-            notes: "",
+            isbn: doc.isbn?.first ?? isbn,
+            bookDescription: description,
+            quotes: [],
+            notes: [],
             tags: [],
             status: .unread
         )

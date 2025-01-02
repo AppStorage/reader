@@ -1,5 +1,3 @@
-import SwiftUI
-
 enum Field: Hashable {
     case title
     case author

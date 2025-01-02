@@ -1,11 +1,15 @@
 import SwiftUI
 import SwiftData
 
+import SwiftUI
+import SwiftData
+
 struct QuotesSection: View {
     @Bindable var book: BookData
     @Binding var newQuote: String
     
     @State private var newPageNumber: String = ""
+    @State private var newAttribution: String = ""
     @State private var isEditing: Bool = false
     @State private var isAddingQuote: Bool = false
     @State private var isCollapsed: Bool = false
@@ -39,7 +43,7 @@ struct QuotesSection: View {
                 isEditing = false
             }
         }
-        .onAppear {
+        .onChange(of: book.id) {
             loadQuotes()
         }
     }
@@ -50,14 +54,20 @@ struct QuotesSection: View {
                 emptyStateView
                     .transition(.opacity)
             } else {
-                ForEach(sortedQuotesArray, id: \.self) { quote in
+                ForEach(localQuotes, id: \..self) { quote in
                     let components = quote.components(separatedBy: " [p. ")
-                    let text = components.first ?? quote
-                    let pageNumber = components.count > 1 ? components.last?.replacingOccurrences(of: "]", with: "") : nil
+                    let textPart = components.first ?? quote
+                    let pageAndAttribution = components.count > 1 ? components.last?.replacingOccurrences(of: "]", with: "") : nil
+                    
+                    let pageComponents = pageAndAttribution?.components(separatedBy: " — ")
+                    let pageNumber = pageComponents?.first
+                    let attribution = pageComponents?.count ?? 0 > 1 ? pageComponents?.last : nil
+                    
                     
                     ItemDisplayRow(
-                        text: text,
-                        secondaryText: pageNumber.map { "\(PageNumberInput.pagePrefix(for: $0)) \($0)" },
+                        text: textPart,
+                        secondaryText: pageNumber,
+                        attributedText: attribution,
                         isEditing: isEditing,
                         includeQuotes: true,
                         customFont: .custom("Merriweather-Regular", size: 12, relativeTo: .body),
@@ -101,13 +111,16 @@ struct QuotesSection: View {
         .disabled(book.status == .deleted)
     }
     
-    // MARK: Quote form
     private var addQuoteForm: some View {
         ItemForm(
             text: $newQuote,
             supplementaryField: Binding<String?>(
                 get: { newPageNumber },
                 set: { newPageNumber = $0 ?? "" }
+            ),
+            attributedField: Binding<String?>(
+                get: { newAttribution },
+                set: { newAttribution = $0 ?? "" }
             ),
             textLabel: "Enter a quote here",
             iconName: "text.quote",
@@ -120,7 +133,8 @@ struct QuotesSection: View {
     // MARK: Actions
     private func saveQuote() {
         let formattedQuote = newPageNumber.isEmpty ? newQuote : "\(newQuote) [p. \(newPageNumber)]"
-        addQuote(formattedQuote)
+        let attributedQuote = newAttribution.isEmpty ? formattedQuote : "\(formattedQuote) — \(newAttribution)"
+        addQuote(attributedQuote)
         resetAddQuoteForm()
     }
     
@@ -139,27 +153,20 @@ struct QuotesSection: View {
         saveTask = Task {
             try? await Task.sleep(nanoseconds: 500_000_000)
             await MainActor.run {
-                book.notes = localQuotes.joined(separator: "|||")
+                book.quotes = localQuotes
                 try? modelContext.save()
             }
         }
     }
     
     private func loadQuotes() {
-        localQuotes = book.quotes.components(separatedBy: "|||").filter { !$0.isEmpty }
+        localQuotes = book.quotes
     }
     
     private func resetAddQuoteForm() {
         newQuote = ""
         newPageNumber = ""
+        newAttribution = ""
         isAddingQuote = false
-    }
-    
-    private var sortedQuotesArray: [String] {
-        localQuotes.sorted { quote1, quote2 in
-            let page1 = PageNumberInput.extractPageNumber(from: quote1) ?? Int.max
-            let page2 = PageNumberInput.extractPageNumber(from: quote2) ?? Int.max
-            return page1 < page2
-        }
     }
 }

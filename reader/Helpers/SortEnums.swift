@@ -1,5 +1,3 @@
-import SwiftUI
-
 enum SortOption: String, CaseIterable {
     case title = "Title"
     case author = "Author"

@@ -39,7 +39,7 @@ struct NotesSection: View {
                 isEditing = false
             }
         }
-        .onAppear {
+        .onChange(of: book.id) {
             loadNotes()
         }
     }
@@ -50,14 +50,15 @@ struct NotesSection: View {
                 emptyStateView
                     .transition(.opacity)
             } else {
-                ForEach(sortedNotesArray, id: \.self) { note in
+                ForEach(localNotes, id: \..self) { note in
                     let components = note.components(separatedBy: " [p. ")
                     let text = components.first ?? note
                     let pageNumber = components.count > 1 ? components.last?.replacingOccurrences(of: "]", with: "") : nil
                     
                     ItemDisplayRow(
                         text: text,
-                        secondaryText: pageNumber.map { "\(PageNumberInput.pagePrefix(for: $0)) \($0)" },
+                        secondaryText: pageNumber,
+                        attributedText: nil,
                         isEditing: isEditing,
                         includeQuotes: false,
                         customFont: nil,
@@ -74,6 +75,7 @@ struct NotesSection: View {
         }
         .animation(.easeInOut(duration: 0.25), value: localNotes.isEmpty)
     }
+
     
     private var emptyStateView: some View {
         VStack {
@@ -89,19 +91,6 @@ struct NotesSection: View {
         .padding()
     }
     
-    
-    private func removeNoteButton(note: String) -> some View {
-        ItemActionButton(
-            label: nil,
-            systemImageName: "minus.circle.fill",
-            foregroundColor: .red,
-            action: { removeNote(note) },
-            padding: nil
-        )
-        .buttonStyle(BorderlessButtonStyle())
-        .transition(.opacity)
-    }
-    
     private var addNoteButton: some View {
         ItemActionButton(
             label: "Add Note",
@@ -113,7 +102,6 @@ struct NotesSection: View {
         .disabled(book.status == .deleted)
     }
     
-    // MARK: Note Form
     private var addNoteForm: some View {
         ItemForm(
             text: $newNote,
@@ -121,6 +109,7 @@ struct NotesSection: View {
                 get: { newPageNumber },
                 set: { newPageNumber = $0 ?? "" }
             ),
+            attributedField: .constant(nil),
             textLabel: "Enter a note here",
             iconName: "note.text",
             onSave: saveNote,
@@ -151,27 +140,19 @@ struct NotesSection: View {
         saveTask = Task {
             try? await Task.sleep(nanoseconds: 500_000_000)
             await MainActor.run {
-                book.notes = localNotes.joined(separator: "|||")
+                book.notes = localNotes
                 try? modelContext.save()
             }
         }
     }
     
     private func loadNotes() {
-        localNotes = book.notes.components(separatedBy: "|||").filter { !$0.isEmpty }
+        localNotes = book.notes
     }
     
     private func resetAddNoteForm() {
         newNote = ""
         newPageNumber = ""
         isAddingNote = false
-    }
-    
-    private var sortedNotesArray: [String] {
-        localNotes.sorted { note1, note2 in
-            let page1 = PageNumberInput.extractPageNumber(from: note1) ?? Int.max
-            let page2 = PageNumberInput.extractPageNumber(from: note2) ?? Int.max
-            return page1 < page2
-        }
     }
 }
