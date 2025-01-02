@@ -5,7 +5,8 @@ extension UTType {
     static let bookTransferData = UTType.json
 }
 
-struct BookTransferData: Codable, Transferable, Sendable, Equatable {
+struct BookTransferData: Codable, Transferable, Sendable, Equatable, Identifiable {
+    var id: UUID = UUID()
     let title: String
     let author: String
     let published: Date?

@@ -26,7 +26,7 @@ struct ItemForm: View {
                 }
                 if attributedField != nil {
                     HStack(alignment: .center, spacing: 8) {
-                        Image(systemName: "person.bubble")
+                        Image(systemName: "person")
                             .frame(width: 20, height: 20)
                             .foregroundColor(.secondary)
                         

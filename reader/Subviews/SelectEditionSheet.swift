@@ -29,11 +29,14 @@ struct SelectEditionSheet: View {
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
-                        ForEach(searchResults, id: \.isbn) { book in
+                        ForEach(searchResults) { book in
                             VStack(alignment: .leading) {
-                                Text(book.title).font(.headline)
-                                Text("By: \(book.author)").font(.subheadline)
-                                Text("Publisher: \(book.publisher ?? "Unknown")").font(.footnote)
+                                Text(book.title)
+                                    .font(.headline)
+                                Text("By: \(book.author)")
+                                    .font(.subheadline)
+                                Text("Publisher: \(book.publisher ?? "Unknown")")
+                                    .font(.footnote)
                                 Text(book.bookDescription ?? "")
                                     .lineLimit(2)
                                     .font(.footnote)
