@@ -111,8 +111,6 @@ struct readerApp: App {
         .windowStyle(HiddenTitleBarWindowStyle())
         .windowResizability(.contentSize)
         .defaultPosition(.center)
-        .windowToolbarStyle(.unified)
-        .commandsRemoved()
     }
     
     private func handleOnAppear() {

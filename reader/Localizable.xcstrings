@@ -209,6 +209,22 @@
         }
       }
     },
+    "Author: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Author: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autor: %@"
+          }
+        }
+      }
+    },
     "by %@" : {
       "localizations" : {
         "en" : {
@@ -253,6 +269,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cancelar"
+          }
+        }
+      }
+    },
+    "Cancel Fetching Books" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel Fetching Books"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar la Obtención de Libros"
           }
         }
       }
@@ -481,18 +513,34 @@
         }
       }
     },
-    "Fetching books..." : {
+    "ISBN: %@" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fetching books..."
+            "value" : "ISBN: %@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Obteniendo Libros…"
+            "value" : "ISBN: %@"
+          }
+        }
+      }
+    },
+    "ISBN: Not available" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ISBN: Not available"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ISBN: No disponible"
           }
         }
       }
@@ -1133,6 +1181,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tema"
+          }
+        }
+      }
+    },
+    "Title: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Title: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Título: %@"
           }
         }
       }

@@ -188,11 +188,7 @@ struct MiddlePanelView: View {
             genre: book.genre,
             series: book.series,
             isbn: book.isbn,
-            bookDescription: book.bookDescription,
-            quotes: book.quotes,
-            notes: book.notes,
-            tags: book.tags,
-            status: book.status
+            bookDescription: book.bookDescription
         )
     }
     

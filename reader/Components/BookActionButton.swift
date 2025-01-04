@@ -42,9 +42,9 @@ struct BookActionButton: View {
         
         return Button(action: {
             if isPermanent {
-                dataManager.permanentlyDeleteBooks(books)
+                appState.showPermanentDeleteConfirmation(for: books)
             } else {
-                dataManager.softDeleteBooks(books)
+                appState.showSoftDeleteConfirmation(for: books)
             }
         }) {
             Label(isPermanent ? "Permanently Delete" : "Delete", systemImage: "trash")

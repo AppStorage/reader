@@ -12,9 +12,6 @@ struct NotesSection: View {
     @State private var localNotes: [String] = []
     @State private var saveTask: Task<Void, Never>?
     
-    @FocusState private var isFocusedOnNote: Bool
-    @FocusState private var isFocusedOnPage: Bool
-    
     var modelContext: ModelContext
     
     var body: some View {
@@ -40,6 +37,9 @@ struct NotesSection: View {
             }
         }
         .onChange(of: book.id) {
+            loadNotes()
+        }
+        .onAppear {
             loadNotes()
         }
     }
@@ -75,7 +75,6 @@ struct NotesSection: View {
         }
         .animation(.easeInOut(duration: 0.25), value: localNotes.isEmpty)
     }
-
     
     private var emptyStateView: some View {
         VStack {
@@ -120,7 +119,13 @@ struct NotesSection: View {
     
     // MARK: Actions
     private func saveNote() {
-        let formattedNote = newPageNumber.isEmpty ? newNote : "\(newNote) [p. \(newPageNumber)]"
+        guard !newNote.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        let formattedNote: String
+        if let pageNumber = Int(newPageNumber), pageNumber > 0 {
+            formattedNote = "\(newNote) [p. \(pageNumber)]"
+        } else {
+            formattedNote = newNote
+        }
         addNote(formattedNote)
         resetAddNoteForm()
     }
@@ -141,13 +146,19 @@ struct NotesSection: View {
             try? await Task.sleep(nanoseconds: 500_000_000)
             await MainActor.run {
                 book.notes = localNotes
-                try? modelContext.save()
+                do {
+                    try modelContext.save()
+                } catch {
+                    print("Failed to save notes: \(error)")
+                }
             }
         }
     }
     
     private func loadNotes() {
-        localNotes = book.notes
+        if localNotes != book.notes {
+            localNotes = book.notes
+        }
     }
     
     private func resetAddNoteForm() {
@@ -156,3 +167,4 @@ struct NotesSection: View {
         isAddingNote = false
     }
 }
+

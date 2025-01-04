@@ -12,6 +12,7 @@ struct AddView: View {
     @State private var selectedBook: BookTransferData? = nil
     @State private var isLoading = false
     @State private var isSheetPresented = false
+    @State private var fetchTask: Task<Void, Never>?
     
     @FocusState private var focusedField: Field?
     
@@ -27,10 +28,7 @@ struct AddView: View {
             .frame(width: 450)
             .padding()
             .onAppear {
-                if let window = NSApp.windows.first(where: { $0.title == "Add Book" }) {
-                    window.styleMask.remove(.miniaturizable)
-                    window.canHide = false
-                }
+                enforceWindowStyle()
             }
             .onDisappear(perform: resetForm)
             .sheet(isPresented: $isSheetPresented) {
@@ -39,7 +37,6 @@ struct AddView: View {
                     addBook: { book in
                         addBook(book)
                         isSheetPresented = false
-                        // Closes Add Book window
                         if let window = NSApp.windows.first(where: { $0.title == "Add Book" }) {
                             window.close()
                         }
@@ -50,9 +47,8 @@ struct AddView: View {
                     searchResults: searchResults
                 )
             }
-            
             if isLoading {
-                loadingView
+                LoadingOverlayView(message: "Fetching books...", onCancel: cancelFetch)
             }
         }
     }
@@ -184,14 +180,16 @@ struct AddView: View {
     }
     
     private func fetchAndShowSheet() {
-        Task {
-            isLoading = true
-            
+        isLoading = true
+        
+        fetchTask = Task {
             let results = await dataManager.fetchBookData(
                 title: form.title,
                 author: form.author,
                 isbn: form.isbn.isEmpty ? nil : form.isbn
             )
+            
+            if Task.isCancelled { return }
             
             isLoading = false
             
@@ -204,16 +202,9 @@ struct AddView: View {
         }
     }
     
-    private var loadingView: some View {
-        ZStack {
-            Color.black.opacity(0.3).edgesIgnoringSafeArea(.all)
-            
-            ProgressView("Fetching books...")
-                .padding(20)
-                .background(.ultraThinMaterial)
-                .cornerRadius(10)
-                .shadow(radius: 10)
-        }
+    private func cancelFetch() {
+        fetchTask?.cancel()
+        isLoading = false
     }
     
     private func addBook(_ bookTransferData: BookTransferData) {
@@ -227,11 +218,7 @@ struct AddView: View {
             genre: bookTransferData.genre,
             series: bookTransferData.series,
             isbn: bookTransferData.isbn,
-            bookDescription: bookTransferData.bookDescription,
-            status: bookTransferData.status,
-            quotes: bookTransferData.quotes,
-            notes: bookTransferData.notes,
-            tags: bookTransferData.tags
+            bookDescription: bookTransferData.bookDescription
         )
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             dataManager.addBook(book: book)
@@ -264,6 +251,13 @@ struct AddView: View {
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
         return formatter.string(from: date)
+    }
+    
+    private func enforceWindowStyle() {
+        if let window = NSApp.windows.first(where: { $0.title == "Add Book" }) {
+            window.styleMask.remove([.resizable, .miniaturizable, .fullScreen])
+            window.canHide = false
+        }
     }
 }
 

@@ -71,7 +71,7 @@ struct AddCollectionSheet: View {
         .animation(.easeInOut, value: errorMessage)
     }
     
-    // MARK:  Validation
+    // MARK: Validation
     private func validateName() -> Bool {
         if collectionName.isEmpty {
             errorMessage = "Name cannot be empty"

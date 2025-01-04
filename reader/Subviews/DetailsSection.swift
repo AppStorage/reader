@@ -16,17 +16,20 @@ struct DetailsSection: View {
             Text(title)
                 .font(.custom("Merriweather-Regular", size: 24))
                 .foregroundStyle(.primary)
+                .accessibilityLabel("Title: \(title)")
             
             // Author
             Text("by \(author)")
                 .font(.system(size: 16))
                 .foregroundStyle(.secondary)
+                .accessibilityLabel("Author: \(author)")
             
             // Info Rows
             ForEach(infoRows, id: \.label) { row in
                 Text("\(row.label): \(row.value)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .accessibilityLabel("\(row.label): \(row.value)")
             }
             
             // Description with ScrollView

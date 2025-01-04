@@ -30,16 +30,29 @@ struct SelectEditionSheet: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
                         ForEach(searchResults) { book in
-                            VStack(alignment: .leading) {
+                            VStack(alignment: .leading, spacing: 6) {
                                 Text(book.title)
                                     .font(.headline)
                                 Text("By: \(book.author)")
                                     .font(.subheadline)
                                 Text("Publisher: \(book.publisher ?? "Unknown")")
                                     .font(.footnote)
+                                    .foregroundColor(.secondary)
+                                
+                                if let isbn = book.isbn, !isbn.isEmpty {
+                                    Text("ISBN: \(isbn)")
+                                        .font(.footnote)
+                                        .foregroundColor(.secondary)
+                                } else {
+                                    Text("ISBN: Not available")
+                                        .font(.footnote)
+                                        .foregroundColor(.secondary)
+                                }
+                                
                                 Text(book.bookDescription ?? "")
                                     .lineLimit(2)
                                     .font(.footnote)
+                                    .foregroundColor(.secondary)
                             }
                             .padding()
                             .frame(maxWidth: .infinity, alignment: .leading)

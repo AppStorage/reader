@@ -47,7 +47,6 @@ func sanitizeDescription(_ description: String?) -> String? {
     return sanitized.trimmingCharacters(in: .whitespacesAndNewlines)
 }
 
-
 // Constructs a Google Books API query URL from query parameters
 func constructQueryURL(apiKey: String, queryParameters: [String: String]) -> URL? {
     // Combine query parameters into a string

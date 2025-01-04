@@ -4,38 +4,36 @@ struct URLBuilder {
     static func constructGoogleBooksURL(apiKey: String, parameters: [String: String]) -> URL? {
         var components = URLComponents(string: "https://www.googleapis.com/books/v1/volumes")
         components?.queryItems = parameters.map { key, value in
-            let encodedValue = value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? value
-            return URLQueryItem(name: key, value: encodedValue)
+            URLQueryItem(name: key, value: value)
         }
-        components?.queryItems?.append(URLQueryItem(name: "key", value: apiKey))
+        
+        if !parameters.keys.contains("key") {
+            components?.queryItems?.append(URLQueryItem(name: "key", value: apiKey))
+        }
         return components?.url
     }
     
     static func constructOpenLibraryURL(title: String?, author: String?, isbn: String?, limit: Int = 10, page: Int = 1) -> URL? {
-        var queryItems: [String] = []
+        var components = URLComponents(string: "https://openlibrary.org/search.json")
+        var queryItems: [URLQueryItem] = []
         
-        // ISBN-based query (prioritized if ISBN is provided)
         if let isbn = isbn {
-            queryItems.append("bibkeys=ISBN:\(isbn)")
-            let urlString = "https://openlibrary.org/api/books?\(queryItems.joined(separator: "&"))&format=json&jscmd=data"
-            return URL(string: urlString)
+            components = URLComponents(string: "https://openlibrary.org/api/books")
+            queryItems.append(URLQueryItem(name: "bibkeys", value: "ISBN:\(isbn)"))
+            queryItems.append(URLQueryItem(name: "format", value: "json"))
+            queryItems.append(URLQueryItem(name: "jscmd", value: "data"))
+        } else {
+            if let title = title, !title.isEmpty {
+                queryItems.append(URLQueryItem(name: "title", value: title))
+            }
+            if let author = author, !author.isEmpty {
+                queryItems.append(URLQueryItem(name: "author", value: author))
+            }
+            queryItems.append(URLQueryItem(name: "limit", value: "\(limit)"))
+            queryItems.append(URLQueryItem(name: "page", value: "\(page)"))
         }
         
-        // Title and Author-based query
-        if let title = title {
-            queryItems.append("title=\(title)")
-        }
-        if let author = author {
-            queryItems.append("author=\(author)")
-        }
-        
-        // Add limit and pagination parameters
-        queryItems.append("limit=\(limit)")
-        queryItems.append("page=\(page)")
-        
-        // Construct search URL
-        let query = queryItems.joined(separator: "&")
-        let urlString = "https://openlibrary.org/search.json?\(query)"
-        return URL(string: urlString)
+        components?.queryItems = queryItems.isEmpty ? nil : queryItems
+        return components?.url
     }
 }

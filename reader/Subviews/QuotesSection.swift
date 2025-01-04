@@ -1,9 +1,6 @@
 import SwiftUI
 import SwiftData
 
-import SwiftUI
-import SwiftData
-
 struct QuotesSection: View {
     @Bindable var book: BookData
     @Binding var newQuote: String
@@ -15,9 +12,6 @@ struct QuotesSection: View {
     @State private var isCollapsed: Bool = false
     @State private var localQuotes: [String] = []
     @State private var saveTask: Task<Void, Never>?
-    
-    @FocusState private var isFocusedOnQuote: Bool
-    @FocusState private var isFocusedOnPage: Bool
     
     var modelContext: ModelContext
     
@@ -46,6 +40,9 @@ struct QuotesSection: View {
         .onChange(of: book.id) {
             loadQuotes()
         }
+        .onAppear {
+            loadQuotes()
+        }
     }
     
     private var content: some View {
@@ -62,7 +59,6 @@ struct QuotesSection: View {
                     let pageComponents = pageAndAttribution?.components(separatedBy: " — ")
                     let pageNumber = pageComponents?.first
                     let attribution = pageComponents?.count ?? 0 > 1 ? pageComponents?.last : nil
-                    
                     
                     ItemDisplayRow(
                         text: textPart,
@@ -132,9 +128,11 @@ struct QuotesSection: View {
     
     // MARK: Actions
     private func saveQuote() {
-        let formattedQuote = newPageNumber.isEmpty ? newQuote : "\(newQuote) [p. \(newPageNumber)]"
-        let attributedQuote = newAttribution.isEmpty ? formattedQuote : "\(formattedQuote) — \(newAttribution)"
-        addQuote(attributedQuote)
+        guard !newQuote.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        let pagePart = newPageNumber.isEmpty ? "" : "[p. \(newPageNumber)]"
+        let attributionPart = newAttribution.isEmpty ? "" : " — \(newAttribution)"
+        let formattedQuote = "\(newQuote) \(pagePart)\(attributionPart)".trimmingCharacters(in: .whitespaces)
+        addQuote(formattedQuote)
         resetAddQuoteForm()
     }
     
@@ -154,7 +152,11 @@ struct QuotesSection: View {
             try? await Task.sleep(nanoseconds: 500_000_000)
             await MainActor.run {
                 book.quotes = localQuotes
-                try? modelContext.save()
+                do {
+                    try modelContext.save()
+                } catch {
+                    print("Failed to save quotes: \(error.localizedDescription)")
+                }
             }
         }
     }
