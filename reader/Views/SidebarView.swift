@@ -114,24 +114,16 @@ struct SidebarView: View {
     
     // MARK: Collection Actions
     private func addNewCollection() {
-        overlayManager.showOverlay(message: "Adding collection...")
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            dataManager.addCollection(named: newCollectionName)
-            overlayManager.showOverlay(message: "Added collection: \(newCollectionName)")
-            newCollectionName = ""
-            isAddingCollection = false
-        }
+        dataManager.addCollection(named: newCollectionName)
+        overlayManager.showOverlay(message: "Added collection: \(newCollectionName)")
+        newCollectionName = ""
+        isAddingCollection = false
     }
     
     private func deleteCollection(_ collection: BookCollection) {
-        overlayManager.showOverlay(message: "Deleting collection...")
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            dataManager.removeCollection(collection)
-            selectedSidebarItem = nil
-            overlayManager.showOverlay(message: "Deleted \(collection.name)")
-        }
+        dataManager.removeCollection(collection)
+        selectedSidebarItem = nil
+        overlayManager.showOverlay(message: "Deleted \(collection.name)")
     }
     
     private func addBookToCollection(_ items: [BookTransferData], collection: BookCollection) -> Bool {
@@ -144,20 +136,12 @@ struct SidebarView: View {
             viewModel.books.first { $0.title == item.title && $0.author == item.author }
         }
         
-        if booksToAdd.count == 1, let firstBook = booksToAdd.first {
-            overlayManager.showOverlay(message: "Adding \"\(firstBook.title)\" to \(collection.name)...")
-        } else {
-            overlayManager.showOverlay(message: "Adding \(booksToAdd.count) books to \(collection.name)...")
-        }
-        
         dataManager.addBookToCollection(booksToAdd, to: targetCollection)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { // 1.5-second delay
-            if booksToAdd.count == 1, let firstBook = booksToAdd.first {
-                overlayManager.showOverlay(message: "Added \"\(firstBook.title)\" to \(collection.name)")
-            } else {
-                overlayManager.showOverlay(message: "Added \(booksToAdd.count) books to \(collection.name)")
-            }
+        if booksToAdd.count == 1, let firstBook = booksToAdd.first {
+            overlayManager.showOverlay(message: "Added \"\(firstBook.title)\" to \(collection.name)")
+        } else {
+            overlayManager.showOverlay(message: "Added \(booksToAdd.count) books to \(collection.name)")
         }
         
         return true
@@ -187,20 +171,12 @@ struct SidebarView: View {
             viewModel.books.first { $0.title == item.title && $0.author == item.author }
         }
         
-        if booksToUpdate.count == 1, let firstBook = booksToUpdate.first {
-            overlayManager.showOverlay(message: "Changing status of \"\(firstBook.title)\" to \(newStatus.displayText)...")
-        } else {
-            overlayManager.showOverlay(message: "Changing status of \(booksToUpdate.count) books to \(newStatus.displayText)...")
-        }
-        
         viewModel.updateBookStatus(for: booksToUpdate, to: newStatus)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            if booksToUpdate.count == 1, let firstBook = booksToUpdate.first {
-                overlayManager.showOverlay(message: "Changed status of \"\(firstBook.title)\" to \(newStatus.displayText)")
-            } else {
-                overlayManager.showOverlay(message: "Changed status of \(booksToUpdate.count) books to \(newStatus.displayText)")
-            }
+        if booksToUpdate.count == 1, let firstBook = booksToUpdate.first {
+            overlayManager.showOverlay(message: "Changed status of \"\(firstBook.title)\" to \(newStatus.displayText)")
+        } else {
+            overlayManager.showOverlay(message: "Changed status of \(booksToUpdate.count) books to \(newStatus.displayText)")
         }
         
         return true
