@@ -124,7 +124,7 @@ If you'd like to compile the app yourself, follow these steps:
 
 7. Build and Run the App
 
-   - Press `⌘R` to build and run the app on your Mac
+   - Press `Command ⌘` + `R` to build and run the app on your Mac
 
 8. Archive the App for Independent Use
 

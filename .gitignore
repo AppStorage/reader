@@ -1,22 +1,5 @@
-# Ignore macOS system files
-.DS_Store
-
-# Ignore the entire Assets.xcassets folder
-Assets.xcassets/
-
-# Ignore build products and output
-build/
-
-# Ignore Xcode configuration files
+project.pbxproj
+project.xcworkspace
+xcuserdata
 Config.xcconfig
-
-# Ignore DerivedData directory (Xcode build artifacts)
-DerivedData/
-
-# Ignore Xcode project
-reader.xcodeproj
-
-# Ignore symbolic links
-github-visible
-gitignore-visible
-
+squareGear.imageset
