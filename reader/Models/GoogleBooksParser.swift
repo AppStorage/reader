@@ -18,7 +18,10 @@ struct GoogleBooksParser {
             genre: bookInfo.categories?.first ?? "Unknown Genre",
             series: nil, // Google Books doesn't provide series info
             isbn: isbn,
-            bookDescription: bookInfo.description ?? ""
+            bookDescription: bookInfo.description ?? "",
+            status: "unread",
+            dateStarted: nil,
+            dateFinished: nil
         )
     }
 }

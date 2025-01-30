@@ -63,39 +63,6 @@ struct AboutView: View {
     }
 }
 
-struct AboutButton: View {
-    let title: String
-    let systemImage: String
-    let url: String
-    @State private var isHovered: Bool = false
-    
-    var body: some View {
-        Link(destination: URL(string: url)!) {
-            HStack {
-                Image(systemName: systemImage)
-                    .foregroundColor(.primary)
-                Text(title)
-                    .foregroundColor(.primary)
-            }
-            .font(.callout)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(isHovered ? Color.gray.opacity(0.2) : Color.gray.opacity(0.1))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(isHovered ? Color.gray : Color.clear, lineWidth: 1)
-            )
-            .animation(.easeInOut(duration: 0.2), value: isHovered)
-        }
-        .onHover { hovering in
-            isHovered = hovering
-        }
-    }
-}
-
 extension Bundle {
     var appVersion: String {
         return Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"

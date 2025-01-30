@@ -2,13 +2,15 @@ import SwiftUI
 import SwiftData
 
 struct StatusSection: View {
-    let book: BookData
+    @Bindable var book: BookData
     let modelContext: ModelContext
     
+    @State private var isEditingStartDate = false
+    @State private var isEditingFinishDate = false
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Status Display
-            HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
                 Text("Status:")
                     .font(.headline)
                 
@@ -21,42 +23,109 @@ struct StatusSection: View {
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .frame(height: 30)
                 .background(book.status.statusColor.opacity(0.2))
                 .foregroundColor(book.status.statusColor)
                 .clipShape(Capsule())
                 
                 Spacer()
             }
-            .padding(.vertical, 8)
+            .padding(.bottom, 6)
             
-            // Date Information
-            if let dateStarted = book.dateStarted {
-                StatusSection.dateTextView(label: "Date Started", date: dateStarted)
-            }
-            
-            if let dateFinished = book.dateFinished {
-                StatusSection.dateTextView(label: "Date Finished", date: dateFinished)
-            }
+            DateEditorView(label: "Date Started", date: $book.dateStarted, isEditing: $isEditingStartDate)
+            DateEditorView(label: "Date Finished", date: $book.dateFinished, isEditing: $isEditingFinishDate)
+        }
+        .padding(.vertical, 10)
+        .onChange(of: [book.dateStarted, book.dateFinished]) { validateDates() }
+    }
+    
+    private func validateDates() {
+        if let start = book.dateStarted, let finish = book.dateFinished, finish < start {
+            book.dateFinished = start
         }
     }
 }
 
-// MARK: Helpers
-extension StatusSection {
-    // Display
-    static func dateTextView(label: String, date: Date) -> some View {
-        Text("\(label): \(formatDate(date))")
-            .font(.subheadline)
-            .foregroundColor(.secondary)
-    }
+struct DateEditorView: View {
+    let label: String
+    @Binding var date: Date?
+    @Binding var isEditing: Bool
+    @State private var tempDate: Date? = nil
     
+    var body: some View {
+        HStack {
+            Text("\(label):")
+                .font(.subheadline)
+                .frame(width: 120, alignment: .leading)
+                .foregroundColor(.secondary)
+            
+            if let unwrappedDate = date {
+                if isEditing {
+                    DatePicker("", selection: Binding(
+                        get: { tempDate ?? unwrappedDate },
+                        set: { newDate in tempDate = newDate }
+                    ), displayedComponents: .date)
+                    .labelsHidden()
+                    .datePickerStyle(.compact)
+                    .padding(8)
+                    .background(RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.gray.opacity(0.5), lineWidth: 1))
+                    
+                    Button(action: {
+                        date = tempDate
+                        isEditing = false
+                    }) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Button(action: {
+                        date = nil
+                        isEditing = false
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.red)
+                    }
+                    .buttonStyle(.plain)
+                    
+                } else {
+                    HStack {
+                        Text(StatusSection.formatDate(unwrappedDate))
+                            .foregroundColor(.primary)
+                        
+                        Button(action: {
+                            tempDate = date
+                            isEditing = true
+                        }) {
+                            Image(systemName: "pencil")
+                                .foregroundColor(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                    .background(RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.gray.opacity(0.5), lineWidth: 1))
+                }
+            } else {
+                Button("Add Date") {
+                    tempDate = Date()
+                    date = tempDate
+                    isEditing = true
+                }
+                .buttonStyle(.bordered)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+extension StatusSection {
     static func formatDate(_ date: Date?) -> String {
         guard let date = date else { return "" }
         return DateFormatter.cachedMediumFormatter.string(from: date)
     }
     
-    // Handlers
     static func handleStatusChange(for book: BookData, to newStatus: ReadingStatus, modelContext: ModelContext) {
         DispatchQueue.main.async {
             updateBookDates(for: book, newStatus: newStatus)
@@ -66,14 +135,12 @@ extension StatusSection {
     
     static func updateBookDates(for book: BookData, newStatus: ReadingStatus) {
         switch newStatus {
-        case .unread:
+        case .unread, .deleted:
             resetBookDates(for: book)
         case .reading:
             startReading(for: book)
         case .read:
             finishReading(for: book)
-        case .deleted:
-            resetBookDates(for: book)
         }
     }
     

@@ -46,7 +46,10 @@ struct OpenLibraryParser {
             genre: doc.subject?.first ?? "Unknown Genre",
             series: nil, // Open Library doesn't provide series info
             isbn: doc.isbn?.first ?? isbn,
-            bookDescription: await description ?? ""
+            bookDescription: await description ?? "",
+            status: "unread",
+            dateStarted: nil,
+            dateFinished: nil
         )
     }
 }

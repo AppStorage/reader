@@ -65,6 +65,9 @@
         }
       }
     },
+    "%@:" : {
+
+    },
     "%@: %@" : {
       "localizations" : {
         "en" : {
@@ -224,6 +227,12 @@
           }
         }
       }
+    },
+    "Books have been exported successfully." : {
+
+    },
+    "Books have been imported successfully." : {
+
     },
     "by %@" : {
       "localizations" : {
@@ -497,6 +506,9 @@
         }
       }
     },
+    "Export Successful" : {
+
+    },
     "Fetch Book" : {
       "localizations" : {
         "en" : {
@@ -512,6 +524,9 @@
           }
         }
       }
+    },
+    "Import Successful" : {
+
     },
     "ISBN: %@" : {
       "localizations" : {

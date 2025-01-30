@@ -12,19 +12,16 @@ struct DetailsSection: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // Title
             Text(title)
-                .font(.custom("Merriweather-Regular", size: 24))
+                .font(.custom("Merriweather Regular", size: 24))
                 .foregroundStyle(.primary)
                 .accessibilityLabel("Title: \(title)")
             
-            // Author
             Text("by \(author)")
                 .font(.system(size: 16))
                 .foregroundStyle(.secondary)
                 .accessibilityLabel("Author: \(author)")
             
-            // Info Rows
             ForEach(infoRows, id: \.label) { row in
                 Text("\(row.label): \(row.value)")
                     .font(.subheadline)
@@ -32,7 +29,6 @@ struct DetailsSection: View {
                     .accessibilityLabel("\(row.label): \(row.value)")
             }
             
-            // Description with ScrollView
             if !description.isEmpty {
                 ScrollView {
                     Text(description)
@@ -58,6 +54,6 @@ struct DetailsSection: View {
             ("ISBN", isbn),
             ("Publisher", publisher),
             ("Published", formattedDate)
-        ].filter { !$0.value.isEmpty } // Only show non-empty rows
+        ].filter { !$0.value.isEmpty }
     }
 }

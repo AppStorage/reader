@@ -104,7 +104,7 @@ struct SidebarView: View {
     private var settingsButton: some View {
         HStack {
             SettingsButton {
-                readerApp.showSettingsWindow(appState: appState) {
+                readerApp.showSettingsWindow(appState: appState, dataManager: dataManager) {
                     appState.checkForAppUpdates(isUserInitiated: true)
                 }
             }

@@ -55,6 +55,8 @@ class BookData: Identifiable {
         isbn: String? = nil,
         bookDescription: String? = nil,
         status: ReadingStatus = .unread,
+        dateStarted: Date? = nil,
+        dateFinished: Date? = nil,
         quotes: [String] = [],
         notes: [String] = [],
         tags: [String] = []
@@ -68,6 +70,8 @@ class BookData: Identifiable {
         self.isbn = isbn
         self.bookDescription = bookDescription
         self.statusRawValue = status.rawValue
+        self.dateStarted = dateStarted
+        self.dateFinished = dateFinished
         self.quotes = quotes
         self.notes = notes
         self.tags = tags
@@ -77,39 +81,46 @@ class BookData: Identifiable {
         switch newStatus {
         case .reading:
             if dateStarted == nil { dateStarted = Date() }
-            dateFinished = nil
+            if let startDate = dateStarted, let finishDate = dateFinished, finishDate < startDate {
+                dateFinished = nil
+            }
         case .read:
             if dateStarted == nil { dateStarted = Date() }
-            dateFinished = Date()
+            if dateFinished == nil { dateFinished = Date() }
+            if let startDate = dateStarted, let finishDate = dateFinished, finishDate < startDate {
+                dateFinished = startDate
+            }
         case .unread, .deleted:
             dateStarted = nil
             dateFinished = nil
         }
+        validateDates()
     }
     
-    // Encodes tags into JSON
+    func validateDates() {
+        if let startDate = dateStarted, let finishDate = dateFinished, finishDate < startDate {
+            dateFinished = startDate
+        }
+    }
+    
     private func encodeTags(_ tags: [String]) -> Data? {
         try? JSONEncoder().encode(tags)
     }
     
-    // Decodes tags from JSON
     private func decodeTags() -> [String]? {
         guard let data = tagsData else { return nil }
         return try? JSONDecoder().decode([String].self, from: data)
     }
     
-    // Encodes text arrays into JSON
     private func encodeTextArray(_ texts: [String]) -> Data? {
         try? JSONEncoder().encode(texts)
     }
     
-    // Decodes text arrays from JSON
     private func decodeTextArray(from data: Data?) -> [String]? {
         guard let data = data else { return nil }
         return try? JSONDecoder().decode([String].self, from: data)
     }
     
-    // Formats dates consistently
     static func formatDate(_ date: Date?) -> String {
         guard let date = date else { return "N/A" }
         let formatter = DateFormatter()
@@ -118,7 +129,6 @@ class BookData: Identifiable {
         return formatter.string(from: date)
     }
     
-    // Checks if the book has any notes or quotes
     var hasNotesOrQuotes: Bool {
         !notes.isEmpty || !quotes.isEmpty
     }

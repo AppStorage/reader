@@ -54,10 +54,23 @@ extension AlertType {
             return Alert(
                 title: Text("Permanently Delete?"),
                 message: Text(message),
-                primaryButton: .default(Text("Delete")) {
+                primaryButton: .destructive(Text("Delete")) {
                     appState.viewModel?.permanentlyDeleteBooks(books)
                 },
                 secondaryButton: .cancel(Text("Cancel"))
+            )
+        case .importSuccess:
+            return Alert(
+                title: Text("Import Successful"),
+                message: Text("Books have been imported successfully."),
+                dismissButton: .default(Text("OK"))
+            )
+            
+        case .exportSuccess:
+            return Alert(
+                title: Text("Export Successful"),
+                message: Text("Books have been exported successfully."),
+                dismissButton: .default(Text("OK"))
             )
         }
     }
@@ -70,6 +83,8 @@ enum AlertType: Identifiable {
     case noResults(String)
     case softDelete(books: [BookData])
     case permanentDelete(books: [BookData])
+    case importSuccess
+    case exportSuccess
     
     var id: String {
         switch self {
@@ -81,6 +96,8 @@ enum AlertType: Identifiable {
             return "softDelete-\(books.map { $0.id.uuidString }.joined(separator: ","))"
         case .permanentDelete(let books):
             return "permanentDelete-\(books.map { $0.id.uuidString }.joined(separator: ","))"
+        case .importSuccess: return "importSuccess"
+        case .exportSuccess: return "exportSuccess"
         }
     }
 }

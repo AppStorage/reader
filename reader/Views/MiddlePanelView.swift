@@ -188,7 +188,10 @@ struct MiddlePanelView: View {
             genre: book.genre,
             series: book.series,
             isbn: book.isbn,
-            bookDescription: book.bookDescription
+            bookDescription: book.bookDescription,
+            status: book.status.rawValue,
+            dateStarted: book.dateStarted,
+            dateFinished: book.dateFinished
         )
     }
     

@@ -19,10 +19,10 @@ struct AppCommands {
         }
     }
     
-    static func settingsCommands(appState: AppState) -> some Commands {
+    static func settingsCommands(appState: AppState, dataManager: DataManager) -> some Commands {
         CommandGroup(replacing: .appSettings) {
             Button("Preferences...") {
-                readerApp.showSettingsWindow(appState: appState) {
+                readerApp.showSettingsWindow(appState: appState, dataManager: dataManager) {
                     appState.checkForAppUpdates(isUserInitiated: true)
                 }
             }

@@ -64,19 +64,25 @@ struct readerApp: App {
         .commands {
             AppCommands.fileCommands { openWindow(id: $0) }
             AppCommands.appInfoCommands(appState: appState)
-            AppCommands.settingsCommands(appState: appState)
+            AppCommands.settingsCommands(appState: appState, dataManager: dataManager)
             AppCommands.deleteCommands(appState: appState, viewModel: viewModel)
         }
     }
     
-    // MARK: Preferencees Window
-    static func showSettingsWindow(appState: AppState, checkForUpdates: @escaping () -> Void) {
+    // MARK: Preferences Window
+    static func showSettingsWindow(appState: AppState, dataManager: DataManager, checkForUpdates: @escaping () -> Void) {
         if preferencesWindow == nil {
             let settingsView = SettingsView(checkForUpdates: {
                 checkForUpdates()
-            }).environmentObject(appState)
+            })
+                .environmentObject(appState)
             
-            let aboutView = AboutView().environmentObject(appState)
+            let aboutView = AboutView()
+                .environmentObject(appState)
+            
+            let importExportView = ImportExportView()
+                .environmentObject(dataManager)
+                .environmentObject(appState)
             
             preferencesWindow = SettingsWindowController(
                 panes: [
@@ -86,6 +92,13 @@ struct readerApp: App {
                         toolbarIcon: { gearToolbarIcon() }()
                     ) {
                         settingsView
+                    },
+                    Settings.Pane(
+                        identifier: Settings.PaneIdentifier("import_export"),
+                        title: "Manage Data",
+                        toolbarIcon: { manageDataToolbarIcon() }()
+                    ) {
+                        importExportView
                     },
                     Settings.Pane(
                         identifier: Settings.PaneIdentifier("about"),
@@ -146,6 +159,14 @@ struct readerApp: App {
         return NSImage(
             systemSymbolName: "info.square.fill",
             accessibilityDescription: nil
+        )!.withSymbolConfiguration(config)!
+    }
+    
+    private static func manageDataToolbarIcon(size: CGFloat = 24) -> NSImage {
+        let config = NSImage.SymbolConfiguration(pointSize: size, weight: .regular)
+        return NSImage(
+            systemSymbolName: "icloud.square.fill",
+            accessibilityDescription: "Manage Data"
         )!.withSymbolConfiguration(config)!
     }
 }

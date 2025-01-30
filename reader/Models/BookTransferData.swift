@@ -15,6 +15,9 @@ struct BookTransferData: Codable, Transferable, Sendable, Equatable, Identifiabl
     let series: String?
     let isbn: String?
     let bookDescription: String?
+    let status: String
+    let dateStarted: Date?
+    let dateFinished: Date?
     
     // MARK: Transferable Conformance
     static var transferRepresentation: some TransferRepresentation {
