@@ -22,13 +22,14 @@ reader is a simple book library and reading tracker app for macOS, designed and 
 
 - Add books by fetching from Google Books and Open Library, or entering them manually
 - Create collections and organize books into them
-- Filter books by reading status, tags ,or collections
+- Filter books by reading status, tags, or collections
 - Jot down thoughts or annotations in a dedicated notes section
 - Save memorable excerpts in the quotes section
 - Search through your added books
 - Sort your library by title, author, or published date, in ascending or descending order
 - Tag books
 - Track reading statuses: unread, reading, or read
+- Import/export books to/from `JSON`
 
 ## Screenshots
 
