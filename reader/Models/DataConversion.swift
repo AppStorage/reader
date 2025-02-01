@@ -15,10 +15,12 @@ struct DataConversion {
             bookDescription: book.bookDescription,
             status: book.status.rawValue,
             dateStarted: book.dateStarted,
-            dateFinished: book.dateFinished
+            dateFinished: book.dateFinished,
+            quotes: book.quotes,
+            notes: book.notes,
+            tags: book.tags
         )
     }
-    
     
     static func toBookData(from transferData: BookTransferData) -> BookData {
         return BookData(
@@ -32,7 +34,10 @@ struct DataConversion {
             bookDescription: transferData.bookDescription,
             status: ReadingStatus(rawValue: transferData.status) ?? .unread,
             dateStarted: transferData.dateStarted,
-            dateFinished: transferData.dateFinished
+            dateFinished: transferData.dateFinished,
+            quotes: transferData.quotes,
+            notes: transferData.notes,
+            tags: transferData.tags
         )
     }
     

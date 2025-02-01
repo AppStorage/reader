@@ -191,7 +191,10 @@ struct MiddlePanelView: View {
             bookDescription: book.bookDescription,
             status: book.status.rawValue,
             dateStarted: book.dateStarted,
-            dateFinished: book.dateFinished
+            dateFinished: book.dateFinished,
+            quotes: book.quotes,
+            notes: book.notes,
+            tags: book.tags
         )
     }
     

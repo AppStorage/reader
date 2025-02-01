@@ -66,7 +66,20 @@
       }
     },
     "%@:" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        }
+      }
     },
     "%@: %@" : {
       "localizations" : {
@@ -229,10 +242,36 @@
       }
     },
     "Books have been exported successfully." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Books have been exported successfully."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los libros se han exportado con éxito."
+          }
+        }
+      }
     },
     "Books have been imported successfully." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Books have been imported successfully."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los libros se han importado con éxito."
+          }
+        }
+      }
     },
     "by %@" : {
       "localizations" : {
@@ -506,8 +545,37 @@
         }
       }
     },
+    "Export Books..." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export Books…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportar Libros..."
+          }
+        }
+      }
+    },
     "Export Successful" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export Successful"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportación exitosa."
+          }
+        }
+      }
     },
     "Fetch Book" : {
       "localizations" : {
@@ -525,8 +593,37 @@
         }
       }
     },
+    "Import Books..." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import Books..."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importar Libros..."
+          }
+        }
+      }
+    },
     "Import Successful" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import Successful"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " Importación exitosa."
+          }
+        }
+      }
     },
     "ISBN: %@" : {
       "localizations" : {

@@ -62,7 +62,7 @@ struct readerApp: App {
                 }
         }
         .commands {
-            AppCommands.fileCommands { openWindow(id: $0) }
+            AppCommands.fileCommands(appState: appState, dataManager: dataManager) { openWindow(id: $0) }
             AppCommands.appInfoCommands(appState: appState)
             AppCommands.settingsCommands(appState: appState, dataManager: dataManager)
             AppCommands.deleteCommands(appState: appState, viewModel: viewModel)

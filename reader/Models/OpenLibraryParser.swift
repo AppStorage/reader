@@ -49,7 +49,10 @@ struct OpenLibraryParser {
             bookDescription: await description ?? "",
             status: "unread",
             dateStarted: nil,
-            dateFinished: nil
+            dateFinished: nil,
+            quotes: [],
+            notes: [],
+            tags: []
         )
     }
 }

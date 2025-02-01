@@ -21,7 +21,10 @@ struct GoogleBooksParser {
             bookDescription: bookInfo.description ?? "",
             status: "unread",
             dateStarted: nil,
-            dateFinished: nil
+            dateFinished: nil,
+            quotes: [],
+            notes: [],
+            tags: []
         )
     }
 }

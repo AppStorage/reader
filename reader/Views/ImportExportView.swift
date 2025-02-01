@@ -39,35 +39,17 @@ struct ImportExportView: View {
         }
     }
     
-    // MARK: Import JSON
     private func handleImport(result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
             if let url = urls.first {
-                do {
-                    guard url.startAccessingSecurityScopedResource() else {
-                        importError = "Failed to access file permissions."
-                        return
-                    }
-                    
-                    defer { url.stopAccessingSecurityScopedResource() }
-                    
-                    let jsonData = try Data(contentsOf: url)
-                    
-                    let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .iso8601
-                    
-                    if let importedData = try? decoder.decode([BookTransferData].self, from: jsonData) {
-                        for book in importedData {
-                            let newBook = DataConversion.toBookData(from: book)
-                            dataManager.addBook(book: newBook)
-                        }
+                dataManager.importBooks(from: url) { result in
+                    switch result {
+                    case .success:
                         appState.showImportSuccess()
-                    } else {
-                        importError = "Failed to parse JSON."
+                    case .failure(let error):
+                        importError = "Import failed: \(error.localizedDescription)"
                     }
-                } catch {
-                    importError = "Failed to load file: \(error.localizedDescription)"
                 }
             }
         case .failure(let error):
@@ -75,35 +57,23 @@ struct ImportExportView: View {
         }
     }
     
-    // MARK: Export JSON
     private func handleExport() {
-        let books = dataManager.books
-            .filter { $0.status != .deleted }
-            .map { DataConversion.toTransferData(from: $0) }
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.json]
+        panel.nameFieldStringValue = "Books.json"
         
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        
-        guard let jsonData = try? encoder.encode(books) else {
-            importError = "Failed to encode books to JSON."
-            return
-        }
-        
-        let savePanel = NSSavePanel()
-        savePanel.allowedContentTypes = [.json]
-        savePanel.nameFieldStringValue = "Books.json"
-        
-        if savePanel.runModal() == .OK, let url = savePanel.url {
-            do {
-                try jsonData.write(to: url)
-                appState.showExportSuccess()
-            } catch {
-                importError = "Failed to save file: \(error.localizedDescription)"
+        if panel.runModal() == .OK, let url = panel.url {
+            dataManager.exportBooks(to: url) { result in
+                switch result {
+                case .success:
+                    appState.showExportSuccess()
+                case .failure(let error):
+                    importError = "Export failed: \(error.localizedDescription)"
+                }
             }
         }
     }
     
-    // MARK: Cleanup
     private func releaseSettingsWindowResources() {
         appState.cleanupPreferencesCache()
     }

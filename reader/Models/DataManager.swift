@@ -127,4 +127,44 @@ final class DataManager: ObservableObject {
             print("Failed to save changes: \(error)")
         }
     }
+    
+    // MARK: Import/Export
+    func importBooks(from url: URL, completion: @escaping (Result<Void, Error>) -> Void) {
+        do {
+            guard url.startAccessingSecurityScopedResource() else {
+                completion(.failure(NSError(domain: "ImportError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to access file permissions."])))
+                return
+            }
+            defer { url.stopAccessingSecurityScopedResource() }
+            
+            let jsonData = try Data(contentsOf: url)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let importedData = try decoder.decode([BookTransferData].self, from: jsonData)
+            
+            for book in importedData {
+                let newBook = DataConversion.toBookData(from: book)
+                addBook(book: newBook)
+            }
+            
+            completion(.success(()))
+        } catch {
+            completion(.failure(error))
+        }
+    }
+    
+    func exportBooks(to url: URL, completion: @escaping (Result<Void, Error>) -> Void) {
+        let books = self.books.filter { $0.status != .deleted }.map { DataConversion.toTransferData(from: $0) }
+        
+        do {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            let jsonData = try encoder.encode(books)
+            try jsonData.write(to: url)
+            completion(.success(()))
+        } catch {
+            completion(.failure(error))
+        }
+    }
+    
 }

@@ -1,12 +1,51 @@
 import SwiftUI
 
 struct AppCommands {
-    @MainActor static func fileCommands(openWindow: @escaping (String) -> Void) -> some Commands {
+    @MainActor static func fileCommands(appState: AppState, dataManager: DataManager, openWindow: @escaping (String) -> Void) -> some Commands {
         CommandGroup(replacing: .newItem) {
             Button("Add Book") {
                 openWindow("addBookWindow")
             }
             .keyboardShortcut("n", modifiers: .command)
+            
+            Divider()
+            
+            Button("Import Books...") {
+                let panel = NSOpenPanel()
+                panel.allowedContentTypes = [.json]
+                panel.allowsMultipleSelection = false
+                panel.canChooseDirectories = false
+                
+                if panel.runModal() == .OK, let url = panel.url {
+                    dataManager.importBooks(from: url) { result in
+                        switch result {
+                        case .success:
+                            appState.showImportSuccess()
+                        case .failure(let error):
+                            appState.alertType = .error("Import failed: \(error.localizedDescription)")
+                        }
+                    }
+                }
+            }
+            .keyboardShortcut("i", modifiers: .command)
+            
+            Button("Export Books...") {
+                let panel = NSSavePanel()
+                panel.allowedContentTypes = [.json]
+                panel.nameFieldStringValue = "Books.json"
+                
+                if panel.runModal() == .OK, let url = panel.url {
+                    dataManager.exportBooks(to: url) { result in
+                        switch result {
+                        case .success:
+                            appState.showExportSuccess()
+                        case .failure(let error):
+                            appState.alertType = .error("Export failed: \(error.localizedDescription)")
+                        }
+                    }
+                }
+            }
+            .keyboardShortcut("e", modifiers: .command)
         }
     }
     
@@ -38,7 +77,6 @@ struct AppCommands {
             let deleteLabel = bookCount == 1 ? "Delete Book" : "Delete Books"
             let permanentDeleteLabel = bookCount == 1 ? "Permanently Delete Book" : "Permanently Delete Books"
             
-            // Soft Delete
             Button(deleteLabel) {
                 guard !selectedBooks.isEmpty else { return }
                 
@@ -51,7 +89,6 @@ struct AppCommands {
             .keyboardShortcut(.delete, modifiers: [])
             .disabled(selectedBooks.isEmpty)
             
-            // Permanent Delete
             Button(permanentDeleteLabel) {
                 guard !selectedBooks.isEmpty else { return }
                 appState.showPermanentDeleteConfirmation(for: selectedBooks)

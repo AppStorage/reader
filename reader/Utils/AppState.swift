@@ -121,7 +121,7 @@ class AppState: ObservableObject {
         alertType = .noResults("")
     }
     
-    // MARK: Import/Export JSON
+    // MARK: Import/Export
     func showImportSuccess() {
         alertType = .importSuccess
     }
