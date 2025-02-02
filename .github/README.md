@@ -95,7 +95,7 @@ If you'd like to compile the app yourself, follow these steps:
        ├── Models/
        ├── Preview Content
        ├── reader.entitlements
-       ├── readerDebug.entitlements
+       ├── readerApp.swift
        ├── Subviews/
        ├── Utils/
        └── Views/
