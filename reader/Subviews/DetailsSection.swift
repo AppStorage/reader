@@ -13,7 +13,7 @@ struct DetailsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
-                .font(.custom("Merriweather Regular", size: 24))
+                .font(.custom("Merriweather-Regular", size: 24))
                 .foregroundStyle(.primary)
                 .accessibilityLabel("Title: \(title)")
             

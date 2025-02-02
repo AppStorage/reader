@@ -66,7 +66,7 @@ struct QuotesSection: View {
                         attributedText: attribution,
                         isEditing: isEditing,
                         includeQuotes: true,
-                        customFont: .custom("Merriweather-Regular", size: 12, relativeTo: .body),
+                        customFont: .custom("Merriweather Regular", size: 12, relativeTo: .body),
                         onRemove: { removeQuote(quote) }
                     )
                 }
