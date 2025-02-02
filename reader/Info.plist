@@ -6,7 +6,5 @@
 	<string>.</string>
 	<key>GOOGLE_BOOKS_API_KEY</key>
 	<string>$(GOOGLE_BOOKS_API_KEY)</string>
-	<key>NSSupportsSuddenTermination</key>
-	<false/>
 </dict>
 </plist>
