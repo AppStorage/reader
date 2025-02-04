@@ -25,10 +25,13 @@ class BookData: Identifiable {
     @Attribute private var tagsData: Data?
     var tags: [String] {
         get {
-            decodeTags() ?? []
+            guard let data = tagsData else { return [] }
+            let decodedTags = (try? JSONDecoder().decode([String].self, from: data)) ?? []
+            return decodedTags
         }
         set {
-            tagsData = encodeTags(newValue)
+            let encodedData = try? JSONEncoder().encode(newValue)
+            tagsData = encodedData
         }
     }
     

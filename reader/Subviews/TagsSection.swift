@@ -8,7 +8,12 @@ struct TagsSection: View {
     @State private var isEditing: Bool = false
     @State private var newTag: String = ""
     @State private var isAddingTag: Bool = false
-    @State private var localTags: [String] = []
+    @State private var localTags: [String]
+    
+    init(book: BookData) {
+        self.book = book
+        _localTags = State(initialValue: book.tags)
+    }
     
     @FocusState private var isFocused: Bool
     
@@ -25,7 +30,6 @@ struct TagsSection: View {
             
             if !isCollapsed {
                 VStack(alignment: .leading, spacing: 16) {
-                    // Selected tags view
                     if !viewModel.selectedTags.isEmpty {
                         selectedTagsView
                     }
@@ -40,13 +44,12 @@ struct TagsSection: View {
                         }
                     }
                     
-                    // Tag input form
                     if isAddingTag {
                         tagForm
                             .transition(.opacity.combined(with: .move(edge: .bottom)))
                     } else {
                         addTagButton
-                            .disabled(book.status == .deleted) // Only disabled if deleted
+                            .disabled(book.status == .deleted)
                     }
                 }
                 .animation(.easeInOut(duration: 0.3), value: localTags.isEmpty)
@@ -55,13 +58,11 @@ struct TagsSection: View {
         .padding(16)
         .cornerRadius(12)
         .animation(.easeInOut(duration: 0.3), value: isCollapsed)
-        .onChange(of: localTags) { oldTags, newTags in
-            if newTags.isEmpty {
+        .onChange(of: book.tags) {
+            localTags = book.tags
+            if localTags.isEmpty {
                 isEditing = false
             }
-        }
-        .onAppear {
-            loadTags()
         }
     }
     
@@ -109,7 +110,7 @@ struct TagsSection: View {
     
     private var tagGrid: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 8)], spacing: 8) {
-            ForEach(book.tags, id: \.self) { tag in
+            ForEach(localTags, id: \.self) { tag in
                 TagChip(tag: tag, isEditing: isEditing, onRemove: { removeTag(tag) })
                     .background(viewModel.selectedTags.contains(tag) ? Color.accentColor.opacity(0.2) : Color.clear)
                     .cornerRadius(8)
