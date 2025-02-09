@@ -132,6 +132,21 @@ struct SidebarView: View {
             return false
         }
         
+        let existingBooks = items.filter { item in
+            targetCollection.books.contains { book in
+                book.title == item.title && book.author == item.author
+            }
+        }
+        
+        if !existingBooks.isEmpty {
+            if existingBooks.count == 1 {
+                overlayManager.showOverlay(message: "\"\(existingBooks[0].title)\" is already in \(collection.name)")
+            } else {
+                overlayManager.showOverlay(message: "\(existingBooks.count) books are already in \(collection.name)")
+            }
+            return false
+        }
+        
         let booksToAdd = items.compactMap { item in
             viewModel.books.first { $0.title == item.title && $0.author == item.author }
         }
@@ -164,6 +179,23 @@ struct SidebarView: View {
     private func updateBookStatus(for items: [BookTransferData], with status: StatusFilter) -> Bool {
         guard let newStatus = status.toReadingStatus() else {
             overlayManager.showOverlay(message: "Cannot change status to \"All\"")
+            return false
+        }
+        
+        let alreadyInStatus = items.filter { item in
+            viewModel.books.contains { book in
+                book.title == item.title &&
+                book.author == item.author &&
+                book.status == newStatus
+            }
+        }
+        
+        if !alreadyInStatus.isEmpty {
+            if alreadyInStatus.count == 1 {
+                overlayManager.showOverlay(message: "\"\(alreadyInStatus[0].title)\" is already marked as \(newStatus.displayText)")
+            } else {
+                overlayManager.showOverlay(message: "\(alreadyInStatus.count) books are already marked as \(newStatus.displayText)")
+            }
             return false
         }
         
