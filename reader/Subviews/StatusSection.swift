@@ -123,7 +123,7 @@ struct DateEditorView: View {
 extension StatusSection {
     static func formatDate(_ date: Date?) -> String {
         guard let date = date else { return "" }
-        return DateFormatter.cachedMediumFormatter.string(from: date)
+        return DateFormatterUtils.cachedMediumFormatter.string(from: date)
     }
     
     static func handleStatusChange(for book: BookData, to newStatus: ReadingStatus, modelContext: ModelContext) {

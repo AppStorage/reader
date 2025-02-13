@@ -123,15 +123,7 @@ class BookData: Identifiable {
         guard let data = data else { return nil }
         return try? JSONDecoder().decode([String].self, from: data)
     }
-    
-    static func formatDate(_ date: Date?) -> String {
-        guard let date = date else { return "N/A" }
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter.string(from: date)
-    }
-    
+        
     var hasNotesOrQuotes: Bool {
         !notes.isEmpty || !quotes.isEmpty
     }

@@ -60,7 +60,7 @@ struct ImportExportView: View {
     private func handleExport() {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.json]
-        panel.nameFieldStringValue = "Books.json"
+        panel.nameFieldStringValue = "books-\(currentDateString()).json"
         
         if panel.runModal() == .OK, let url = panel.url {
             dataManager.exportBooks(to: url) { result in

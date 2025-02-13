@@ -247,10 +247,7 @@ struct AddView: View {
     
     private func formattedDate(_ date: Date?) -> String? {
         guard let date = date else { return nil }
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter.string(from: date)
+        return DateFormatterUtils.cachedMediumFormatter.string(from: date)
     }
     
     private func enforceWindowStyle() {
