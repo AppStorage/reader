@@ -3,9 +3,9 @@
     <h1>reader</h1>
 </div>
 
-![Platform](https://img.shields.io/badge/platform-macOS-blue?style=flat)
-![Requirements](https://img.shields.io/badge/requirements-macOS%2014%2B-fa4e49?style=flat)
-[![Downloads](https://img.shields.io/github/downloads/chippokiddo/reader/total)](https://github.com/chippokiddo/reader/releases/latest)
+![Platform](https://img.shields.io/badge/platform-macOS%2014+-blue?logo=apple&style=flat)
+![Downloads](https://img.shields.io/github/downloads/chippokiddo/reader/total)
+[![Latest Downloads](https://img.shields.io/github/downloads/chippokiddo/reader/latest/total)](https://github.com/chippokiddo/reader/releases/latest)
 [![License](https://img.shields.io/github/license/chippokiddo/reader)](../LICENSE)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?&logo=buy-me-a-coffee&logoColor=0D0C22)](https://buymeacoffee.com/chippo)
 

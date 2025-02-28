@@ -18,11 +18,22 @@ struct ContentView: View {
                 SidebarView(viewModel: viewModel)
                     .frame(width: 225)
             } content: {
-                MiddlePanelView(viewModel: viewModel, selectedBookIDs: $selectedBookIDs)
+                if viewModel.showDashboard {
+                    ReadingDashboardView()
+                        .frame(minWidth: 485, maxWidth: .infinity)
+                } else {
+                    MiddlePanelView(
+                        viewModel: viewModel, selectedBookIDs: $selectedBookIDs
+                    )
                     .frame(minWidth: 485, maxWidth: .infinity)
+                }
             } detail: {
-                if selectedBookIDs.count > 1 {
-                    let selectedBooks = viewModel.displayedBooks.filter { selectedBookIDs.contains($0.id) }
+                if viewModel.showDashboard {
+                    EmptyView()
+                } else if selectedBookIDs.count > 1 {
+                    let selectedBooks = viewModel.displayedBooks.filter {
+                        selectedBookIDs.contains($0.id)
+                    }
                     MultipleSelectionView(
                         count: selectedBooks.count,
                         selectedBooks: selectedBooks,
@@ -31,20 +42,23 @@ struct ContentView: View {
                         selectedCollection: viewModel.selectedCollection
                     )
                     .frame(minWidth: 450, maxWidth: .infinity)
-                }
-                else if let selectedID = selectedBookIDs.first,
-                        let selectedBook = viewModel.displayedBooks.first(where: { $0.id == selectedID }) {
+                } else if let selectedID = selectedBookIDs.first,
+                          let selectedBook = viewModel.displayedBooks.first(where: {
+                              $0.id == selectedID
+                          })
+                {
                     DetailView(book: selectedBook)
                         .frame(minWidth: 450, maxWidth: .infinity)
-                }
-                else {
+                } else {
                     EmptyStateView(type: .detail, viewModel: viewModel)
                         .frame(minWidth: 450, maxWidth: .infinity)
                 }
             }
             .onChange(of: selectedBookIDs) { oldValue, newValue in
                 if oldValue != newValue {
-                    appState.selectedBooks = viewModel.displayedBooks.filter { newValue.contains($0.id) }
+                    appState.selectedBooks = viewModel.displayedBooks.filter {
+                        newValue.contains($0.id)
+                    }
                 }
             }
             .navigationSplitViewStyle(.balanced)

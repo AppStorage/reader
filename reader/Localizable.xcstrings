@@ -97,6 +97,19 @@
         }
       }
     },
+    "%lld" : {
+
+    },
+    "%lld (%lld%%)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld (%2$lld%%)"
+          }
+        }
+      }
+    },
     "%lld Books Selected" : {
       "localizations" : {
         "en" : {
@@ -112,6 +125,19 @@
           }
         }
       }
+    },
+    "%lld day%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld day%2$@"
+          }
+        }
+      }
+    },
+    "•" : {
+
     },
     "Add" : {
       "localizations" : {
@@ -193,6 +219,9 @@
         }
       }
     },
+    "All Time" : {
+
+    },
     "Appearance" : {
       "localizations" : {
         "en" : {
@@ -241,6 +270,15 @@
         }
       }
     },
+    "Average Reading Time" : {
+
+    },
+    "books" : {
+
+    },
+    "Books" : {
+
+    },
     "Books have been exported successfully." : {
       "localizations" : {
         "en" : {
@@ -272,6 +310,12 @@
           }
         }
       }
+    },
+    "Books This Month" : {
+
+    },
+    "Books This Year" : {
+
     },
     "by %@" : {
       "localizations" : {
@@ -433,6 +477,28 @@
         }
       }
     },
+    "CSV" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CSV"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CSV"
+          }
+        }
+      }
+    },
+    "Dashboard" : {
+
+    },
+    "days" : {
+
+    },
     "Delete" : {
       "localizations" : {
         "en" : {
@@ -593,6 +659,9 @@
         }
       }
     },
+    "Genre" : {
+
+    },
     "Import Books..." : {
       "localizations" : {
         "en" : {
@@ -653,6 +722,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ISBN: No disponible"
+          }
+        }
+      }
+    },
+    "JSON" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "JSON"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "JSON"
           }
         }
       }
@@ -720,6 +805,9 @@
           }
         }
       }
+    },
+    "Month" : {
+
     },
     "Move to Deleted?" : {
       "localizations" : {
@@ -801,6 +889,12 @@
         }
       }
     },
+    "No genre data available" : {
+
+    },
+    "No monthly reading data available" : {
+
+    },
     "No notes exist here yet." : {
       "localizations" : {
         "en" : {
@@ -832,6 +926,9 @@
           }
         }
       }
+    },
+    "No recently finished books" : {
+
     },
     "No Results Found" : {
       "localizations" : {
@@ -1121,6 +1218,12 @@
         }
       }
     },
+    "Refresh" : {
+
+    },
+    "Refresh dashboard data" : {
+
+    },
     "Remove from Collection" : {
       "localizations" : {
         "en" : {
@@ -1296,6 +1399,9 @@
           }
         }
       }
+    },
+    "This Year" : {
+
     },
     "Title: %@" : {
       "localizations" : {

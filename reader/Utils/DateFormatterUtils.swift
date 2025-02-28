@@ -1,7 +1,8 @@
 import Foundation
 
 final class DateFormatterUtils {
-    static let formatterQueue = DispatchQueue(label: "chip.reader.dateformatter.queue", attributes: .concurrent)
+    static let formatterQueue = DispatchQueue(
+        label: "chip.reader.dateformatter.queue", attributes: .concurrent)
     
     private static let _sharedFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -23,7 +24,10 @@ final class DateFormatterUtils {
         return formatter
     }()
     
-    static func formatDate(_ date: Date?, dateStyle: DateFormatter.Style = .medium, timeStyle: DateFormatter.Style = .none) -> String {
+    static func formatDate(
+        _ date: Date?, dateStyle: DateFormatter.Style = .medium,
+        timeStyle: DateFormatter.Style = .none
+    ) -> String {
         guard let date = date else { return "N/A" }
         
         var formattedString: String = ""
@@ -46,7 +50,8 @@ func parseDate(_ dateString: String?) -> Date? {
         DateFormatterUtils.formatterQueue.sync {
             DateFormatterUtils.sharedFormatter.dateFormat = format
         }
-        if let date = DateFormatterUtils.sharedFormatter.date(from: dateString) {
+        if let date = DateFormatterUtils.sharedFormatter.date(from: dateString)
+        {
             return date
         }
     }

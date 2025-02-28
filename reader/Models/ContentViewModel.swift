@@ -13,6 +13,7 @@ final class ContentViewModel: ObservableObject {
     @Published var selectedBook: BookData?
     @Published var selectedTags: Set<String> = []
     @Published var selectedCollection: BookCollection?
+    @Published var showDashboard: Bool = true
     
     private var cancellables = Set<AnyCancellable>()
     private var dataManager: DataManager
