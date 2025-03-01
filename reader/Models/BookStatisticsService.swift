@@ -57,27 +57,33 @@ class BookStatisticsService {
         )
     }
     
-    static func getMonthlyReadingData(books: [BookData]) -> [(
+    static func getMonthlyReadingData(books: [BookData], forYear year: Int? = nil) -> [(
         month: String, count: Int
     )] {
         let calendar = Calendar.current
         let now = Date()
-        let currentYear = calendar.component(.year, from: now)
+        let targetYear = year ?? calendar.component(.year, from: now)
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MMM"
         
         let monthsData = (0...11).map {
             monthIndex -> (month: String, count: Int) in
             let monthComponents = DateComponents(
-                year: currentYear, month: monthIndex + 1)
+                year: targetYear, month: monthIndex + 1)
             let month = calendar.date(from: monthComponents)!
             
             let monthName = dateFormatter.string(from: month)
             
             let monthStart = calendar.date(
                 from: calendar.dateComponents([.year, .month], from: month))!
-            let monthEnd = calendar.date(
-                byAdding: DateComponents(month: 1, day: -1), to: monthStart)!
+            
+            let isCurrentMonth =
+            calendar.component(.year, from: now) == targetYear &&
+            calendar.component(.month, from: now) == monthIndex + 1
+            
+            let monthEnd = isCurrentMonth
+            ? now
+            : calendar.date(byAdding: DateComponents(month: 1, day: -1), to: monthStart)!
             
             let booksInMonth = books.filter { book in
                 guard let dateFinished = book.dateFinished else { return false }
@@ -91,7 +97,6 @@ class BookStatisticsService {
     }
     
     static func getLongestReadingStreak(books: [BookData]) -> Int {
-        // Group books by date finished
         let finishedDates = books.compactMap { $0.dateFinished }
             .map { Calendar.current.startOfDay(for: $0) }
             .sorted()

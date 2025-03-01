@@ -29,7 +29,8 @@ reader is a simple book library and reading tracker app for macOS, designed and 
 - Sort your library by title, author, or published date, in ascending or descending order
 - Tag books
 - Track reading statuses: unread, reading, or read
-- Import/export books to/from `JSON`
+- Import/export books to/from `CSV` or `JSON`
+- See your reading statistics in the dashboard
 
 ## Screenshots
 

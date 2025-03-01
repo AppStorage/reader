@@ -1,4 +1,4 @@
-import SwiftUI
+import Foundation
 
 func sanitizeDescription(_ description: String?) -> String? {
     guard let description, !description.isEmpty else { return nil }

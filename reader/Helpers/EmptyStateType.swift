@@ -1,4 +1,4 @@
-import SwiftUI
+import Foundation
 
 enum EmptyStateType {
     case list // Generic list (default)

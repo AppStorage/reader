@@ -2,113 +2,25 @@
   "sourceLanguage" : "en",
   "strings" : {
     "" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(Empty string)"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(Cadena vacía)"
-          }
-        }
-      }
+      "shouldTranslate" : false
     },
     "— %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "— %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "— %@"
-          }
-        }
-      }
+      "shouldTranslate" : false
     },
     "*" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "*"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "*"
-          }
-        }
-      }
+      "shouldTranslate" : false
     },
     "#%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "#%@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "#%@"
-          }
-        }
-      }
+      "shouldTranslate" : false
     },
     "%@:" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@"
-          }
-        }
-      }
+      "shouldTranslate" : false
     },
     "%@: %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@: %2$@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@:%2$@"
-          }
-        }
-      }
+      "shouldTranslate" : false
     },
     "%lld" : {
-
-    },
-    "%lld (%lld%%)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld (%2$lld%%)"
-          }
-        }
-      }
+      "shouldTranslate" : false
     },
     "%lld Books Selected" : {
       "localizations" : {
@@ -130,14 +42,37 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "%1$lld day%2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld día%@"
+          }
+        }
+      }
+    },
+    "%lld: %lld book%@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld: %2$lld book%3$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld: %2$lld libro%3$@"
           }
         }
       }
     },
     "•" : {
-
+      "shouldTranslate" : false
     },
     "Add" : {
       "localizations" : {
@@ -220,7 +155,20 @@
       }
     },
     "All Time" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All Time"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acumulado"
+          }
+        }
+      }
     },
     "Appearance" : {
       "localizations" : {
@@ -270,14 +218,21 @@
         }
       }
     },
-    "Average Reading Time" : {
-
-    },
-    "books" : {
-
-    },
     "Books" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Books"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Libros"
+          }
+        }
+      }
     },
     "Books have been exported successfully." : {
       "localizations" : {
@@ -310,12 +265,6 @@
           }
         }
       }
-    },
-    "Books This Month" : {
-
-    },
-    "Books This Year" : {
-
     },
     "by %@" : {
       "localizations" : {
@@ -477,6 +426,22 @@
         }
       }
     },
+    "Count" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Count"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cantidad"
+          }
+        }
+      }
+    },
     "CSV" : {
       "localizations" : {
         "en" : {
@@ -494,10 +459,20 @@
       }
     },
     "Dashboard" : {
-
-    },
-    "days" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dashboard"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Panel de Control"
+          }
+        }
+      }
     },
     "Delete" : {
       "localizations" : {
@@ -660,7 +635,20 @@
       }
     },
     "Genre" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genre"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Género"
+          }
+        }
+      }
     },
     "Import Books..." : {
       "localizations" : {
@@ -689,7 +677,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : " Importación exitosa."
+            "value" : "Importación exitosa."
           }
         }
       }
@@ -807,7 +795,20 @@
       }
     },
     "Month" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Month"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes"
+          }
+        }
+      }
     },
     "Move to Deleted?" : {
       "localizations" : {
@@ -889,12 +890,6 @@
         }
       }
     },
-    "No genre data available" : {
-
-    },
-    "No monthly reading data available" : {
-
-    },
     "No notes exist here yet." : {
       "localizations" : {
         "en" : {
@@ -926,9 +921,6 @@
           }
         }
       }
-    },
-    "No recently finished books" : {
-
     },
     "No Results Found" : {
       "localizations" : {
@@ -1219,10 +1211,36 @@
       }
     },
     "Refresh" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizar"
+          }
+        }
+      }
     },
-    "Refresh dashboard data" : {
-
+    "Refreshing..." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refreshing..."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizando..."
+          }
+        }
+      }
     },
     "Remove from Collection" : {
       "localizations" : {
@@ -1401,7 +1419,36 @@
       }
     },
     "This Year" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This Year"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este Año"
+          }
+        }
+      }
+    },
+    "Time Scale" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time Scale"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escala de Tiempo"
+          }
+        }
+      }
     },
     "Title: %@" : {
       "localizations" : {
@@ -1463,6 +1510,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Versión %@"
+          }
+        }
+      }
+    },
+    "Year" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Year"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Año"
           }
         }
       }

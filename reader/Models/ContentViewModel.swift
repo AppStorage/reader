@@ -1,4 +1,3 @@
-import Foundation
 import SwiftUI
 import Combine
 
@@ -21,7 +20,6 @@ final class ContentViewModel: ObservableObject {
     init(dataManager: DataManager) {
         self.dataManager = dataManager
         
-        // Observe books in DataManager and update local books property
         dataManager.$books
             .receive(on: DispatchQueue.main)
             .assign(to: &$books)
@@ -33,17 +31,17 @@ final class ContentViewModel: ObservableObject {
             return collection.books.sorted(by: sortOption, order: sortOrder)
         } else {
             let filteredByStatus = books.filtered(by: selectedStatus)
-
+            
             let filteredBySearch = filteredByStatus.searched(with: searchQuery)
-
+            
             let filteredByTags = selectedTags.isEmpty
-                ? filteredBySearch
-                : filteredBySearch.filter { book in
-                    let bookTags = Set(book.tags.map { $0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) })
-                    let selectedTagsLower = Set(selectedTags.map { $0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) })
-                    return !selectedTagsLower.isDisjoint(with: bookTags)
-                }
-
+            ? filteredBySearch
+            : filteredBySearch.filter { book in
+                let bookTags = Set(book.tags.map { $0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) })
+                let selectedTagsLower = Set(selectedTags.map { $0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) })
+                return !selectedTagsLower.isDisjoint(with: bookTags)
+            }
+            
             return filteredByTags.sorted(by: sortOption, order: sortOrder)
         }
     }
