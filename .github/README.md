@@ -3,7 +3,7 @@
     <h1>reader</h1>
 </div>
 
-![Platform](https://img.shields.io/badge/platform-macOS%2014+-blue?logo=apple&style=flat)
+![macOS](https://img.shields.io/badge/macOS-14+-blue?logo=apple&style=flat)
 ![Downloads](https://img.shields.io/github/downloads/chippokiddo/reader/total)
 [![Latest Downloads](https://img.shields.io/github/downloads/chippokiddo/reader/latest/total)](https://github.com/chippokiddo/reader/releases/latest)
 [![License](https://img.shields.io/github/license/chippokiddo/reader)](../LICENSE)
