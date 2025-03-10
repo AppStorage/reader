@@ -51,7 +51,7 @@ struct AppCommands {
     
     @MainActor static func appInfoCommands(appState: AppState) -> some Commands {
         CommandGroup(after: .appInfo) {
-            Button("Check for Updates") {
+            Button("Check for Updates...") {
                 appState.checkForAppUpdates(isUserInitiated: true)
             }
             .disabled(appState.isCheckingForUpdates)

@@ -4,11 +4,13 @@ import SwiftUI
 class AppState: ObservableObject {
     @AppStorage("selectedTheme") private var storedTheme: String = "system"
     @AppStorage("checkForUpdatesAutomatically") var checkForUpdatesAutomatically: Bool = false
+    @AppStorage("updateCheckFrequency") var updateCheckFrequency: Double = 604800.0 // Default to weekly in seconds
     
     @Published var isCheckingForUpdates: Bool = false
     @Published var alertType: AlertType?
     @Published var latestVersion: String?
     @Published var downloadURL: URL?
+    @Published var lastCheckStatus: UpdateCheckStatus = .unknown
     @Published var showSoftDeleteConfirmation = false
     @Published var showPermanentDeleteConfirmation = false
     @Published var selectedBooks: [BookData] = []
@@ -32,7 +34,7 @@ class AppState: ObservableObject {
             self.applyTheme(self.selectedTheme)
         }
         
-        scheduleDailyUpdateCheck()
+        scheduleUpdateCheck()
     }
     
     // MARK: Appearance
@@ -54,8 +56,9 @@ class AppState: ObservableObject {
     }
     
     // MARK: Updates
-    func checkForAppUpdates(isUserInitiated: Bool) {
+    func checkForAppUpdates(isUserInitiated: Bool, showAlert: Bool = true) {
         isCheckingForUpdates = true
+        lastCheckStatus = .checking
         
         Task {
             defer { isCheckingForUpdates = false }
@@ -68,15 +71,31 @@ class AppState: ObservableObject {
                     DispatchQueue.main.async {
                         self.latestVersion = latestVersionFound
                         self.downloadURL = downloadURLFound
-                        self.alertType = .newUpdateAvailable
+                        self.lastCheckStatus = .updateAvailable
+                        
+                        if showAlert {
+                            self.alertType = .newUpdateAvailable
+                        }
                     }
-                } else if isUserInitiated {
-                    alertType = .upToDate
-                }
-            } catch {
-                if isUserInitiated {
+                } else {
                     DispatchQueue.main.async {
-                        self.alertType = .error("Update Check Failed: \(error.localizedDescription)")
+                        self.lastCheckStatus = .upToDate
+                        
+                        if isUserInitiated && showAlert {
+                            self.alertType = .upToDate
+                        }
+                    }
+                }
+                
+                UserDefaults.standard.set(Date(), forKey: "lastUpdateCheck")
+            } catch {
+                let errorMessage = "Update Check Failed: \(error.localizedDescription)"
+                
+                DispatchQueue.main.async {
+                    self.lastCheckStatus = .error(errorMessage)
+                    
+                    if isUserInitiated && showAlert {
+                        self.alertType = .error(errorMessage)
                     }
                 }
             }
@@ -95,16 +114,24 @@ class AppState: ObservableObject {
         return newComponents.count > currentComponents.count
     }
     
-    func scheduleDailyUpdateCheck() {
+    func scheduleUpdateCheck() {
         guard checkForUpdatesAutomatically else { return }
         
         let lastUpdateCheck = UserDefaults.standard.object(forKey: "lastUpdateCheck") as? Date ?? .distantPast
         let now = Date()
+        let timeInterval = now.timeIntervalSince(lastUpdateCheck)
         
-        if !Calendar.current.isDate(now, inSameDayAs: lastUpdateCheck) {
+        if timeInterval >= updateCheckFrequency {
             checkForAppUpdates(isUserInitiated: false)
-            UserDefaults.standard.set(now, forKey: "lastUpdateCheck")
         }
+    }
+    
+    enum UpdateCheckStatus {
+        case unknown
+        case checking
+        case upToDate
+        case updateAvailable
+        case error(String)
     }
     
     // MARK: Delete Actions

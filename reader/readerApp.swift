@@ -128,7 +128,7 @@ struct readerApp: App {
     
     private func handleOnAppear() {
         appState.applyTheme(appState.selectedTheme)
-        appState.scheduleDailyUpdateCheck()
+        appState.scheduleUpdateCheck()
     }
     
     // MARK: Preferences Icons

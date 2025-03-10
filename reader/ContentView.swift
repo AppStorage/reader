@@ -20,12 +20,12 @@ struct ContentView: View {
             } content: {
                 if viewModel.showDashboard {
                     ReadingDashboardView()
-                        .frame(minWidth: 935, maxWidth: .infinity)
+                        .frame(minWidth: 800, maxWidth: .infinity)
                 } else {
                     MiddlePanelView(
                         viewModel: viewModel, selectedBookIDs: $selectedBookIDs
                     )
-                    .frame(minWidth: 485, maxWidth: .infinity)
+                    .frame(minWidth: 350, maxWidth: .infinity)
                 }
             } detail: {
                 if viewModel.showDashboard {

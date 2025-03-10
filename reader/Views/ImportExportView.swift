@@ -9,80 +9,87 @@ struct ImportExportView: View {
     @State private var isExportHovered: Bool = false
     
     var body: some View {
-        VStack(spacing: 20) {
-            HStack(spacing: 12) {
-                AboutButton(
-                    title: "Import Books...",
-                    systemImage: "square.and.arrow.down",
-                    action: {
-                        showingImporter.toggle()
-                    }
-                )
-                .fileImporter(
-                    isPresented: $showingImporter,
-                    allowedContentTypes: [.json, .commaSeparatedText],
-                    allowsMultipleSelection: false
-                ) { result in
-                    handleImport(result: result)
-                }
-                
-                Menu {
-                    Button("JSON") {
-                        handleExport(format: .json)
+        ZStack {
+            // Match style with SettingsView
+            Form { }
+                .formStyle(.grouped)
+                .opacity(0)
+            
+            VStack(spacing: 20) {
+                HStack(spacing: 12) {
+                    AboutButton(
+                        title: "Import Books...",
+                        systemImage: "square.and.arrow.down",
+                        action: {
+                            showingImporter.toggle()
+                        }
+                    )
+                    .fileImporter(
+                        isPresented: $showingImporter,
+                        allowedContentTypes: [.json, .commaSeparatedText],
+                        allowsMultipleSelection: false
+                    ) { result in
+                        handleImport(result: result)
                     }
                     
-                    Button("CSV") {
-                        handleExport(format: .csv)
+                    Menu {
+                        Button("JSON") {
+                            handleExport(format: .json)
+                        }
+                        
+                        Button("CSV") {
+                            handleExport(format: .csv)
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "square.and.arrow.up")
+                                .foregroundColor(.primary)
+                            Text("Export Books...")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "chevron.down")
+                                .foregroundColor(.primary)
+                                .font(.system(size: 12))
+                                .padding(.leading, -5)
+                        }
+                        .font(.callout)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(
+                                    isExportHovered
+                                    ? Color.gray.opacity(0.2)
+                                    : Color.gray.opacity(0.1))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(
+                                    isExportHovered ? Color.gray : Color.clear,
+                                    lineWidth: 1)
+                        )
+                        .animation(
+                            .easeInOut(duration: 0.2), value: isExportHovered
+                        )
+                        .frame(width: 150)
                     }
-                } label: {
-                    HStack {
-                        Image(systemName: "square.and.arrow.up")
-                            .foregroundColor(.primary)
-                        Text("Export Books...")
-                            .foregroundColor(.primary)
-                        Spacer()
-                        Image(systemName: "chevron.down")
-                            .foregroundColor(.primary)
-                            .font(.system(size: 12))
-                            .padding(.leading, -5)
+                    .buttonStyle(PlainButtonStyle())
+                    .onHover { hovering in
+                        isExportHovered = hovering
                     }
-                    .font(.callout)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(
-                                isExportHovered
-                                ? Color.gray.opacity(0.2)
-                                : Color.gray.opacity(0.1))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(
-                                isExportHovered ? Color.gray : Color.clear,
-                                lineWidth: 1)
-                    )
-                    .animation(
-                        .easeInOut(duration: 0.2), value: isExportHovered
-                    )
-                    .frame(width: 150)
                 }
-                .buttonStyle(PlainButtonStyle())
-                .onHover { hovering in
-                    isExportHovered = hovering
+                
+                if let error = importError {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .font(.callout)
                 }
             }
-            
-            if let error = importError {
-                Text(error)
-                    .foregroundColor(.red)
-                    .font(.callout)
+            .padding()
+            .frame(width: 400)
+            .onDisappear {
+                releaseSettingsWindowResources()
             }
-        }
-        .padding()
-        .frame(width: 400)
-        .onDisappear {
-            releaseSettingsWindowResources()
         }
     }
     
