@@ -61,7 +61,7 @@ struct ReadingTrendsView: View {
             TrendMetricView(
                 title: "Monthly Average",
                 value: String(format: "%.1f", averageBooksPerMonth),
-                unit: "books",
+                unit: averageBooksPerMonth == 1.0 ? "book" : "books",
                 icon: "chart.xyaxis.line"
             )
             
@@ -70,7 +70,7 @@ struct ReadingTrendsView: View {
             TrendMetricView(
                 title: "This Year",
                 value: "\(yearlyComparison.current)",
-                unit: "books",
+                unit: yearlyComparison.current == 1 ? "book" : "books",
                 icon: "calendar"
             )
             
@@ -80,7 +80,7 @@ struct ReadingTrendsView: View {
                 TrendMetricView(
                     title: "Last Year",
                     value: "\(yearlyComparison.previous)",
-                    unit: "books",
+                    unit: yearlyComparison.previous == 1 ? "book" : "books",
                     icon: "calendar.badge.clock"
                 )
             }
@@ -90,7 +90,7 @@ struct ReadingTrendsView: View {
             TrendMetricView(
                 title: "Projected \(currentYear)",
                 value: String(format: "%.0f", projectedTotal),
-                unit: "books",
+                unit: projectedTotal == 1.0 ? "book" : "books",
                 icon: "chart.line.uptrend.xyaxis",
                 color: Color(nsColor: NSColor.systemBlue)
             )

@@ -26,7 +26,7 @@ struct ReadingInsightsView: View {
         return InsightCardView(
             title: "Books This Month",
             value: monthlyComparison.current,
-            unit: "books",
+            unit: monthlyComparison.current == 1 ? "book" : "books",
             icon: "calendar",
             iconColor: Color.accentColor
         )
@@ -38,7 +38,7 @@ struct ReadingInsightsView: View {
         return InsightCardView(
             title: "Books This Year",
             value: yearlyComparison.current,
-            unit: "books",
+            unit: yearlyComparison.current == 1 ? "book" : "books",
             icon: "chart.bar.fill",
             iconColor: Color.accentColor
         )
@@ -48,7 +48,7 @@ struct ReadingInsightsView: View {
         InsightCardView(
             title: "Average Reading Time",
             value: Int(avgDays),
-            unit: "days",
+            unit: Int(avgDays) == 1 ? "day" : "days",
             icon: "clock.fill",
             iconColor: Color.accentColor
         )
