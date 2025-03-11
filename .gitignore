@@ -2,5 +2,5 @@ project.pbxproj
 project.xcworkspace
 reader.xcscheme
 xcuserdata
-Config.xcconfig
+*.xcconfig
 squareGear.imageset
