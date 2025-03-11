@@ -81,7 +81,7 @@ struct SettingsView: View {
                         ProgressView()
                             .controlSize(.small)
                             .padding(.trailing, 5)
-                        Text("Checking for Updates...")
+                        Text("Checking...")
                     } else {
                         Text("Check for Updates")
                     }

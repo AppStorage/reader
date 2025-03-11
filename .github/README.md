@@ -31,12 +31,23 @@ reader is a simple book library and reading tracker app for macOS, designed and 
 - Track reading statuses: unread, reading, or read
 - Import/export books to/from `CSV` or `JSON`
 - See your reading statistics in the dashboard
+- Save quotes as an image in three different styles: light, sepia, or dark
 
 ## Screenshots
 
 <figure>
     <img src = "./assets/img02.png" alt = "reader in light mode" />
     <figcaption>reader in light mode</figcaption>
+</figure>
+
+<figure>
+    <img src = "./assets/img03.png" alt = "reader in light mode" />
+    <figcaption>reader dashboard</figcaption>
+</figure>
+
+<figure>
+    <img src = "./assets/img04.png" alt = "reader in light mode" />
+    <figcaption>export quote as an image</figcaption>
 </figure>
 
 ## Install

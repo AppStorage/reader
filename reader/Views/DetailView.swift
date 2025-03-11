@@ -46,6 +46,9 @@ struct DetailView: View {
             ToolbarItem(placement: .automatic) {
                 BookActionButton(books: [book], dataManager: dataManager)
             }
+            ToolbarItem(placement: .automatic) {
+                QuoteShareButton(book: book)
+            }
         }
     }
     
