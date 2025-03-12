@@ -35,20 +35,11 @@ reader is a simple book library and reading tracker app for macOS, designed and 
 
 ## Screenshots
 
-<figure>
-    <img src = "./assets/img02.png" alt = "reader in light mode" />
-    <figcaption>reader in light mode</figcaption>
-</figure>
+<img src = "./assets/img02.png" alt = "reader in light mode" />
 
-<figure>
-    <img src = "./assets/img03.png" alt = "reader in light mode" />
-    <figcaption>reader dashboard</figcaption>
-</figure>
+<img src = "./assets/img03.png" alt = "reader's dashbaord" />
 
-<figure>
-    <img src = "./assets/img04.png" alt = "reader in light mode" />
-    <figcaption>export quote as an image</figcaption>
-</figure>
+<img src = "./assets/img04.png" alt = "reader's share quote sheet" />
 
 ## Install
 
