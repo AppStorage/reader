@@ -6,4 +6,5 @@ enum Field: Hashable {
     case isbn
     case publisher
     case published
+    case description
 }

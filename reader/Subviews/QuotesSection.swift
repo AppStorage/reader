@@ -13,6 +13,11 @@ struct QuotesSection: View {
     @State private var localQuotes: [String] = []
     @State private var saveTask: Task<Void, Never>?
     
+    @State private var editingQuoteId: String? = nil
+    @State private var editQuoteText: String = ""
+    @State private var editPageNumber: String = ""
+    @State private var editAttribution: String = ""
+    
     var modelContext: ModelContext
     
     var body: some View {
@@ -22,7 +27,12 @@ struct QuotesSection: View {
                 isEditing: $isEditing,
                 title: "Quotes",
                 onToggleCollapse: { isCollapsed.toggle() },
-                onEditToggle: { isEditing.toggle() },
+                onEditToggle: {
+                    isEditing.toggle()
+                    if !isEditing {
+                        editingQuoteId = nil
+                    }
+                },
                 isEditingDisabled: book.status == .deleted || (book.quotes.isEmpty)
             )
             if !isCollapsed {
@@ -31,7 +41,8 @@ struct QuotesSection: View {
         }
         .padding(16)
         .cornerRadius(12)
-        .animation(.easeInOut(duration: 0.25), value: isEditing)
+        .animation(.easeInOut(duration: 0.3), value: isEditing)
+        .animation(.easeInOut(duration: 0.3), value: editingQuoteId)
         .onChange(of: localQuotes) { oldQuotes, newQuotes in
             if newQuotes.isEmpty {
                 isEditing = false
@@ -51,35 +62,44 @@ struct QuotesSection: View {
                 emptyStateView
                     .transition(.opacity)
             } else {
-                ForEach(localQuotes, id: \..self) { quote in
+                ForEach(localQuotes, id: \.self) { quote in
                     let components = quote.components(separatedBy: " [p. ")
                     let textPart = components.first ?? quote
-                    let pageAndAttribution = components.count > 1 ? components.last?.replacingOccurrences(of: "]", with: "") : nil
                     
-                    let pageComponents = pageAndAttribution?.components(separatedBy: " — ")
-                    let pageNumber = pageComponents?.first
-                    let attribution = pageComponents?.count ?? 0 > 1 ? pageComponents?.last : nil
+                    let pageAndAttribution = components.count > 1 ? components.last?.replacingOccurrences(of: "]", with: "") ?? "" : ""
+                    let pageComponents = pageAndAttribution.components(separatedBy: " — ")
+                    
+                    let pageNumber = pageComponents.first ?? ""
+                    let attribution = pageComponents.count > 1 ? pageComponents.last ?? "" : ""
                     
                     ItemDisplayRow(
                         text: textPart,
-                        secondaryText: pageNumber,
-                        attributedText: attribution,
+                        secondaryText: pageNumber.isEmpty ? nil : pageNumber,
+                        attributedText: attribution.isEmpty ? nil : attribution,
                         isEditing: isEditing,
                         includeQuotes: true,
                         customFont: .custom("Merriweather Regular", size: 12, relativeTo: .body),
-                        onRemove: { removeQuote(quote) }
+                        isEditingThis: editingQuoteId == quote,
+                        editText: $editQuoteText,
+                        editSecondary: $editPageNumber,
+                        editAttribution: $editAttribution,
+                        onRemove: { removeQuote(quote) },
+                        onEdit: { beginEditingQuote(quote) },
+                        onSave: { saveEditedQuote(originalQuote: quote) },
+                        onCancel: { cancelEditingQuote() }
                     )
                 }
             }
             
-            if isAddingQuote {
+            if isAddingQuote && editingQuoteId == nil {
                 addQuoteForm
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
-            } else {
+            } else if editingQuoteId == nil {
                 addQuoteButton
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: localQuotes.isEmpty)
+        .animation(.easeInOut(duration: 0.3), value: localQuotes.isEmpty)
+        .animation(.easeInOut(duration: 0.3), value: isAddingQuote)
     }
     
     private var emptyStateView: some View {
@@ -144,6 +164,72 @@ struct QuotesSection: View {
     private func removeQuote(_ quote: String) {
         localQuotes.removeAll { $0 == quote }
         saveQuotes()
+    }
+    
+    private func beginEditingQuote(_ quote: String) {
+        if editingQuoteId != nil {
+            cancelEditingQuote()
+        }
+        
+        let components = quote.components(separatedBy: " [p. ")
+        let textPart = components.first ?? quote
+        
+        var pageNumber = ""
+        var attribution = ""
+        
+        if components.count > 1 {
+            let pageAndAttribution = components.last?.replacingOccurrences(of: "]", with: "") ?? ""
+            let pageComponents = pageAndAttribution.components(separatedBy: " — ")
+            
+            pageNumber = pageComponents.first ?? ""
+            
+            if pageComponents.count > 1 {
+                attribution = pageComponents.last ?? ""
+            }
+        }
+        
+        editQuoteText = textPart
+        editPageNumber = pageNumber
+        editAttribution = attribution
+        
+        withAnimation(.easeInOut(duration: 0.2)) {
+            editingQuoteId = quote
+        }
+    }
+    
+    private func saveEditedQuote(originalQuote: String) {
+        guard !editQuoteText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        
+        let pagePart = editPageNumber.isEmpty ? "" : "[p. \(editPageNumber)]"
+        let attributionPart = editAttribution.isEmpty ? "" : " — \(editAttribution)"
+        let formattedQuote = "\(editQuoteText) \(pagePart)\(attributionPart)".trimmingCharacters(in: .whitespaces)
+        
+        if let index = localQuotes.firstIndex(of: originalQuote) {
+            localQuotes[index] = formattedQuote
+            saveQuotes()
+        }
+        
+        withAnimation(.easeInOut(duration: 0.2)) {
+            editingQuoteId = nil
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            editQuoteText = ""
+            editPageNumber = ""
+            editAttribution = ""
+        }
+    }
+    
+    private func cancelEditingQuote() {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            editingQuoteId = nil
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            editQuoteText = ""
+            editPageNumber = ""
+            editAttribution = ""
+        }
     }
     
     private func saveQuotes() {

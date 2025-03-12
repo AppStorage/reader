@@ -13,6 +13,7 @@ struct DetailView: View {
     @State private var descriptionText: String = ""
     @State private var saveTask: Task<Void, Never>?
     @State private var currentStatus: ReadingStatus
+    @State private var isEditingDetails = false
     
     init(book: BookData) {
         self.book = book
@@ -44,11 +45,23 @@ struct DetailView: View {
                 Spacer()
             }
             ToolbarItem(placement: .automatic) {
+                Button(action: {
+                    isEditingDetails = true
+                }) {
+                    Image(systemName: "square.and.pencil")
+                        .help("Edit Details")
+                        .accessibilityLabel("Edit Details")
+                }
+            }
+            ToolbarItem(placement: .automatic) {
                 BookActionButton(books: [book], dataManager: dataManager)
             }
             ToolbarItem(placement: .automatic) {
                 QuoteShareButton(book: book)
             }
+        }
+        .sheet(isPresented: $isEditingDetails) {
+            EditBookDetails(book: book)
         }
     }
     

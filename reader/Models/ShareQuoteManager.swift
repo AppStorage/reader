@@ -3,22 +3,29 @@ import AppKit
 
 @MainActor
 class ShareQuoteManager {
-    static func parseQuote(_ quoteString: String) -> (quote: String, attribution: String?) {
+    static func parseQuote(_ quoteString: String) -> (quote: String, attribution: String?, page: String?) {
         let components = quoteString.components(separatedBy: " — ")
+        var quoteText = ""
+        var pageNumber: String? = nil
         
-        if components.count > 1 {
-            let attributionText = components[1]
-            
+        // Extract quote and page number
+        if components.count > 0 {
             let quoteParts = components[0].components(separatedBy: " [p. ")
-            let quoteText = quoteParts[0].trimmingCharacters(in: .whitespacesAndNewlines)
+            quoteText = quoteParts[0].trimmingCharacters(in: .whitespacesAndNewlines)
             
-            return (quoteText, attributionText)
-        } else {
-            let quoteParts = quoteString.components(separatedBy: " [p. ")
-            let quoteText = quoteParts[0].trimmingCharacters(in: .whitespacesAndNewlines)
-            
-            return (quoteText, nil)
+            // Extract page number if available
+            if quoteParts.count > 1 {
+                let pageStr = quoteParts[1]
+                if let endIndex = pageStr.firstIndex(of: "]") {
+                    pageNumber = String(pageStr[..<endIndex])
+                }
+            }
         }
+        
+        // Extract attribution if available
+        let attributionText = components.count > 1 ? components[1] : nil
+        
+        return (quoteText, attributionText, pageNumber)
     }
     
     static func exportQuoteAsPNG(

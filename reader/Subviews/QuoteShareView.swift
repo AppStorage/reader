@@ -8,56 +8,6 @@ struct QuoteShareView: View {
     @State private var selectedBackground: QuoteBackgroundStyle = .light
     @State private var quoteContentSize: CGSize = .zero
     
-    enum QuoteBackgroundStyle: String, CaseIterable, Identifiable {
-        case light, sepia, dark
-        
-        var id: String { self.rawValue }
-        
-        var backgroundColor: Color {
-            switch self {
-            case .light: return Color.white
-            case .sepia: return Color(red: 249/255, green: 241/255, blue: 228/255)
-            case .dark: return Color(white: 0.1)
-            }
-        }
-        
-        var quoteTextColor: Color {
-            switch self {
-            case .light, .sepia: return Color.black
-            case .dark: return Color.white
-            }
-        }
-        
-        var attributionTextColor: Color {
-            switch self {
-            case .light, .sepia: return Color.gray
-            case .dark: return Color(white: 0.8)
-            }
-        }
-        
-        var bookAuthorColor: Color {
-            switch self {
-            case .light, .sepia: return Color.black
-            case .dark: return Color.white
-            }
-        }
-        
-        var bookTitleColor: Color {
-            switch self {
-            case .light, .sepia: return Color.gray
-            case .dark: return Color(white: 0.8)
-            }
-        }
-        
-        var iconName: String {
-            switch self {
-            case .light: return "sun.max"
-            case .sepia: return "book.closed"
-            case .dark: return "moon"
-            }
-        }
-    }
-    
     var body: some View {
         VStack(spacing: 0) {
             headerView
@@ -91,6 +41,10 @@ struct QuoteShareView: View {
                 updateQuoteContentSize()
             }
         }
+    }
+    
+    private var currentQuote: (quote: String, attribution: String?, page: String?) {
+        ShareQuoteManager.parseQuote(book.quotes[selectedQuoteIndex])
     }
     
     private var headerView: some View {
@@ -138,52 +92,82 @@ struct QuoteShareView: View {
         .padding()
     }
     
+    private var previewView: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Preview")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 24)
+            
+            ScrollView(.vertical, showsIndicators: true) {
+                QuoteCard(
+                    quote: currentQuote.quote,
+                    attribution: currentQuote.attribution,
+                    book: book,
+                    style: selectedBackground
+                )
+                .cornerRadius(12)
+                .shadow(color: Color.black.opacity(0.12), radius: 6, x: 0, y: 2)
+                .frame(width: 500)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
+                .background(
+                    GeometryReader { geo -> Color in
+                        DispatchQueue.main.async {
+                            quoteContentSize = geo.size
+                        }
+                        return Color.clear
+                    }
+                )
+            }
+            .frame(maxHeight: .infinity)
+        }
+    }
+    
     private var controlsView: some View {
         VStack(spacing: 28) {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Select Quote")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.secondary)
-                    
-                    Spacer()
-                    
-                    Text("\(selectedQuoteIndex + 1) of \(book.quotes.count)")
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary.opacity(0.8))
-                }
-                
-                pickerWithNavigationButtons
-            }
-            .padding(.horizontal, 24)
-            
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Background")
+            quoteSelectionControls
+            backgroundStyleControls
+        }
+    }
+    
+    private var quoteSelectionControls: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Select Quote")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.secondary)
                 
-                backgroundStyleSelector
+                Spacer()
+                
+                Text("\(selectedQuoteIndex + 1) of \(book.quotes.count)")
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary.opacity(0.8))
             }
-            .padding(.horizontal, 24)
+            
+            pickerWithNavigationButtons
         }
+        .padding(.horizontal, 24)
+    }
+    
+    private var backgroundStyleControls: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Background")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.secondary)
+            
+            backgroundStyleSelector
+        }
+        .padding(.horizontal, 24)
     }
     
     private var pickerWithNavigationButtons: some View {
         HStack(spacing: 8) {
-            Button(action: {
-                if selectedQuoteIndex > 0 {
-                    selectedQuoteIndex -= 1
-                    updateQuoteContentSize()
-                }
-            }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(selectedQuoteIndex > 0 ? .primary : .secondary.opacity(0.5))
-                    .frame(width: 36, height: 32)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(PlainButtonStyle())
-            .disabled(selectedQuoteIndex == 0)
+            navigationButton(
+                iconName: "chevron.left",
+                isEnabled: selectedQuoteIndex > 0,
+                action: { selectedQuoteIndex -= 1 }
+            )
             
             Picker("", selection: $selectedQuoteIndex) {
                 ForEach(0..<book.quotes.count, id: \.self) { index in
@@ -195,25 +179,33 @@ struct QuoteShareView: View {
             .labelsHidden()
             .pickerStyle(.menu)
             .frame(maxWidth: .infinity)
-            .onChange(of: selectedQuoteIndex) { oldValue, newValue in
+            .onChange(of: selectedQuoteIndex) { _, _ in
                 updateQuoteContentSize()
             }
             
-            Button(action: {
-                if selectedQuoteIndex < book.quotes.count - 1 {
-                    selectedQuoteIndex += 1
-                    updateQuoteContentSize()
-                }
-            }) {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(selectedQuoteIndex < book.quotes.count - 1 ? .primary : .secondary.opacity(0.5))
-                    .frame(width: 36, height: 32)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(PlainButtonStyle())
-            .disabled(selectedQuoteIndex == book.quotes.count - 1)
+            navigationButton(
+                iconName: "chevron.right",
+                isEnabled: selectedQuoteIndex < book.quotes.count - 1,
+                action: { selectedQuoteIndex += 1 }
+            )
         }
+    }
+    
+    private func navigationButton(iconName: String, isEnabled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: {
+            if isEnabled {
+                action()
+                updateQuoteContentSize()
+            }
+        }) {
+            Image(systemName: iconName)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(isEnabled ? .primary : .secondary.opacity(0.5))
+                .frame(width: 36, height: 32)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(PlainButtonStyle())
+        .disabled(!isEnabled)
     }
     
     private var backgroundStyleSelector: some View {
@@ -262,94 +254,6 @@ struct QuoteShareView: View {
         .frame(maxWidth: .infinity)
     }
     
-    private var previewView: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Preview")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.secondary)
-                .padding(.horizontal, 24)
-            
-            ScrollView(.vertical, showsIndicators: true) {
-                quoteCardView
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.12), radius: 6, x: 0, y: 2)
-                    .frame(width: 500)
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 24)
-                    .background(
-                        GeometryReader { geo -> Color in
-                            DispatchQueue.main.async {
-                                quoteContentSize = geo.size
-                            }
-                            return Color.clear
-                        }
-                    )
-            }
-            .frame(maxHeight: .infinity)
-        }
-    }
-    
-    private var quoteCardView: some View {
-        let parsedQuote = ShareQuoteManager.parseQuote(book.quotes[selectedQuoteIndex])
-        
-        return ZStack {
-            selectedBackground.backgroundColor
-            // Quote icon
-            VStack(alignment: .leading, spacing: 0) {
-                Image(systemName: "quote.opening")
-                    .font(.system(size: 24))
-                    .foregroundColor(selectedBackground.quoteTextColor.opacity(0.3))
-                    .padding(.bottom, 1)
-                    .padding(.leading, 17)
-                
-                VStack(alignment: .leading, spacing: 16) {
-                    // Quote text and attribution
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text(parsedQuote.quote)
-                            .font(.custom("Merriweather-Regular", size: 18))
-                            .foregroundColor(selectedBackground.quoteTextColor)
-                            .lineSpacing(7)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding(.leading, 16)
-                            .frame(width: 452, alignment: .leading)
-                        
-                        if let attribution = parsedQuote.attribution, !attribution.isEmpty {
-                            Text("— \(attribution)")
-                                .font(.custom("Merriweather-Italic", size: 16))
-                                .foregroundColor(selectedBackground.attributionTextColor)
-                                .padding(.leading, 16)
-                                .frame(width: 452, alignment: .leading)
-                        }
-                    }
-                    .overlay(
-                        Rectangle()
-                            .fill(selectedBackground.quoteTextColor.opacity(0.5))
-                            .frame(width: 3)
-                        , alignment: .leading
-                    )
-                    
-                    // Book details
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(book.author)
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(selectedBackground.bookAuthorColor)
-                        
-                        Text(book.title)
-                            .font(.system(size: 13, weight: .regular))
-                            .foregroundColor(selectedBackground.bookTitleColor)
-                    }
-                    .frame(width: 452, alignment: .leading)
-                }
-                .padding(.all, 24)
-                .frame(width: 500)
-            }
-            .padding(.top, 20)
-        }
-        .frame(width: 500)
-        .transition(.opacity)
-        .id(selectedBackground)
-    }
-    
     private var actionButtonsView: some View {
         VStack {
             Button(action: {
@@ -381,13 +285,18 @@ struct QuoteShareView: View {
         let exportHeight = max(280.0, quoteContentSize.height + 24.0)
         let exportWidth: CGFloat = 500.0
         
-        let parsedQuote = ShareQuoteManager.parseQuote(book.quotes[selectedQuoteIndex])
+        // Create filename from book title and page number
+        let pageText = currentQuote.page != nil ? ", p.\(currentQuote.page!)" : ""
+        let filename = "\(book.title)\(pageText)"
         
-        let exportView = createExportView(parsedQuote: parsedQuote, width: exportWidth, height: exportHeight)
-        
-        // Create filename from the quote
-        let quoteWords = parsedQuote.quote.split(separator: " ").prefix(5).joined(separator: " ")
-        let filename = "\(quoteWords)..."
+        let exportView = QuoteCard(
+            quote: currentQuote.quote,
+            attribution: currentQuote.attribution,
+            book: book,
+            style: selectedBackground,
+            fixedSize: CGSize(width: exportWidth, height: exportHeight)
+        )
+            .environment(\.colorScheme, .light)
         
         ShareQuoteManager.exportQuoteAsPNG(
             exportView: exportView,
@@ -396,64 +305,5 @@ struct QuoteShareView: View {
             filename: filename,
             scaleFactor: 2.0
         )
-    }
-    
-    private func createExportView(parsedQuote: (quote: String, attribution: String?), width: CGFloat, height: CGFloat) -> some View {
-        ZStack {
-            selectedBackground.backgroundColor
-            
-            VStack(alignment: .leading, spacing: 0) {
-                // Quote icon
-                Image(systemName: "quote.opening")
-                    .font(.system(size: 24))
-                    .foregroundColor(selectedBackground.quoteTextColor.opacity(0.3))
-                    .padding(.bottom, 4)
-                    .padding(.leading, 17)
-                
-                VStack(alignment: .leading, spacing: 16) {
-                    // Quote text and attribution
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text(parsedQuote.quote)
-                            .font(.custom("Merriweather-Regular", size: 18))
-                            .foregroundColor(selectedBackground.quoteTextColor)
-                            .lineSpacing(7)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding(.leading, 16)
-                            .frame(width: width - 48, alignment: .leading)
-                        
-                        if let attribution = parsedQuote.attribution, !attribution.isEmpty {
-                            Text("— \(attribution)")
-                                .font(.custom("Merriweather-Italic", size: 16))
-                                .foregroundColor(selectedBackground.attributionTextColor)
-                                .padding(.leading, 16)
-                                .frame(width: width - 48, alignment: .leading)
-                        }
-                    }
-                    .overlay(
-                        Rectangle()
-                            .fill(selectedBackground.quoteTextColor.opacity(0.5))
-                            .frame(width: 3)
-                        , alignment: .leading
-                    )
-                    
-                    // Book details
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(book.author)
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(selectedBackground.bookAuthorColor)
-                        
-                        Text(book.title)
-                            .font(.system(size: 13, weight: .regular))
-                            .foregroundColor(selectedBackground.bookTitleColor)
-                    }
-                    .frame(width: width - 48, alignment: .leading)
-                }
-                .padding(.all, 24)
-                .frame(width: width)
-            }
-            .padding(.top, 20)
-        }
-        .frame(width: width, height: height)
-        .environment(\.colorScheme, .light)
     }
 }
