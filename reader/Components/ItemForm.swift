@@ -12,11 +12,35 @@ struct ItemForm: View {
     let iconName: String
     let onSave: () -> Void
     let onCancel: () -> Void
+    let isMultiline: Bool
+    
+    init(text: Binding<String>,
+         supplementaryField: Binding<String?>,
+         attributedField: Binding<String?>,
+         textLabel: String,
+         iconName: String,
+         onSave: @escaping () -> Void,
+         onCancel: @escaping () -> Void,
+         isMultiline: Bool) {
+        self._text = text
+        self._supplementaryField = supplementaryField
+        self._attributedField = attributedField
+        self.textLabel = textLabel
+        self.iconName = iconName
+        self.onSave = onSave
+        self.onCancel = onCancel
+        self.isMultiline = isMultiline
+    }
     
     var body: some View {
         VStack(spacing: 16) {
             VStack(spacing: 12) {
-                textInputSection
+                if isMultiline {
+                    multilineTextInputSection
+                } else {
+                    singleLineTextInputSection
+                }
+                
                 if supplementaryField != nil {
                     PageNumberInput(pageNumber: Binding(
                         get: { supplementaryField ?? "" },
@@ -42,8 +66,9 @@ struct ItemForm: View {
         )
     }
     
+    // Multi-line text input
     @ViewBuilder
-    private var textInputSection: some View {
+    private var multilineTextInputSection: some View {
         HStack(alignment: .top, spacing: 8) {
             Image(systemName: iconName)
                 .frame(width: 20, height: 20)
@@ -61,6 +86,7 @@ struct ItemForm: View {
                     .font(.body)
                     .lineSpacing(4)
                     .padding(6)
+                    .frame(height: 100)
                     .background(RoundedRectangle(cornerRadius: 6)
                         .fill(Color(NSColor.controlBackgroundColor)))
                     .overlay(
@@ -72,7 +98,38 @@ struct ItemForm: View {
                     .scrollContentBackground(.hidden)
                     .scrollIndicators(.visible)
             }
-            .frame(minHeight: 60, maxHeight: max(120, CGFloat(text.split(separator: "\n").count * 20)))
+            .frame(height: 100)
+        }
+    }
+    
+    // Single-line text input
+    @ViewBuilder
+    private var singleLineTextInputSection: some View {
+        HStack(alignment: .center, spacing: 8) {
+            Image(systemName: iconName)
+                .frame(width: 20, height: 20)
+                .foregroundColor(.secondary)
+            
+            ZStack(alignment: .leading) {
+                if text.isEmpty {
+                    Text(textLabel)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 6)
+                        .allowsHitTesting(false)
+                }
+                
+                TextField("", text: $text)
+                    .textFieldStyle(PlainTextFieldStyle())
+                    .padding(8)
+                    .background(RoundedRectangle(cornerRadius: 6)
+                        .fill(Color(NSColor.controlBackgroundColor)))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(isFocusedOnText ? Color.accentColor : Color(NSColor.separatorColor), lineWidth: 2)
+                    )
+                    .focused($isFocusedOnText)
+                    .animation(.easeInOut(duration: 0.2), value: isFocusedOnText)
+            }
         }
     }
     

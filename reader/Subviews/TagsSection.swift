@@ -100,7 +100,8 @@ struct TagsSection: View {
             textLabel: "Enter a tag here",
             iconName: "tag",
             onSave: handleAddTag,
-            onCancel: { withAnimation { isAddingTag = false } }
+            onCancel: { withAnimation { isAddingTag = false } },
+            isMultiline: false
         )
         .onSubmit {
             handleAddTag()

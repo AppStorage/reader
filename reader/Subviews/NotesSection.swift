@@ -131,7 +131,8 @@ struct NotesSection: View {
             textLabel: "Enter a note here",
             iconName: "note.text",
             onSave: saveNote,
-            onCancel: resetAddNoteForm
+            onCancel: resetAddNoteForm,
+            isMultiline: true
         )
     }
     
