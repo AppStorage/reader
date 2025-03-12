@@ -33,21 +33,20 @@ struct EditBookDetails: View {
     }
     
     var body: some View {
-        ZStack {
-            VStack(spacing: 16) {
-                header
-                Divider()
-                formFields
-                Divider()
-                actionButtons
-            }
-            .frame(width: 450)
-            .padding()
-            .alert("Invalid Data", isPresented: $showValidationAlert) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text(validationMessage)
-            }
+        VStack(spacing: 20) {
+            header
+            Divider()
+            formFields
+            Divider()
+            actionButtons
+        }
+        .frame(width: 450)
+        .padding(24)
+        .background(Color(.windowBackgroundColor))
+        .alert("Invalid Data", isPresented: $showValidationAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(validationMessage)
         }
     }
     
@@ -60,7 +59,7 @@ struct EditBookDetails: View {
                 .foregroundColor(.primary)
             Spacer()
         }
-        .padding(.top, 20)
+        .padding(.top, 8)
     }
     
     private var formFields: some View {
@@ -88,10 +87,13 @@ struct EditBookDetails: View {
             Text("Description")
                 .font(.body)
                 .foregroundColor(.primary)
+                .frame(width: 120, alignment: .leading)
             
             TextEditor(text: $description)
-                .frame(height: 120)
-                .padding(4)
+                .frame(height: 100)
+                .padding(12)
+                .font(.system(size: 12))
+                .lineSpacing(1.5)
                 .background(
                     RoundedRectangle(cornerRadius: 6)
                         .fill(Color(nsColor: .controlBackgroundColor))
@@ -119,6 +121,7 @@ struct EditBookDetails: View {
             .disabled(title.isEmpty || author.isEmpty)
             Spacer()
         }
+        .padding(.top, 8)
     }
     
     private func fieldRow(label: String, placeholder: String, text: Binding<String>, field: Field, required: Bool = false) -> some View {
@@ -137,6 +140,7 @@ struct EditBookDetails: View {
             TextField(placeholder, text: text)
                 .padding(.vertical, 6)
                 .padding(.horizontal, 10)
+                .lineSpacing(1.3)
                 .background(
                     RoundedRectangle(cornerRadius: 6)
                         .fill(Color(nsColor: .controlBackgroundColor))

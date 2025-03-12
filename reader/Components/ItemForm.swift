@@ -12,7 +12,6 @@ struct ItemForm: View {
     let iconName: String
     let onSave: () -> Void
     let onCancel: () -> Void
-    let isSingleLine: Bool
     
     var body: some View {
         VStack(spacing: 16) {
@@ -25,26 +24,7 @@ struct ItemForm: View {
                     ))
                 }
                 if attributedField != nil {
-                    HStack(alignment: .center, spacing: 8) {
-                        Image(systemName: "person")
-                            .frame(width: 20, height: 20)
-                            .foregroundColor(.secondary)
-                        
-                        TextField("Attributed to", text: Binding(
-                            get: { attributedField ?? "" },
-                            set: { attributedField = $0.isEmpty ? nil : $0 }
-                        ))
-                        .textFieldStyle(PlainTextFieldStyle())
-                        .padding(8)
-                        .background(RoundedRectangle(cornerRadius: 6)
-                            .fill(Color(NSColor.controlBackgroundColor)))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(isFocusedOnAttributedField ? Color.accentColor : Color(NSColor.separatorColor), lineWidth: 2)
-                        )
-                        .focused($isFocusedOnAttributedField)
-                        .animation(.easeInOut(duration: 0.2), value: isFocusedOnAttributedField)
-                    }
+                    attributionField
                 }
             }
             
@@ -64,17 +44,23 @@ struct ItemForm: View {
     
     @ViewBuilder
     private var textInputSection: some View {
-        HStack(alignment: .center, spacing: 8) {
-            // Icon
+        HStack(alignment: .top, spacing: 8) {
             Image(systemName: iconName)
                 .frame(width: 20, height: 20)
                 .foregroundColor(.secondary)
+                .padding(.top, 4)
             
-            if isSingleLine {
-                // Single-line
-                TextField(textLabel, text: $text)
-                    .textFieldStyle(PlainTextFieldStyle())
-                    .padding(8)
+            ZStack(alignment: .topLeading) {
+                if text.isEmpty {
+                    Text(textLabel)
+                        .foregroundColor(.secondary)
+                        .padding(EdgeInsets(top: 12, leading: 6, bottom: 0, trailing: 0))
+                        .allowsHitTesting(false)
+                }
+                TextEditor(text: $text)
+                    .font(.body)
+                    .lineSpacing(4)
+                    .padding(6)
                     .background(RoundedRectangle(cornerRadius: 6)
                         .fill(Color(NSColor.controlBackgroundColor)))
                     .overlay(
@@ -83,32 +69,34 @@ struct ItemForm: View {
                     )
                     .focused($isFocusedOnText)
                     .animation(.easeInOut(duration: 0.2), value: isFocusedOnText)
-            } else {
-                // Multi-line
-                ZStack(alignment: .topLeading) {
-                    if text.isEmpty {
-                        Text(textLabel)
-                            .foregroundColor(.secondary)
-                            .padding(EdgeInsets(top: 12, leading: 6, bottom: 0, trailing: 0))
-                            .allowsHitTesting(false)
-                    }
-                    TextEditor(text: $text)
-                        .font(.body)
-                        .lineSpacing(4)
-                        .padding(6)
-                        .background(RoundedRectangle(cornerRadius: 6)
-                            .fill(Color(NSColor.controlBackgroundColor)))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(isFocusedOnText ? Color.accentColor : Color(NSColor.separatorColor), lineWidth: 2)
-                        )
-                        .focused($isFocusedOnText)
-                        .animation(.easeInOut(duration: 0.2), value: isFocusedOnText)
-                        .scrollDisabled(text.split(separator: "\n").count < 6)
-                        .scrollIndicators(.hidden)
-                }
-                .frame(minHeight: 60, maxHeight: max(120, CGFloat(text.split(separator: "\n").count * 20)))
+                    .scrollContentBackground(.hidden)
+                    .scrollIndicators(.visible)
             }
+            .frame(minHeight: 60, maxHeight: max(120, CGFloat(text.split(separator: "\n").count * 20)))
+        }
+    }
+    
+    @ViewBuilder
+    private var attributionField: some View {
+        HStack(alignment: .center, spacing: 8) {
+            Image(systemName: "person")
+                .frame(width: 20, height: 20)
+                .foregroundColor(.secondary)
+            
+            TextField("Attributed to", text: Binding(
+                get: { attributedField ?? "" },
+                set: { attributedField = $0.isEmpty ? nil : $0 }
+            ))
+            .textFieldStyle(PlainTextFieldStyle())
+            .padding(8)
+            .background(RoundedRectangle(cornerRadius: 6)
+                .fill(Color(NSColor.controlBackgroundColor)))
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(isFocusedOnAttributedField ? Color.accentColor : Color(NSColor.separatorColor), lineWidth: 2)
+            )
+            .focused($isFocusedOnAttributedField)
+            .animation(.easeInOut(duration: 0.2), value: isFocusedOnAttributedField)
         }
     }
     

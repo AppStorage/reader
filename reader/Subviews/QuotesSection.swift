@@ -141,8 +141,7 @@ struct QuotesSection: View {
             textLabel: "Enter a quote here",
             iconName: "text.quote",
             onSave: saveQuote,
-            onCancel: resetAddQuoteForm,
-            isSingleLine: false
+            onCancel: resetAddQuoteForm
         )
     }
     

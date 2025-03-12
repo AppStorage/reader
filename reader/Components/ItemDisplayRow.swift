@@ -34,8 +34,7 @@ struct ItemDisplayRow: View {
                 textLabel: includeQuotes ? "Edit quote" : "Edit note",
                 iconName: includeQuotes ? "text.quote" : "note.text",
                 onSave: onSave ?? {},
-                onCancel: onCancel ?? {},
-                isSingleLine: false
+                onCancel: onCancel ?? {}
             )
             .transition(.asymmetric(
                 insertion: .opacity.animation(.easeIn(duration: 0.2)),
