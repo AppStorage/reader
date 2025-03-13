@@ -7,7 +7,7 @@ class AppState: ObservableObject {
     @AppStorage("updateCheckFrequency") var updateCheckFrequency: Double = 604800.0 // Default to weekly in seconds
     
     @Published var isCheckingForUpdates: Bool = false
-    @Published var alertType: AlertType?
+    @Published var alertType: AlertTypes?
     @Published var latestVersion: String?
     @Published var downloadURL: URL?
     @Published var lastCheckStatus: UpdateCheckStatus = .unknown

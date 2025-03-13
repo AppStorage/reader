@@ -35,12 +35,12 @@ struct AboutView: View {
                 
                 // Buttons
                 HStack(spacing: 20) {
-                    AboutButton(
+                    AboutButtons(
                         title: "GitHub",
                         systemImage: "link",
                         url: "https://github.com/chippokiddo/reader"
                     )
-                    AboutButton(
+                    AboutButtons(
                         title: "Support",
                         systemImage: "cup.and.saucer",
                         url: "https://www.buymeacoffee.com/chippo"

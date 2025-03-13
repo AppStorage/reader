@@ -1,6 +1,6 @@
 import Foundation
 
-enum EmptyStateType {
+enum EmptyStateTypes {
     case list // Generic list (default)
     case search // No search results
     case deleted // No deleted books

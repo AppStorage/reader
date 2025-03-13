@@ -1,7 +1,9 @@
 import SwiftUI
 
 enum QuoteBackgroundStyle: String, CaseIterable, Identifiable {
-    case light, sepia, dark
+    case light
+    case sepia
+    case dark
     
     var id: String { self.rawValue }
     

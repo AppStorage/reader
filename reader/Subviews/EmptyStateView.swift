@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct EmptyStateView: View {
-    let type: EmptyStateType
+    let type: EmptyStateTypes
     var minWidth: CGFloat? = nil
     var selectedBooks: [BookData] = []
     var viewModel: ContentViewModel

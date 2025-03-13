@@ -3,6 +3,7 @@ import SwiftUI
 struct CollapsibleHeader: View {
     @Binding var isCollapsed: Bool
     @Binding var isEditing: Bool
+    
     var title: String
     var onToggleCollapse: () -> Void
     var onEditToggle: () -> Void

@@ -1,5 +1,16 @@
 import SwiftUI
 
+enum Field: Hashable {
+    case title
+    case author
+    case genre
+    case series
+    case isbn
+    case publisher
+    case published
+    case description
+}
+
 struct AddView: View {
     @EnvironmentObject var dataManager: DataManager
     @EnvironmentObject var appState: AppState

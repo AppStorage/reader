@@ -1,11 +1,13 @@
 import SwiftUI
 
-struct AboutButton: View {
+struct AboutButtons: View {
+    @State private var isHovered: Bool = false
+    
     let title: String
     let systemImage: String
+    
     var url: String? = nil
     var action: (() -> Void)? = nil
-    @State private var isHovered: Bool = false
     
     var body: some View {
         Button(action: {

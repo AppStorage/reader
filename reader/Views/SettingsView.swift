@@ -2,10 +2,12 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var appState: AppState
-    var checkForUpdates: () -> Void
+    
+    @Environment(\.colorScheme) private var colorScheme
     
     @State private var isCheckingManually = false
-    @Environment(\.colorScheme) private var colorScheme
+    
+    var checkForUpdates: () -> Void
     
     var body: some View {
         Form {

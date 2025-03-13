@@ -19,7 +19,7 @@ struct BookActionButton: View {
         }
     }
     
-    // Recover Button
+    // MARK: Recover Button
     private func recoverButton(for books: [BookData]) -> some View {
         let label = books.count == 1 ? "Recover Book" : "Recover Books"
         
@@ -34,7 +34,7 @@ struct BookActionButton: View {
         .accessibilityLabel(label)
     }
     
-    // Delete Button
+    // MARK: Delete Button
     private func deleteButton(for books: [BookData], isPermanent: Bool) -> some View {
         let label = isPermanent
         ? (books.count == 1 ? "Permanently Delete Book" : "Permanently Delete Books")

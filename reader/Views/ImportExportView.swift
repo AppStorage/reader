@@ -17,7 +17,7 @@ struct ImportExportView: View {
             
             VStack(spacing: 20) {
                 HStack(spacing: 12) {
-                    AboutButton(
+                    AboutButtons(
                         title: "Import Books...",
                         systemImage: "square.and.arrow.down",
                         action: {

@@ -158,10 +158,10 @@ struct MiddlePanelView: View {
     
     // MARK: Empty State Views
     private var emptyStateView: some View {
-        EmptyStateView(type: emptyStateType, viewModel: viewModel)
+        EmptyStateView(type: emptyStateTypes, viewModel: viewModel)
     }
     
-    private var emptyStateType: EmptyStateType {
+    private var emptyStateTypes: EmptyStateTypes {
         if viewModel.selectedCollection != nil {
             return .collection
         } else if viewModel.searchQuery.isEmpty {

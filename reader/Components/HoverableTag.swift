@@ -1,12 +1,13 @@
 import SwiftUI
 
 struct HoverableTag: View {
+    @State private var isHovered: Bool = false
+    
     let tag: String
     let clearAction: () -> Void
+    
     var backgroundColor: Color = .accentColor
     var enableHoverEffect: Bool = true
-    
-    @State private var isHovered: Bool = false
     
     var body: some View {
         HStack(spacing: 4) {

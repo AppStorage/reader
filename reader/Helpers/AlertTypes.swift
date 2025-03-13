@@ -1,6 +1,32 @@
 import SwiftUI
 
-extension AlertType {
+enum AlertTypes: Identifiable {
+    case newUpdateAvailable
+    case upToDate
+    case error(String)
+    case noResults(String)
+    case softDelete(books: [BookData])
+    case permanentDelete(books: [BookData])
+    case importSuccess
+    case exportSuccess
+    
+    var id: String {
+        switch self {
+        case .newUpdateAvailable: return "newUpdateAvailable"
+        case .upToDate: return "upToDate"
+        case .error(let message): return "error-\(message)"
+        case .noResults(let message): return "noResults-\(message)"
+        case .softDelete(let books):
+            return "softDelete-\(books.map { $0.id.uuidString }.joined(separator: ","))"
+        case .permanentDelete(let books):
+            return "permanentDelete-\(books.map { $0.id.uuidString }.joined(separator: ","))"
+        case .importSuccess: return "importSuccess"
+        case .exportSuccess: return "exportSuccess"
+        }
+    }
+}
+
+extension AlertTypes {
     @MainActor func createAlert(appState: AppState) -> Alert {
         switch self {
         case .newUpdateAvailable:
@@ -72,32 +98,6 @@ extension AlertType {
                 message: Text("Books have been exported successfully."),
                 dismissButton: .default(Text("OK"))
             )
-        }
-    }
-}
-
-enum AlertType: Identifiable {
-    case newUpdateAvailable
-    case upToDate
-    case error(String)
-    case noResults(String)
-    case softDelete(books: [BookData])
-    case permanentDelete(books: [BookData])
-    case importSuccess
-    case exportSuccess
-    
-    var id: String {
-        switch self {
-        case .newUpdateAvailable: return "newUpdateAvailable"
-        case .upToDate: return "upToDate"
-        case .error(let message): return "error-\(message)"
-        case .noResults(let message): return "noResults-\(message)"
-        case .softDelete(let books):
-            return "softDelete-\(books.map { $0.id.uuidString }.joined(separator: ","))"
-        case .permanentDelete(let books):
-            return "permanentDelete-\(books.map { $0.id.uuidString }.joined(separator: ","))"
-        case .importSuccess: return "importSuccess"
-        case .exportSuccess: return "exportSuccess"
         }
     }
 }
