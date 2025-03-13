@@ -2,9 +2,10 @@ import SwiftUI
 import SwiftData
 
 struct EditBookDetails: View {
+    @Bindable var book: BookData
+    
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @Bindable var book: BookData
     
     @State private var title: String
     @State private var author: String

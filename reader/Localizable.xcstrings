@@ -681,18 +681,18 @@
         }
       }
     },
-    "Edit Details" : {
+    "Enter name" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit Details"
+            "value" : "Enter name"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Editar Detalles"
+            "value" : "Ingresa el nombre"
           }
         }
       }
@@ -1338,20 +1338,7 @@
       }
     },
     "reader" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "reader"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "reader"
-          }
-        }
-      }
+      "shouldTranslate" : false
     },
     "reader %@ is available. Would you like to download it?" : {
       "localizations" : {

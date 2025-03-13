@@ -48,9 +48,9 @@ struct DetailView: View {
                 Button(action: {
                     isEditingDetails = true
                 }) {
-                    Image(systemName: "square.and.pencil")
-                        .help("Edit Details")
-                        .accessibilityLabel("Edit Details")
+                    Label("Edit", systemImage: "square.and.pencil")
+                        .help("Edit Book Details")
+                        .accessibilityLabel("Edit Book Details")
                 }
             }
             ToolbarItem(placement: .automatic) {

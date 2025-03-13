@@ -10,65 +10,125 @@ struct AddCollectionSheet: View {
     var onCancel: () -> Void
     
     var body: some View {
-        VStack(spacing: 12) {
-            Text("Add New Collection")
-                .font(.headline)
-                .padding(.top, 8)
+        VStack(spacing: 0) {
+            headerView
             
-            TextField("Collection Name", text: $collectionName)
-                .textFieldStyle(.roundedBorder)
-                .padding(.horizontal, 12)
-                .onChange(of: collectionName) {
-                    typingTimer?.invalidate()
-                    typingTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
-                        DispatchQueue.main.async {
-                            _ = validateName()
+            Divider()
+                .padding(.horizontal)
+                .padding(.bottom, 12)
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Collection Name")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.secondary)
+                
+                HStack(spacing: 8) {
+                    Image(systemName: "folder.badge.plus")
+                        .foregroundColor(.secondary)
+                        .font(.system(size: 16))
+                    
+                    TextField("Enter name", text: $collectionName)
+                        .font(.system(size: 14))
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .onChange(of: collectionName) {
+                            typingTimer?.invalidate()
+                            typingTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
+                                DispatchQueue.main.async {
+                                    _ = validateName()
+                                }
+                            }
                         }
-                    }
+                        .onSubmit {
+                            if validateName() {
+                                onAdd()
+                            }
+                        }
                 }
-                .onSubmit {
-                    if validateName() {
-                        onAdd()
-                    }
-                }
-            
-            if let errorMessage = errorMessage {
-                Label {
-                    Text(errorMessage)
-                        .font(.caption)
-                        .foregroundColor(.yellow)
-                } icon: {
-                    Image(systemName: "exclamationmark.circle")
-                        .foregroundColor(.yellow)
-                }
-                .padding(8)
-                .background(Color.yellow.opacity(0.1))
-                .cornerRadius(8)
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .animation(.easeInOut, value: errorMessage)
-            }
-            
-            HStack {
-                Button("Cancel") {
-                    onCancel()
-                }
-                .keyboardShortcut(.cancelAction)
                 
-                Spacer()
-                
-                Button("Add") {
-                    if validateName() {
-                        onAdd()
-                    }
+                if let errorMessage = errorMessage {
+                    validationMessageView(message: errorMessage)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
                 }
-                .keyboardShortcut(.defaultAction)
-                .disabled(errorMessage != nil || collectionName.isEmpty)
             }
-            .padding(.top, 8)
+            .padding(.horizontal, 20)
+            .animation(.spring(duration: 0.3), value: errorMessage)
+            
+            Spacer(minLength: 20)
+            
+            actionButtonsView
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
         }
-        .padding()
-        .frame(width: 300, height: 200)
-        .animation(.easeInOut, value: errorMessage)
+        .frame(width: 350, height: 225)
+        .background(Color(.windowBackgroundColor))
+        .cornerRadius(12)
+    }
+    
+    private var headerView: some View {
+        HStack {
+            Text("Add New Collection")
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .foregroundColor(.primary)
+            
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 25)
+        .padding(.bottom, 14)
+    }
+    
+    private func validationMessageView(message: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "exclamationmark.circle")
+                .foregroundColor(.yellow)
+            
+            Text(message)
+                .font(.system(size: 13))
+                .foregroundColor(.primary.opacity(0.8))
+            
+            Spacer()
+        }
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.yellow.opacity(0.1))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.yellow.opacity(0.3), lineWidth: 0.5)
+                )
+        )
+    }
+    
+    private var actionButtonsView: some View {
+        HStack {
+            Button(action: {
+                onCancel()
+            }) {
+                Text("Cancel")
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundColor(.primary)
+                    .frame(minWidth: 80)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.regular)
+            .keyboardShortcut(.cancelAction)
+            
+            Spacer()
+            
+            Button(action: {
+                if validateName() {
+                    onAdd()
+                }
+            }) {
+                Text("Add")
+                    .font(.system(size: 13, weight: .semibold))
+                    .frame(minWidth: 80)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.regular)
+            .keyboardShortcut(.defaultAction)
+            .disabled(errorMessage != nil || collectionName.isEmpty)
+        }
     }
     
     // MARK: Validation
