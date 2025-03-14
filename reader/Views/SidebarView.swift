@@ -43,15 +43,16 @@ struct SidebarView: View {
                 }
             }
             .sheet(isPresented: $isRenamingCollection) {
-                RenameCollectionSheet(
+                CollectionSheet(
+                    mode: .rename,
                     collectionName: $newCollectionName,
-                    existingCollectionNames: dataManager.collections.map {
-                        $0.name
-                    },
-                    onRename: {
-                        guard collectionToRename != nil else { return }
-                        viewModel.renameSelectedCollection(
-                            to: newCollectionName)
+                    existingCollectionNames: dataManager.collections.map { $0.name },
+                    originalName: collectionToRename?.name,
+                    onAction: {
+                        guard let collection = collectionToRename else { return }
+                        dataManager.renameCollection(collection, to: newCollectionName)
+                        viewModel.refreshAfterAction()
+                        overlayManager.showOverlay(message: "Renamed collection to \(newCollectionName)")
                         isRenamingCollection = false
                     },
                     onCancel: {
@@ -60,12 +61,11 @@ struct SidebarView: View {
                 )
             }
             .sheet(isPresented: $isAddingCollection) {
-                AddCollectionSheet(
+                CollectionSheet(
+                    mode: .add,
                     collectionName: $newCollectionName,
-                    existingCollectionNames: dataManager.collections.map {
-                        $0.name
-                    },
-                    onAdd: {
+                    existingCollectionNames: dataManager.collections.map { $0.name },
+                    onAction: {
                         addNewCollection()
                     },
                     onCancel: {
@@ -74,6 +74,7 @@ struct SidebarView: View {
                     }
                 )
             }
+            
             settingsButton
         }
     }
@@ -160,45 +161,61 @@ struct SidebarView: View {
             return false
         }
         
-        let existingBooks = items.filter { item in
-            targetCollection.books.contains { book in
-                book.title == item.title && book.author == item.author
-            }
-        }
-        
-        if !existingBooks.isEmpty {
-            if existingBooks.count == 1 {
-                overlayManager.showOverlay(
-                    message:
-                        "\"\(existingBooks[0].title)\" is already in \(collection.name)"
-                )
-            } else {
-                overlayManager.showOverlay(
-                    message:
-                        "\(existingBooks.count) books are already in \(collection.name)"
-                )
-            }
-            return false
-        }
-        
+        // Find the corresponding BookData objects
         let booksToAdd = items.compactMap { item in
             viewModel.books.first {
                 $0.title == item.title && $0.author == item.author
             }
         }
         
-        dataManager.addBookToCollection(booksToAdd, to: targetCollection)
-        
-        if booksToAdd.count == 1, let firstBook = booksToAdd.first {
-            overlayManager.showOverlay(
-                message: "Added \"\(firstBook.title)\" to \(collection.name)")
-        } else {
-            overlayManager.showOverlay(
-                message: "Added \(booksToAdd.count) books to \(collection.name)"
-            )
+        // Check which books are already in this collection
+        let existingBooks = booksToAdd.filter { book in
+            targetCollection.books.contains { existingBook in
+                existingBook.id == book.id
+            }
         }
         
-        return true
+        // Only add books that aren't already in the collection
+        let newBooks = booksToAdd.filter { book in
+            !existingBooks.contains { existingBook in
+                existingBook.id == book.id
+            }
+        }
+        
+        if existingBooks.isEmpty && newBooks.isEmpty {
+            overlayManager.showOverlay(message: "No books to add to \(collection.name)")
+            return false
+        }
+        
+        if !existingBooks.isEmpty {
+            if existingBooks.count == 1 {
+                overlayManager.showOverlay(
+                    message: "\"\(existingBooks[0].title)\" is already in \(collection.name)"
+                )
+            } else {
+                overlayManager.showOverlay(
+                    message: "\(existingBooks.count) books are already in \(collection.name)"
+                )
+            }
+        }
+        
+        // Only proceed if there are new books to add
+        if !newBooks.isEmpty {
+            dataManager.addBookToCollection(newBooks, to: targetCollection)
+            
+            if newBooks.count == 1 {
+                overlayManager.showOverlay(
+                    message: "Added \"\(newBooks[0].title)\" to \(collection.name)"
+                )
+            } else {
+                overlayManager.showOverlay(
+                    message: "Added \(newBooks.count) books to \(collection.name)"
+                )
+            }
+            return true
+        }
+        
+        return !existingBooks.isEmpty
     }
     
     // MARK: Helpers

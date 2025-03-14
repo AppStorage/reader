@@ -4,7 +4,8 @@ import SwiftData
 @Model
 class BookCollection: Identifiable {
     @Attribute(.unique) var id: UUID = UUID()
-    @Relationship(deleteRule: .cascade) var books: [BookData] = []
+    
+    @Relationship(deleteRule: .nullify) var books: [BookData] = []
     
     var name: String
     

@@ -1,13 +1,55 @@
 import SwiftUI
 
-struct RenameCollectionSheet: View {
+enum CollectionSheetMode {
+    case add
+    case rename
+    
+    var title: String {
+        switch self {
+        case .add: return "Add New Collection"
+        case .rename: return "Rename Collection"
+        }
+    }
+    
+    var iconName: String {
+        switch self {
+        case .add: return "folder.badge.plus"
+        case .rename: return "folder"
+        }
+    }
+    
+    var actionButtonText: String {
+        switch self {
+        case .add: return "Add"
+        case .rename: return "Save"
+        }
+    }
+}
+
+struct CollectionSheet: View {
+    let mode: CollectionSheetMode
     @Binding var collectionName: String
     @State private var errorMessage: String?
     @State private var typingTimer: Timer?
     
     var existingCollectionNames: [String]
-    var onRename: () -> Void
+    var originalName: String? // Only used in rename mode
+    var onAction: () -> Void
     var onCancel: () -> Void
+    
+    init(mode: CollectionSheetMode,
+         collectionName: Binding<String>,
+         existingCollectionNames: [String],
+         originalName: String? = nil,
+         onAction: @escaping () -> Void,
+         onCancel: @escaping () -> Void) {
+        self.mode = mode
+        self._collectionName = collectionName
+        self.existingCollectionNames = existingCollectionNames
+        self.originalName = originalName
+        self.onAction = onAction
+        self.onCancel = onCancel
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -23,7 +65,7 @@ struct RenameCollectionSheet: View {
                     .foregroundColor(.secondary)
                 
                 HStack(spacing: 8) {
-                    Image(systemName: "folder")
+                    Image(systemName: mode.iconName)
                         .foregroundColor(.secondary)
                         .font(.system(size: 16))
                     
@@ -40,7 +82,7 @@ struct RenameCollectionSheet: View {
                         }
                         .onSubmit {
                             if validateName() {
-                                onRename()
+                                onAction()
                             }
                         }
                 }
@@ -66,7 +108,7 @@ struct RenameCollectionSheet: View {
     
     private var headerView: some View {
         HStack {
-            Text("Rename Collection")
+            Text(mode.title)
                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                 .foregroundColor(.primary)
             
@@ -117,10 +159,10 @@ struct RenameCollectionSheet: View {
             
             Button(action: {
                 if validateName() {
-                    onRename()
+                    onAction()
                 }
             }) {
-                Text("Save")
+                Text(mode.actionButtonText)
                     .font(.system(size: 13, weight: .semibold))
                     .frame(minWidth: 80)
             }
@@ -136,6 +178,11 @@ struct RenameCollectionSheet: View {
         if collectionName.isEmpty {
             errorMessage = "Name cannot be empty"
             return false
+        }
+        else if let originalName = originalName, collectionName.lowercased() == originalName.lowercased() {
+            // In rename mode, allow the original name
+            errorMessage = nil
+            return true
         }
         else if existingCollectionNames.contains(where: { $0.lowercased() == collectionName.lowercased() }) {
             errorMessage = "A collection with this name already exists"

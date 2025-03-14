@@ -94,24 +94,22 @@ struct MiddlePanelView: View {
             if let selectedCollection = viewModel.selectedCollection {
                 // Actions when viewing a collection
                 collectionActions(for: book, in: selectedCollection)
-            } else if allSelectedBooksAreDeleted() {
+            } else if book.status == .deleted {
                 // Actions for deleted books
-                deletedBookActions(for: selectedBooks)
+                deletedBookActions(for: [book])
             } else {
                 // Actions for active books
-                activeBookActions(for: selectedBooks)
+                activeBookActions(for: [book])
             }
         }
     }
     
-    // Collection Actions
     private func collectionActions(for book: BookData, in collection: BookCollection) -> some View {
         Button("Remove from Collection") {
             viewModel.removeBookFromSelectedCollection(book)
         }
     }
     
-    // Deleted Book Actions
     private func deletedBookActions(for books: [BookData]) -> some View {
         Group {
             Button("Restore") {
@@ -125,7 +123,6 @@ struct MiddlePanelView: View {
         }
     }
     
-    // Active Book Actions
     private func activeBookActions(for books: [BookData]) -> some View {
         Group {
             Button("Mark as Unread") {
@@ -151,7 +148,7 @@ struct MiddlePanelView: View {
         viewModel.updateBookStatus(for: books, to: status)
     }
     
-    // MARK: Computed Property for Selected Books
+    // MARK: Selected Books
     private var selectedBooks: [BookData] {
         viewModel.displayedBooks.filter { selectedBookIDs.contains($0.id) }
     }

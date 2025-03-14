@@ -137,22 +137,6 @@
         }
       }
     },
-    "Add New Collection" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add New Collection"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Agregar Nueva Colección"
-          }
-        }
-      }
-    },
     "Add some highlights to this book to create quotes" : {
       "localizations" : {
         "en" : {

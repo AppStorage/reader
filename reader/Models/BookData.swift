@@ -16,6 +16,8 @@ class BookData: Identifiable {
     var dateFinished: Date?
     var bookDescription: String?
     
+    @Relationship(inverse: \BookCollection.books) var collections: [BookCollection] = []
+    
     @Attribute private var statusRawValue: String
     var status: ReadingStatus {
         get { ReadingStatus(rawValue: statusRawValue) ?? .unread }

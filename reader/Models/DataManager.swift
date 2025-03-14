@@ -94,34 +94,28 @@ final class DataManager: ObservableObject {
     }
     
     func removeCollection(_ collection: BookCollection) {
-        if let index = collections.firstIndex(where: { $0.id == collection.id })
-        {
-            collections[index].books.forEach { book in
-                removeBookFromCollection(book, from: collection)
-            }
-        }
         modelContainer.mainContext.delete(collection)
         saveChanges()
     }
     
-    func addBookToCollection(_ books: [BookData], to collection: BookCollection)
-    {
-        if let index = collections.firstIndex(where: { $0.id == collection.id })
-        {
-            collections[index].books.append(contentsOf: books)
+    func addBookToCollection(_ books: [BookData], to collection: BookCollection) {
+        // Check for books already in the collection
+        let existingBookIDs = Set(collection.books.map { $0.id })
+        
+        // Only add books that aren't already in the collection
+        let booksToAdd = books.filter { !existingBookIDs.contains($0.id) }
+        
+        if !booksToAdd.isEmpty {
+            collection.books.append(contentsOf: booksToAdd)
             saveChanges()
         }
     }
     
-    func removeBookFromCollection(
-        _ book: BookData, from collection: BookCollection
-    ) {
-        if let index = collections.firstIndex(where: { $0.id == collection.id })
-        {
-            collections[index].books.removeAll { $0.id == book.id }
-            saveChanges()
-        }
+    func removeBookFromCollection(_ book: BookData, from collection: BookCollection) {
+        collection.books.removeAll { $0.id == book.id }
+        saveChanges()
     }
+    
     
     func renameCollection(_ collection: BookCollection, to newName: String) {
         if let index = collections.firstIndex(where: { $0.id == collection.id })
@@ -134,17 +128,22 @@ final class DataManager: ObservableObject {
     // MARK: State Changes
     func updateBookStatus(_ book: BookData, to status: ReadingStatus) {
         book.status = status
+        
         switch status {
         case .reading:
             if book.dateStarted == nil { book.dateStarted = Date() }
-            book.dateFinished = nil
+            book.dateFinished = nil  // Clear the finish date when marked as reading
         case .read:
             if book.dateStarted == nil { book.dateStarted = Date() }
-            book.dateFinished = Date()
+            if book.dateFinished == nil { book.dateFinished = Date() }
         case .unread, .deleted:
             book.dateStarted = nil
             book.dateFinished = nil
         }
+        
+        // Additional validation if needed
+        book.validateDates()
+        
         saveChanges()
     }
     
