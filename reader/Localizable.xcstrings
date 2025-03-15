@@ -10,6 +10,9 @@
     "*" : {
       "shouldTranslate" : false
     },
+    "#" : {
+      "shouldTranslate" : false
+    },
     "#%@" : {
       "shouldTranslate" : false
     },
@@ -181,6 +184,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Atribuido a"
+          }
+        }
+      }
+    },
+    "author:" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "author:"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "autor:"
           }
         }
       }
@@ -409,6 +428,22 @@
         }
       }
     },
+    "Clear" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar"
+          }
+        }
+      }
+    },
     "Clear tag %@" : {
       "localizations" : {
         "en" : {
@@ -469,6 +504,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Colecciones"
+          }
+        }
+      }
+    },
+    "Copy ISBN" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy ISBN"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar ISBN"
           }
         }
       }
@@ -1049,6 +1100,54 @@
         }
       }
     },
+    "No matching authors found" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No matching authors found"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontraron autores coincidentes"
+          }
+        }
+      }
+    },
+    "No matching tags found" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No matching tags found"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontraron etiquetas coincidentes"
+          }
+        }
+      }
+    },
+    "No matching titles found" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No matching titles found"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontraron títulos coincidentes"
+          }
+        }
+      }
+    },
     "No notes exist here yet." : {
       "localizations" : {
         "en" : {
@@ -1372,6 +1471,22 @@
         }
       }
     },
+    "Recent Searches" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent Searches"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Búsquedas Recientes"
+          }
+        }
+      }
+    },
     "Recover" : {
       "localizations" : {
         "en" : {
@@ -1512,6 +1627,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Guardar imagen"
+          }
+        }
+      }
+    },
+    "Search books..." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search books..."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar libros..."
+          }
+        }
+      }
+    },
+    "Search by" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search by"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar por"
           }
         }
       }
@@ -1688,6 +1835,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Escala de Tiempo"
+          }
+        }
+      }
+    },
+    "title:" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "title:"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "titulo:"
           }
         }
       }

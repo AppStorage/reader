@@ -173,3 +173,87 @@ final class ContentViewModel: ObservableObject {
         }
     }
 }
+
+extension ContentViewModel {
+    // MARK: Search Suggestions
+    
+    // Get top authors matching a prefix
+    func getTopAuthors(matching prefix: String, limit: Int = 5) -> [String] {
+        let allAuthors = Set(books.map { $0.author })
+        return Array(allAuthors)
+            .filter {
+                prefix.isEmpty || $0.lowercased().contains(prefix.lowercased())
+            }
+            .sorted()
+            .prefix(limit)
+            .map { $0 }
+    }
+    
+    // Get top titles matching a prefix
+    func getTopTitles(matching prefix: String, limit: Int = 5) -> [String] {
+        let allTitles = Set(books.map { $0.title })
+        return Array(allTitles)
+            .filter {
+                prefix.isEmpty || $0.lowercased().contains(prefix.lowercased())
+            }
+            .sorted()
+            .prefix(limit)
+            .map { $0 }
+    }
+    
+    // Get top tags matching a prefix
+    func getTopTags(matching prefix: String, limit: Int = 5) -> [String] {
+        let allTags = Set(books.flatMap { $0.tags })
+        return Array(allTags)
+            .filter {
+                prefix.isEmpty || $0.lowercased().contains(prefix.lowercased())
+            }
+            .sorted()
+            .prefix(limit)
+            .map { $0 }
+    }
+    
+    // MARK: Recent Searches
+    
+    // Storage key for UserDefaults
+    private static let kRecentSearchesKey = "RecentSearches"
+    private static let maxRecentSearches = 10
+    
+    // Get recent searches
+    func getRecentSearches() -> [String] {
+        UserDefaults.standard.stringArray(forKey: Self.kRecentSearchesKey) ?? []
+    }
+    
+    // Save a search query to recent searches
+    func saveRecentSearch(_ query: String) {
+        guard !query.isEmpty else { return }
+        
+        var recentSearches = getRecentSearches()
+        
+        // Remove the query if it already exists to avoid duplicates
+        recentSearches.removeAll { $0 == query }
+        
+        // Add the new query at the beginning
+        recentSearches.insert(query, at: 0)
+        
+        // Limit the number of recent searches
+        if recentSearches.count > Self.maxRecentSearches {
+            recentSearches = Array(recentSearches.prefix(Self.maxRecentSearches))
+        }
+        
+        // Save to UserDefaults
+        UserDefaults.standard.set(recentSearches, forKey: Self.kRecentSearchesKey)
+    }
+    
+    // Clear recent searches
+    func clearRecentSearches() {
+        UserDefaults.standard.removeObject(forKey: Self.kRecentSearchesKey)
+    }
+    
+    // Submit search to save to recent searches
+    func submitSearch() {
+        if !searchQuery.isEmpty {
+            saveRecentSearch(searchQuery)
+        }
+    }
+}

@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
     @State private var searchText: String = ""
     @State private var selectedBookIDs: Set<UUID> = []
+    @State private var isSearching = false
     
     var body: some View {
         ZStack {
@@ -62,7 +63,18 @@ struct ContentView: View {
                 }
             }
             .navigationSplitViewStyle(.balanced)
-            .searchable(text: $viewModel.searchQuery, placement: .sidebar)
+            .searchable(
+                text: $viewModel.searchQuery,
+                isPresented: $isSearching,
+                placement: .sidebar,
+                prompt: "Search books..."
+            )
+            .searchSuggestions {
+                SearchSuggestionContainer(viewModel: viewModel)
+            }
+            .onSubmit(of: .search) {
+                viewModel.submitSearch()
+            }
             
             OverlayView()
         }

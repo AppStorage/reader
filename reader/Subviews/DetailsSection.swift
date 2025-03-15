@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct DetailsSection: View {
+    @State private var isbnCopied: Bool = false
+    
     let title: String
     let author: String
     let genre: String
@@ -23,10 +25,33 @@ struct DetailsSection: View {
                 .accessibilityLabel("Author: \(author)")
             
             ForEach(infoRows, id: \.label) { row in
-                Text("\(row.label): \(row.value)")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                if row.label == "ISBN" && !isbn.isEmpty {
+                    HStack(spacing: 6) {
+                        Text("\(row.label): \(row.value)")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        
+                        Button {
+                            let cleanedISBN = isbn.replacingOccurrences(of: " ", with: "")
+                                .trimmingCharacters(in: .whitespacesAndNewlines)
+                            copyToClipboard(cleanedISBN)
+                        } label: {
+                            Image(systemName: isbnCopied ? "checkmark.circle.fill" : "doc.on.doc.fill")
+                                .font(.system(size: 12))
+                                .foregroundStyle(isbnCopied ? .green : .secondary)
+                                .contentTransition(.symbolEffect(.replace))
+                        }
+                        .buttonStyle(.borderless)
+                        .help("Copy ISBN")
+                    }
                     .accessibilityLabel("\(row.label): \(row.value)")
+                    .accessibilityHint("Copy ISBN")
+                } else {
+                    Text("\(row.label): \(row.value)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .accessibilityLabel("\(row.label): \(row.value)")
+                }
             }
             
             if !description.isEmpty {
@@ -55,5 +80,22 @@ struct DetailsSection: View {
             ("Publisher", publisher),
             ("Published", formattedDate)
         ].filter { !$0.value.isEmpty }
+    }
+    
+    private func copyToClipboard(_ text: String) {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
+        
+        // Show checkmark feedback
+        withAnimation {
+            isbnCopied = true
+        }
+        
+        // Reset after delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            withAnimation {
+                isbnCopied = false
+            }
+        }
     }
 }

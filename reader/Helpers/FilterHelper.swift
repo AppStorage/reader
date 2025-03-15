@@ -21,134 +21,246 @@ extension Array where Element == BookData {
         }
     }
     
+    private enum SearchType {
+        case general(String)
+        case title(String)
+        case author(String)
+        case tag(String)
+    }
+    
     // Filter books by search query
     func searched(with query: String) -> [BookData] {
         guard !query.isEmpty else { return self }
         
-        let queryLowercase = query.lowercased()
-        let queryTerms = queryLowercase.split(separator: " ").map(String.init)
-        let fuse = Fuse()
+        // Parse the query into the appropriate search type
+        let searchType: SearchType
         
-        // Calculate a score for each book
+        if query.lowercased().hasPrefix("title:") {
+            let titleQuery = query.dropFirst(6).trimmingCharacters(in: .whitespacesAndNewlines)
+            searchType = .title(titleQuery)
+        } else if query.lowercased().hasPrefix("author:") {
+            let authorQuery = query.dropFirst(7).trimmingCharacters(in: .whitespacesAndNewlines)
+            searchType = .author(authorQuery)
+        } else if query.hasPrefix("#") {
+            let tagQuery = query.dropFirst(1).trimmingCharacters(in: .whitespacesAndNewlines)
+            searchType = .tag(tagQuery)
+        } else {
+            searchType = .general(query)
+        }
+        
+        let fuse = Fuse()
         var bookScores: [(book: BookData, score: Int)] = []
         
         for book in self {
             var score = 0
-            let titleLower = book.title.lowercased()
-            let authorLower = book.author.lowercased()
             
-            if titleLower == queryLowercase {
-                score += 100000
-            }
-            
-            else if titleLower.hasPrefix(queryLowercase) {
-                score += 50000
-            }
-            
-            else {
-                var allTermsFound = true
-                var lastPos = 0
+            switch searchType {
+            case .general(let query):
+                let queryLowercase = query.lowercased()
+                let queryTerms = queryLowercase.split(separator: " ").map(String.init)
+                let titleLower = book.title.lowercased()
+                let authorLower = book.author.lowercased()
                 
-                for term in queryTerms {
-                    if let range = titleLower.range(of: term, range: titleLower.index(titleLower.startIndex, offsetBy: lastPos)..<titleLower.endIndex) {
-                        lastPos = titleLower.distance(from: titleLower.startIndex, to: range.upperBound)
-                    } else {
-                        allTermsFound = false
-                        break
+                // Title exact match
+                if titleLower == queryLowercase {
+                    score += 100000
+                } else if titleLower.hasPrefix(queryLowercase) {
+                    score += 50000
+                } else {
+                    // Sequential terms in title
+                    var allTermsFound = true
+                    var lastPos = 0
+                    
+                    for term in queryTerms {
+                        if let range = titleLower.range(of: term, range: titleLower.index(titleLower.startIndex, offsetBy: lastPos)..<titleLower.endIndex) {
+                            lastPos = titleLower.distance(from: titleLower.startIndex, to: range.upperBound)
+                        } else {
+                            allTermsFound = false
+                            break
+                        }
+                    }
+                    
+                    if allTermsFound {
+                        score += 10000
                     }
                 }
                 
-                if allTermsFound {
-                    score += 10000
+                // Author exact match
+                if authorLower == queryLowercase {
+                    score += 9000
                 }
-            }
-            
-            if authorLower == queryLowercase {
-                score += 9000
-            }
-            
-            for term in queryTerms {
-                if titleLower.contains(term) {
-                    score += 1000
+                
+                // Title contains terms
+                for term in queryTerms {
+                    if titleLower.contains(term) {
+                        score += 1000
+                    }
                 }
-            }
-            
-            if authorLower.contains(queryLowercase) {
-                score += 800
-            }
-            
-            for term in queryTerms {
-                if authorLower.contains(term) {
-                    score += 500
+                
+                // Author contains query
+                if authorLower.contains(queryLowercase) {
+                    score += 800
                 }
-            }
-            
-            if fuse.search(query, in: book.title) != nil {
-                score += 300
-            }
-            
-            if fuse.search(query, in: book.author) != nil {
-                score += 200
-            }
-            
-            if let description = book.bookDescription {
-                if description.lowercased().contains(queryLowercase) {
-                    score += 100
+                
+                // Author contains terms
+                for term in queryTerms {
+                    if authorLower.contains(term) {
+                        score += 500
+                    }
                 }
-                if fuse.search(query, in: description) != nil {
-                    score += 50
-                }
-            }
-            
-            if let publisher = book.publisher {
-                if publisher.lowercased().contains(queryLowercase) {
-                    score += 100
-                }
-                if fuse.search(query, in: publisher) != nil {
-                    score += 50
-                }
-            }
-            
-            if let series = book.series {
-                if series.lowercased().contains(queryLowercase) {
-                    score += 150
-                }
-                if fuse.search(query, in: series) != nil {
-                    score += 75
-                }
-            }
-            
-            if let genre = book.genre {
-                if genre.lowercased().contains(queryLowercase) {
-                    score += 100
-                }
-                if fuse.search(query, in: genre) != nil {
-                    score += 50
-                }
-            }
-            
-            if let isbn = book.isbn {
-                if isbn.contains(query) {
+                
+                // Fuzzy matching
+                if fuse.search(query, in: book.title) != nil {
                     score += 300
                 }
                 
-                if fuse.search(query, in: isbn) != nil {
-                    score += 150
+                if fuse.search(query, in: book.author) != nil {
+                    score += 200
                 }
                 
-                let strippedQuery = query.replacingOccurrences(of: "-", with: "")
-                let strippedISBN = isbn.replacingOccurrences(of: "-", with: "")
-                if strippedISBN.contains(strippedQuery) {
-                    score += 250
+                if let description = book.bookDescription {
+                    if description.lowercased().contains(queryLowercase) {
+                        score += 100
+                    }
+                    if fuse.search(query, in: description) != nil {
+                        score += 50
+                    }
                 }
-            }
-            
-            for tag in book.tags {
-                if tag.lowercased().contains(queryLowercase) {
-                    score += 100
+                
+                if let publisher = book.publisher {
+                    if publisher.lowercased().contains(queryLowercase) {
+                        score += 100
+                    }
+                    if fuse.search(query, in: publisher) != nil {
+                        score += 50
+                    }
                 }
-                if fuse.search(query, in: tag) != nil {
-                    score += 50
+                
+                if let series = book.series {
+                    if series.lowercased().contains(queryLowercase) {
+                        score += 150
+                    }
+                    if fuse.search(query, in: series) != nil {
+                        score += 75
+                    }
+                }
+                
+                if let genre = book.genre {
+                    if genre.lowercased().contains(queryLowercase) {
+                        score += 100
+                    }
+                    if fuse.search(query, in: genre) != nil {
+                        score += 50
+                    }
+                }
+                
+                if let isbn = book.isbn {
+                    if isbn.contains(query) {
+                        score += 300
+                    }
+                    
+                    if fuse.search(query, in: isbn) != nil {
+                        score += 150
+                    }
+                    
+                    let strippedQuery = query.replacingOccurrences(of: "-", with: "")
+                    let strippedISBN = isbn.replacingOccurrences(of: "-", with: "")
+                    if strippedISBN.contains(strippedQuery) {
+                        score += 250
+                    }
+                }
+                
+                for tag in book.tags {
+                    if tag.lowercased().contains(queryLowercase) {
+                        score += 100
+                    }
+                    if fuse.search(query, in: tag) != nil {
+                        score += 50
+                    }
+                }
+                
+            case .title(let titleQuery):
+                // Search only in title
+                if titleQuery.isEmpty { break }
+                
+                let titleLower = book.title.lowercased()
+                let queryLowercase = titleQuery.lowercased()
+                let queryTerms = queryLowercase.split(separator: " ").map(String.init)
+                
+                if titleLower == queryLowercase {
+                    score += 100000
+                } else if titleLower.hasPrefix(queryLowercase) {
+                    score += 50000
+                } else {
+                    var allTermsFound = true
+                    var lastPos = 0
+                    
+                    for term in queryTerms {
+                        if let range = titleLower.range(of: term, range: titleLower.index(titleLower.startIndex, offsetBy: lastPos)..<titleLower.endIndex) {
+                            lastPos = titleLower.distance(from: titleLower.startIndex, to: range.upperBound)
+                        } else {
+                            allTermsFound = false
+                            break
+                        }
+                    }
+                    
+                    if allTermsFound {
+                        score += 10000
+                    }
+                    
+                    for term in queryTerms {
+                        if titleLower.contains(term) {
+                            score += 1000
+                        }
+                    }
+                    
+                    if fuse.search(titleQuery, in: book.title) != nil {
+                        score += 300
+                    }
+                }
+                
+            case .author(let authorQuery):
+                // Search only in author
+                if authorQuery.isEmpty { break }
+                
+                let authorLower = book.author.lowercased()
+                let queryLowercase = authorQuery.lowercased()
+                let queryTerms = queryLowercase.split(separator: " ").map(String.init)
+                
+                if authorLower == queryLowercase {
+                    score += 9000
+                } else if authorLower.hasPrefix(queryLowercase) {
+                    score += 4500
+                } else {
+                    for term in queryTerms {
+                        if authorLower.contains(term) {
+                            score += 500
+                        }
+                    }
+                    
+                    if fuse.search(authorQuery, in: book.author) != nil {
+                        score += 200
+                    }
+                }
+                
+            case .tag(let tagQuery):
+                // Search only in tags
+                if tagQuery.isEmpty { break }
+                
+                let queryLowercase = tagQuery.lowercased()
+                
+                for tag in book.tags {
+                    let tagLower = tag.lowercased()
+                    if tagLower == queryLowercase {
+                        score += 1000
+                        break
+                    } else if tagLower.hasPrefix(queryLowercase) {
+                        score += 500
+                    } else if tagLower.contains(queryLowercase) {
+                        score += 100
+                    } else if fuse.search(queryLowercase, in: tag) != nil {
+                        score += 50
+                    }
                 }
             }
             
@@ -163,6 +275,7 @@ extension Array where Element == BookData {
         
         return sortedBooks.map { $0.book }
     }
+    
     
     // Sort books based on selected option and order
     func sorted(by option: SortOption, order: SortOrder) -> [BookData] {

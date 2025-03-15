@@ -14,7 +14,6 @@ class AppState: ObservableObject {
     @Published var showSoftDeleteConfirmation = false
     @Published var showPermanentDeleteConfirmation = false
     @Published var selectedBooks: [BookData] = []
-    
     @Published var selectedTheme: Theme = .system {
         didSet {
             storedTheme = selectedTheme.rawValue
