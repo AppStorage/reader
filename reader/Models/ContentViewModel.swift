@@ -10,16 +10,21 @@ final class ContentViewModel: ObservableObject {
         }
     }
     
+    private var wasShowingDashboardBeforeSearch: Bool = true
+    
     var searchQuery: String = "" {
         didSet {
-            // When search is started, switch from dashboard to books view
-            if oldValue.isEmpty && !searchQuery.isEmpty && showDashboard {
-                showDashboard = false
+            // When search is started, remember the current dashboard state
+            if oldValue.isEmpty && !searchQuery.isEmpty {
+                wasShowingDashboardBeforeSearch = showDashboard
+                if showDashboard {
+                    showDashboard = false
+                }
             }
             
-            // When search is cleared, return to dashboard
-            if !oldValue.isEmpty && searchQuery.isEmpty && !showDashboard {
-                showDashboard = true
+            // When search is cleared, restore the previous state
+            if !oldValue.isEmpty && searchQuery.isEmpty {
+                showDashboard = wasShowingDashboardBeforeSearch
             }
             
             objectWillChange.send()
@@ -66,12 +71,22 @@ final class ContentViewModel: ObservableObject {
     
     init(dataManager: DataManager) {
         self.dataManager = dataManager
-        
         self.books = dataManager.books
+        
+        // Listen for changes to data manager
+        dataManager.onDataChanged = { [weak self] in
+            self?.refreshData()
+        }
     }
     
     func refreshData() {
-        books = dataManager.books
+        if Thread.isMainThread {
+            books = dataManager.books
+        } else {
+            DispatchQueue.main.async { [weak self] in
+                self?.books = self?.dataManager.books ?? []
+            }
+        }
     }
     
     func refreshAfterAction() {

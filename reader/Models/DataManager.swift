@@ -25,6 +25,8 @@ final class DataManager: ObservableObject {
         }
     }
     
+    var onDataChanged: (() -> Void)?
+    
     private let modelContainer: ModelContainer
     private let apiService: BooksAPIService
     
@@ -66,6 +68,7 @@ final class DataManager: ObservableObject {
     func addBook(book: BookData) {
         modelContainer.mainContext.insert(book)
         saveChanges()
+        objectWillChange.send()
     }
     
     func softDeleteBooks(_ books: [BookData]) {
@@ -73,6 +76,7 @@ final class DataManager: ObservableObject {
             book.status = .deleted
         }
         saveChanges()
+        objectWillChange.send()
     }
     
     func permanentlyDeleteBooks(_ books: [BookData]) {
@@ -152,6 +156,10 @@ final class DataManager: ObservableObject {
             try modelContainer.mainContext.save()
             fetchBooks()
             fetchCollections()
+            
+            DispatchQueue.main.async { [weak self] in
+                self?.onDataChanged?()
+            }
         } catch {
             print("Failed to save changes: \(error)")
         }
