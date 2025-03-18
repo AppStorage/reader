@@ -1,13 +1,13 @@
 import SwiftUI
 
 struct CollapsibleHeader: View {
-    @Binding var isCollapsed: Bool
     @Binding var isEditing: Bool
+    @Binding var isCollapsed: Bool
     
     var title: String
-    var onToggleCollapse: () -> Void
-    var onEditToggle: () -> Void
     var isEditingDisabled: Bool
+    var onEditToggle: () -> Void
+    var onToggleCollapse: () -> Void
     
     var body: some View {
         HStack {

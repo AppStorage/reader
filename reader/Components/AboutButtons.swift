@@ -5,7 +5,6 @@ struct AboutButtons: View {
     
     let title: String
     let systemImage: String
-    
     var url: String? = nil
     var action: (() -> Void)? = nil
     

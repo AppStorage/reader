@@ -148,3 +148,27 @@ class BookStatisticsService {
         return genreCounts
     }
 }
+
+extension BookStatisticsService {
+    struct MonthlyData: Identifiable {
+        let id = UUID()
+        let month: String
+        let count: Int
+        
+        init(month: String, count: Int) {
+            self.month = month
+            self.count = count
+        }
+    }
+    
+    struct GenreData: Identifiable {
+        let id = UUID()
+        let genre: String
+        let count: Int
+        
+        init(genre: String, count: Int) {
+            self.genre = genre
+            self.count = count
+        }
+    }
+}

@@ -1,5 +1,6 @@
 import SwiftUI
 
+// MARK: - Collection Sheet Modes
 enum CollectionSheetMode {
     case add
     case rename
@@ -26,11 +27,14 @@ enum CollectionSheetMode {
     }
 }
 
+// MARK: - Collection Sheet
 struct CollectionSheet: View {
-    let mode: CollectionSheetMode
     @Binding var collectionName: String
+    
     @State private var errorMessage: String?
     @State private var typingTimer: Timer?
+    
+    let mode: CollectionSheetMode
     
     var existingCollectionNames: [String]
     var originalName: String? // Only used in rename mode
@@ -173,7 +177,7 @@ struct CollectionSheet: View {
         }
     }
     
-    // MARK: Validation
+    // MARK: - Validation
     private func validateName() -> Bool {
         if collectionName.isEmpty {
             errorMessage = "Name cannot be empty"

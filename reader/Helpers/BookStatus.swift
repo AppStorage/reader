@@ -1,5 +1,11 @@
 import SwiftUI
 
+protocol StatusDisplayable {
+    var iconName: String { get }
+    var statusColor: Color { get }
+}
+
+// MARK: - Reading Status
 enum ReadingStatus: String, CaseIterable, Codable {
     case unread
     case reading
@@ -14,11 +20,6 @@ enum ReadingStatus: String, CaseIterable, Codable {
         case .deleted: return "Deleted"
         }
     }
-}
-
-protocol StatusDisplayable {
-    var iconName: String { get }
-    var statusColor: Color { get }
 }
 
 extension ReadingStatus: StatusDisplayable {
@@ -50,6 +51,7 @@ extension ReadingStatus: StatusDisplayable {
     }
 }
 
+// MARK: - Status Filter
 enum StatusFilter: String, CaseIterable, Identifiable {
     case all = "All"
     case unread = "Unread"

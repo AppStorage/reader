@@ -1,12 +1,13 @@
 import SwiftUI
 
 struct QuoteShareView: View {
-    let book: BookData
     @Binding var isPresented: Bool
     
     @State private var selectedQuoteIndex = 0
     @State private var selectedBackground: QuoteBackgroundStyle = .light
     @State private var quoteContentSize: CGSize = .zero
+    
+    let book: BookData
     
     var body: some View {
         VStack(spacing: 0) {

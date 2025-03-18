@@ -1,5 +1,6 @@
 import Foundation
 
+// MARK: - Sanitize Description
 func sanitizeDescription(_ description: String?) -> String? {
     guard let description, !description.isEmpty else { return nil }
     
@@ -28,6 +29,7 @@ func sanitizeDescription(_ description: String?) -> String? {
     return sanitized.trimmingCharacters(in: .whitespacesAndNewlines)
 }
 
+// MARK: - Construct Query URL
 func constructQueryURL(apiKey: String, queryParameters: [String: String]) -> URL? {
     let query = queryParameters.compactMap { key, value in
         value.isEmpty ? nil : "\(key):\(value)"

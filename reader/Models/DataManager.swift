@@ -1,267 +1,611 @@
 import Foundation
 import SwiftData
+import Combine
 
 @MainActor
 final class DataManager: ObservableObject {
-    private var _books: [BookData] = []
-    var books: [BookData] {
-        get { _books }
-        set {
-            if _books != newValue {
-                _books = newValue
-                objectWillChange.send()
-            }
-        }
-    }
-    
-    private var _collections: [BookCollection] = []
-    var collections: [BookCollection] {
-        get { _collections }
-        set {
-            if _collections != newValue {
-                _collections = newValue
-                objectWillChange.send()
-            }
-        }
-    }
-    
-    var onDataChanged: (() -> Void)?
-    
-    private let modelContainer: ModelContainer
     private let apiService: BooksAPIService
+    private let modelContainer: ModelContainer
+    private let booksSubject = CurrentValueSubject<[BookData], Never>([])
+    private let collectionsSubject = CurrentValueSubject<[BookCollection], Never>([])
+    
+    private var cancellables = Set<AnyCancellable>()
+    
+    var booksPublisher: AnyPublisher<[BookData], Never> {
+        booksSubject.eraseToAnyPublisher()
+    }
+    
+    var collectionsPublisher: AnyPublisher<[BookCollection], Never> {
+        collectionsSubject.eraseToAnyPublisher()
+    }
+    
+    var books: [BookData] {
+        get { booksSubject.value }
+        set { booksSubject.send(newValue) }
+    }
+    
+    var collections: [BookCollection] {
+        get { collectionsSubject.value }
+        set { collectionsSubject.send(newValue) }
+    }
     
     init(modelContainer: ModelContainer) {
         self.modelContainer = modelContainer
         self.apiService = BooksAPIService()
+        
+        setupSubscriptions()
         fetchBooks()
         fetchCollections()
     }
     
-    // MARK: Fetch
+    private func setupSubscriptions() {
+        // Forward book updates to objectWillChange
+        booksSubject
+            .dropFirst() // Skip initial empty value
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+        
+        // Forward collection updates to objectWillChange
+        collectionsSubject
+            .dropFirst() // Skip initial empty value
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+    }
+    
+    // MARK: - Fetch Operations
     func fetchBooks() {
         do {
-            books = try modelContainer.mainContext.fetch(
+            let fetchedBooks = try modelContainer.mainContext.fetch(
                 FetchDescriptor<BookData>())
+            books = fetchedBooks
         } catch {
             books = []
         }
     }
     
-    func fetchBookData(title: String, author: String, isbn: String? = nil) async
-    -> [BookTransferData]
-    {
-        return await apiService.fetchBookData(
-            title: title, author: author, isbn: isbn)
+    func fetchBookData(title: String, author: String, isbn: String? = nil) -> AnyPublisher<[BookTransferData], Error> {
+        Future<[BookTransferData], Error> { [weak self] promise in
+            guard let self = self else {
+                promise(.failure(NSError(domain: "DataManager", code: 0,
+                                         userInfo: [NSLocalizedDescriptionKey: "DataManager was deallocated"])))
+                return
+            }
+            
+            Task {
+                let results = await self.apiService.fetchBookData(title: title, author: author, isbn: isbn)
+                promise(.success(results))
+            }
+        }.eraseToAnyPublisher()
     }
     
     func fetchCollections() {
         do {
-            let results = try modelContainer.mainContext.fetch(
+            let fetchedCollections = try modelContainer.mainContext.fetch(
                 FetchDescriptor<BookCollection>())
-            collections = results
+            collections = fetchedCollections
         } catch {
             collections = []
         }
     }
     
-    // MARK: Book Actions
-    func addBook(book: BookData) {
-        modelContainer.mainContext.insert(book)
-        saveChanges()
-        objectWillChange.send()
+    // MARK: - Book Actions
+    func addBook(book: BookData) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                self.modelContainer.mainContext.insert(book)
+                self.saveChanges(reloadBooks: true)
+            })
+            .eraseToAnyPublisher()
     }
     
-    func softDeleteBooks(_ books: [BookData]) {
-        for book in books {
-            book.status = .deleted
+    func softDeleteBooks(_ books: [BookData]) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                // Batch update to minimize separate property changes
+                for book in books {
+                    book.status = .deleted
+                    book.dateStarted = nil
+                    book.dateFinished = nil
+                    
+                    // Remove from all collections
+                    for collection in self.collections {
+                        collection.books.removeAll { $0.id == book.id }
+                    }
+                }
+                self.saveChanges(reloadBooks: true, reloadCollections: true)
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    func permanentlyDeleteBooks(_ books: [BookData]) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                for book in books {
+                    self.modelContainer.mainContext.delete(book)
+                }
+                self.saveChanges(reloadBooks: true)
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    // Batch status updates
+    func batchUpdateBookStatus(_ books: [BookData], to status: ReadingStatus) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                for book in books {
+                    self.updateBookStatusInternal(book, to: status)
+                }
+                self.saveChanges(reloadBooks: true)
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Edit Book Details
+    func updateBookDetails(
+        book: BookData,
+        title: String,
+        author: String,
+        genre: String?,
+        series: String?,
+        isbn: String?,
+        publisher: String?,
+        publishedDate: Date?,
+        description: String?
+    ) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard let self = self else {
+                promise(.failure(NSError(domain: "DataManager", code: 0,
+                                         userInfo: [NSLocalizedDescriptionKey: "DataManager was deallocated"])))
+                return
+            }
+            
+            do {
+                book.title = title
+                book.author = author
+                book.genre = genre
+                book.series = series
+                book.isbn = isbn
+                book.publisher = publisher
+                book.published = publishedDate
+                book.bookDescription = description
+                
+                try self.modelContainer.mainContext.save()
+                
+                self.objectWillChange.send()
+                
+                promise(.success(()))
+            } catch {
+                print("Failed to update book details: \(error)")
+                promise(.failure(error))
+            }
         }
-        saveChanges()
-        objectWillChange.send()
+        .eraseToAnyPublisher()
     }
     
-    func permanentlyDeleteBooks(_ books: [BookData]) {
-        for book in books {
-            modelContainer.mainContext.delete(book)
+    // MARK: - Notes Management
+    func addNote(_ text: String, pageNumber: String, to book: BookData) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                let formattedNote = RowItems.formatForStorage(text: text, pageNumber: pageNumber)
+                var updatedNotes = book.notes
+                updatedNotes.append(formattedNote)
+                book.notes = updatedNotes
+                self.saveChanges()
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    func removeNote(_ note: String, from book: BookData) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                var updatedNotes = book.notes
+                updatedNotes.removeAll { $0 == note }
+                book.notes = updatedNotes
+                self.saveChanges()
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    func updateNote(originalNote: String, newText: String, newPageNumber: String, in book: BookData) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                let formattedNote = RowItems.formatForStorage(text: newText, pageNumber: newPageNumber)
+                var updatedNotes = book.notes
+                if let index = updatedNotes.firstIndex(of: originalNote) {
+                    updatedNotes[index] = formattedNote
+                    book.notes = updatedNotes
+                    self.saveChanges()
+                }
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Quotes Management
+    func addQuote(_ text: String, pageNumber: String, attribution: String, to book: BookData) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                let formattedQuote = RowItems.formatForStorage(text: text, pageNumber: pageNumber, attribution: attribution)
+                var updatedQuotes = book.quotes
+                updatedQuotes.append(formattedQuote)
+                book.quotes = updatedQuotes
+                self.saveChanges()
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    func removeQuote(_ quote: String, from book: BookData) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                var updatedQuotes = book.quotes
+                updatedQuotes.removeAll { $0 == quote }
+                book.quotes = updatedQuotes
+                self.saveChanges()
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    func updateQuote(originalQuote: String, newText: String, newPageNumber: String, newAttribution: String, in book: BookData) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                let formattedQuote = RowItems.formatForStorage(text: newText, pageNumber: newPageNumber, attribution: newAttribution)
+                var updatedQuotes = book.quotes
+                if let index = updatedQuotes.firstIndex(of: originalQuote) {
+                    updatedQuotes[index] = formattedQuote
+                    book.quotes = updatedQuotes
+                    self.saveChanges()
+                }
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Tag Management
+    func addTag(_ tag: String, to book: BookData) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                var updatedTags = book.tags
+                // Check if tag already exists (case-insensitive)
+                if !updatedTags.contains(where: { $0.caseInsensitiveCompare(tag) == .orderedSame }) {
+                    updatedTags.append(tag) // Store with original case
+                    book.tags = updatedTags
+                    self.saveChanges()
+                }
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    func removeTag(_ tag: String, from book: BookData) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                var updatedTags = book.tags
+                updatedTags.removeAll { $0.caseInsensitiveCompare(tag) == .orderedSame }
+                book.tags = updatedTags
+                self.saveChanges()
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    func addTagToMultipleBooks(_ tag: String, books: [BookData]) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                let tagLower = tag.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                
+                for book in books {
+                    // Pre-compute lowercase tags for each book once
+                    let bookTagsLower = book.tags.map { $0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) }
+                    
+                    if !bookTagsLower.contains(tagLower) {
+                        var updatedTags = book.tags
+                        updatedTags.append(tag)
+                        book.tags = updatedTags
+                    }
+                }
+                
+                self.saveChanges()
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    func removeTagFromMultipleBooks(_ tag: String, books: [BookData]) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                for book in books {
+                    var updatedTags = book.tags
+                    updatedTags.removeAll { $0.caseInsensitiveCompare(tag) == .orderedSame }
+                    book.tags = updatedTags
+                }
+                
+                self.saveChanges()
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Date Management
+    func validateDates(for book: BookData) {
+        if let startDate = book.dateStarted, let finishDate = book.dateFinished, finishDate < startDate {
+            book.dateFinished = startDate
         }
-        saveChanges()
     }
     
-    // MARK: Collection Actions
-    func addCollection(named name: String) {
-        let newCollection = BookCollection(name: name)
-        modelContainer.mainContext.insert(newCollection)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            self.saveChanges()
-        }
-        saveChanges()
-    }
-    
-    func removeCollection(_ collection: BookCollection) {
-        modelContainer.mainContext.delete(collection)
-        saveChanges()
-    }
-    
-    func addBookToCollection(_ books: [BookData], to collection: BookCollection) {
-        // Check for books already in the collection
-        let existingBookIDs = Set(collection.books.map { $0.id })
-        
-        // Only add books that aren't already in the collection
-        let booksToAdd = books.filter { !existingBookIDs.contains($0.id) }
-        
-        if !booksToAdd.isEmpty {
-            collection.books.append(contentsOf: booksToAdd)
-            saveChanges()
-        }
-    }
-    
-    func removeBookFromCollection(_ book: BookData, from collection: BookCollection) {
-        collection.books.removeAll { $0.id == book.id }
-        saveChanges()
-    }
-    
-    
-    func renameCollection(_ collection: BookCollection, to newName: String) {
-        if let index = collections.firstIndex(where: { $0.id == collection.id })
-        {
-            collections[index].name = newName
-            saveChanges()
-        }
-    }
-    
-    // MARK: State Changes
-    func updateBookStatus(_ book: BookData, to status: ReadingStatus) {
+    // Status update method used by both single and batch operations
+    private func updateBookStatusInternal(_ book: BookData, to status: ReadingStatus) {
+        let oldStatus = book.status
         book.status = status
         
-        switch status {
-        case .reading:
-            if book.dateStarted == nil { book.dateStarted = Date() }
-            book.dateFinished = nil  // Clear the finish date when marked as reading
-        case .read:
-            if book.dateStarted == nil { book.dateStarted = Date() }
-            if book.dateFinished == nil { book.dateFinished = Date() }
-        case .unread, .deleted:
-            book.dateStarted = nil
-            book.dateFinished = nil
+        // Only modify dates if status changed
+        // Respect manual changes
+        if oldStatus != status {
+            switch status {
+            case .reading:
+                // Only set dateStarted if it doesn't exist
+                if book.dateStarted == nil {
+                    book.dateStarted = Date()
+                }
+                // Don't automatically clear dateFinished if manually set
+            case .read:
+                // Only set dates if they don't exist
+                if book.dateStarted == nil {
+                    book.dateStarted = Date()
+                }
+                if book.dateFinished == nil {
+                    book.dateFinished = Date()
+                }
+            case .unread, .deleted:
+                // Still clear dates
+                book.dateStarted = nil
+                book.dateFinished = nil
+                
+                // If book is being deleted, remove it from all collections
+                if status == .deleted {
+                    removeBookFromAllCollections(book)
+                }
+            }
         }
         
-        // Additional validation if needed
-        book.validateDates()
-        
-        saveChanges()
+        validateDates(for: book)
     }
     
-    func saveChanges() {
+    // Public method for updating a single book's status
+    func updateBookStatus(_ book: BookData, to status: ReadingStatus) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                self.updateBookStatusInternal(book, to: status)
+                self.saveChanges()
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Collection Actions
+    func addCollection(named name: String) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                let newCollection = BookCollection(name: name)
+                self.modelContainer.mainContext.insert(newCollection)
+                self.saveChanges(reloadCollections: true)
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    func removeCollection(_ collection: BookCollection) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                self.modelContainer.mainContext.delete(collection)
+                self.saveChanges(reloadCollections: true)
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    // When book status is deleted, it will also remove it from the collection
+    private func removeBookFromAllCollections(_ book: BookData) {
+        for collection in collections {
+            collection.books.removeAll { $0.id == book.id }
+        }
+        
+        DispatchQueue.main.async {
+            self.saveChanges(reloadCollections: true)
+        }
+    }
+    
+    func addBookToCollection(_ books: [BookData], to collection: BookCollection) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                // Check for books already in the collection
+                let existingBookIDs = Set(collection.books.map { $0.id })
+                
+                // Only add books that aren't already in the collection
+                let booksToAdd = books.filter { !existingBookIDs.contains($0.id) }
+                
+                if !booksToAdd.isEmpty {
+                    // Process each book before adding to collection
+                    for book in booksToAdd {
+                        // If book is deleted, change its status to unread before adding to collection
+                        if book.status == .deleted {
+                            book.status = .unread
+                            
+                            // Clear dates as per the existing behavior for unread status
+                            book.dateStarted = nil
+                            book.dateFinished = nil
+                        }
+                    }
+                    
+                    // Add the books to the collection
+                    collection.books.append(contentsOf: booksToAdd)
+                    
+                    // Save changes and reload both books and collections
+                    // Reload books since it might have changed book status
+                    self.saveChanges(reloadBooks: true, reloadCollections: true)
+                }
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    func removeBookFromCollection(_ book: BookData, from collection: BookCollection) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                collection.books.removeAll { $0.id == book.id }
+                self.saveChanges(reloadCollections: true)
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    func renameCollection(_ collection: BookCollection, to newName: String) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                if let index = self.collections.firstIndex(where: { $0.id == collection.id }) {
+                    self.collections[index].name = newName
+                    self.saveChanges(reloadCollections: true)
+                }
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - State Changes
+    func saveChanges(reloadBooks: Bool = false, reloadCollections: Bool = false) {
         do {
             try modelContainer.mainContext.save()
-            fetchBooks()
-            fetchCollections()
             
-            DispatchQueue.main.async { [weak self] in
-                self?.onDataChanged?()
+            // Only reload data that has changed
+            if reloadBooks {
+                fetchBooks()
+            }
+            
+            if reloadCollections {
+                fetchCollections()
             }
         } catch {
             print("Failed to save changes: \(error)")
         }
     }
     
-    // MARK: Import/Export
-    func importBooks(
-        from url: URL, completion: @escaping (Result<Void, Error>) -> Void
-    ) {
-        do {
-            guard url.startAccessingSecurityScopedResource() else {
-                completion(
-                    .failure(
-                        NSError(
-                            domain: "ImportError", code: 1,
-                            userInfo: [
-                                NSLocalizedDescriptionKey:
-                                    "Failed to access file permissions."
-                            ])))
+    // MARK: - Import/Export
+    func importBooks(from url: URL) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard let self = self else {
+                promise(.failure(NSError(domain: "DataManager", code: 0, userInfo: [NSLocalizedDescriptionKey: "DataManager was deallocated"])))
                 return
             }
-            defer { url.stopAccessingSecurityScopedResource() }
             
-            let jsonData = try Data(contentsOf: url)
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            let importedData = try decoder.decode(
-                [BookTransferData].self, from: jsonData)
-            
-            for book in importedData {
-                let newBook = DataConversion.toBookData(from: book)
-                addBook(book: newBook)
+            do {
+                guard url.startAccessingSecurityScopedResource() else {
+                    promise(.failure(NSError(domain: "ImportError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to access file permissions."])))
+                    return
+                }
+                defer { url.stopAccessingSecurityScopedResource() }
+                
+                let jsonData = try Data(contentsOf: url)
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+                let importedData = try decoder.decode([BookTransferData].self, from: jsonData)
+                
+                // Batch insert books
+                for book in importedData {
+                    let newBook = DataConversion.toBookData(from: book)
+                    self.modelContainer.mainContext.insert(newBook)
+                }
+                
+                self.saveChanges(reloadBooks: true)
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
             }
-            
-            completion(.success(()))
-        } catch {
-            completion(.failure(error))
-        }
+        }.eraseToAnyPublisher()
     }
     
-    func exportBooks(
-        to url: URL, completion: @escaping (Result<Void, Error>) -> Void
-    ) {
-        let books = self.books.filter { $0.status != .deleted }.map {
-            DataConversion.toTransferData(from: $0)
-        }
-        
-        do {
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
-            let jsonData = try encoder.encode(books)
-            try jsonData.write(to: url)
-            completion(.success(()))
-        } catch {
-            completion(.failure(error))
-        }
-    }
-    
-    func importBooksFromCSV(
-        from url: URL, completion: @escaping (Result<Void, Error>) -> Void
-    ) {
-        do {
-            guard url.startAccessingSecurityScopedResource() else {
-                completion(
-                    .failure(
-                        NSError(
-                            domain: "ImportError", code: 1,
-                            userInfo: [
-                                NSLocalizedDescriptionKey:
-                                    "Failed to access file permissions."
-                            ])))
+    func exportBooks(to url: URL) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard let self = self else {
+                promise(.failure(NSError(domain: "DataManager", code: 0, userInfo: [NSLocalizedDescriptionKey: "DataManager was deallocated"])))
                 return
             }
-            defer { url.stopAccessingSecurityScopedResource() }
             
-            let csvString = try String(contentsOf: url, encoding: .utf8)
-            let importedData = DataConversion.fromCSV(csvString: csvString)
-            
-            for book in importedData {
-                let newBook = DataConversion.toBookData(from: book)
-                addBook(book: newBook)
+            do {
+                let books = self.books.filter { $0.status != .deleted }.map {
+                    DataConversion.toTransferData(from: $0)
+                }
+                
+                let encoder = JSONEncoder()
+                encoder.dateEncodingStrategy = .iso8601
+                let jsonData = try encoder.encode(books)
+                try jsonData.write(to: url)
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
             }
-            
-            completion(.success(()))
-        } catch {
-            completion(.failure(error))
-        }
+        }.eraseToAnyPublisher()
     }
     
-    func exportBooksToCSV(
-        to url: URL, completion: @escaping (Result<Void, Error>) -> Void
-    ) {
-        let books = self.books.filter { $0.status != .deleted }.map {
-            DataConversion.toTransferData(from: $0)
-        }
-        
-        do {
-            let csvString = DataConversion.toCSV(books: books)
-            try csvString.write(to: url, atomically: true, encoding: .utf8)
-            completion(.success(()))
-        } catch {
-            completion(.failure(error))
-        }
+    func importBooksFromCSV(from url: URL) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard let self = self else {
+                promise(.failure(NSError(domain: "DataManager", code: 0, userInfo: [NSLocalizedDescriptionKey: "DataManager was deallocated"])))
+                return
+            }
+            
+            do {
+                guard url.startAccessingSecurityScopedResource() else {
+                    promise(.failure(NSError(domain: "ImportError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to access file permissions."])))
+                    return
+                }
+                defer { url.stopAccessingSecurityScopedResource() }
+                
+                let csvString = try String(contentsOf: url, encoding: .utf8)
+                let importedData = DataConversion.fromCSV(csvString: csvString)
+                
+                // Batch processing
+                for book in importedData {
+                    let newBook = DataConversion.toBookData(from: book)
+                    self.modelContainer.mainContext.insert(newBook)
+                }
+                
+                self.saveChanges(reloadBooks: true)
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    func exportBooksToCSV(to url: URL) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard let self = self else {
+                promise(.failure(NSError(domain: "DataManager", code: 0, userInfo: [NSLocalizedDescriptionKey: "DataManager was deallocated"])))
+                return
+            }
+            
+            do {
+                let books = self.books.filter { $0.status != .deleted }.map {
+                    DataConversion.toTransferData(from: $0)
+                }
+                
+                let csvString = DataConversion.toCSV(books: books)
+                try csvString.write(to: url, atomically: true, encoding: .utf8)
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
+            }
+        }.eraseToAnyPublisher()
     }
 }

@@ -1,18 +1,29 @@
 import SwiftUI
+import Combine
 
+// MARK: - Sidebar View Selection
+private enum SidebarSelection: Hashable {
+    case dashboard
+    case status(StatusFilter)
+    case collection(BookCollection)
+}
+
+// MARK: - Sidebar
 struct SidebarView: View {
-    @ObservedObject var viewModel: ContentViewModel
+    @ObservedObject var contentViewModel: ContentViewModel
+    
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var dataManager: DataManager
     @EnvironmentObject var overlayManager: OverlayManager
     
     @Environment(\.openWindow) private var openWindow
     
-    @State private var selectedSidebarItem: SidebarSelection?
-    @State private var collectionToRename: BookCollection?
-    @State private var isRenamingCollection = false
     @State private var isAddingCollection = false
+    @State private var isRenamingCollection = false
     @State private var newCollectionName: String = ""
+    @State private var collectionToRename: BookCollection?
+    @State private var cancellables = Set<AnyCancellable>()
+    @State private var selectedSidebarItem: SidebarSelection?
     
     var body: some View {
         VStack(spacing: 0) {
@@ -49,11 +60,14 @@ struct SidebarView: View {
                     existingCollectionNames: dataManager.collections.map { $0.name },
                     originalName: collectionToRename?.name,
                     onAction: {
-                        guard let collection = collectionToRename else { return }
-                        dataManager.renameCollection(collection, to: newCollectionName)
-                        viewModel.refreshAfterAction()
-                        overlayManager.showOverlay(message: "Renamed collection to \(newCollectionName)")
-                        isRenamingCollection = false
+                        guard collectionToRename != nil else { return }
+                        contentViewModel.renameSelectedCollection(to: newCollectionName)
+                            .sink(receiveCompletion: { _ in },
+                                  receiveValue: {
+                                overlayManager.showToast(message: "Renamed collection to \(newCollectionName)")
+                                isRenamingCollection = false
+                            })
+                            .store(in: &cancellables)
                     },
                     onCancel: {
                         isRenamingCollection = false
@@ -79,12 +93,12 @@ struct SidebarView: View {
         }
     }
     
-    // MARK: Sections
+    // MARK: - Reading Section
     private var readingStatusSection: some View {
         Section(header: Text("Reading Status")) {
             ForEach(StatusFilter.allCases) { status in
                 Label(status.rawValue, systemImage: status.iconName)
-                    .badge(viewModel.bookCount(for: status))
+                    .badge(contentViewModel.bookCount(for: status))
                     .tag(SidebarSelection.status(status))
                     .dropDestination(for: BookTransferData.self) { items, _ in
                         updateBookStatus(for: items, with: status)
@@ -93,6 +107,7 @@ struct SidebarView: View {
         }
     }
     
+    // MARK: - Collection Section
     private var collectionsSection: some View {
         Section(header: Text("Collections")) {
             ForEach(
@@ -102,7 +117,7 @@ struct SidebarView: View {
                 })
             ) { collection in
                 Label(collection.name, systemImage: "folder")
-                    .badge(viewModel.bookCount(for: collection))
+                    .badge(contentViewModel.bookCount(for: collection))
                     .tag(SidebarSelection.collection(collection))
                     .dropDestination(for: BookTransferData.self) { items, _ in
                         addBookToCollection(items, collection: collection)
@@ -121,6 +136,7 @@ struct SidebarView: View {
         }
     }
     
+    // MARK: - Settings Button
     private var settingsButton: some View {
         HStack {
             SettingsButton {
@@ -134,19 +150,26 @@ struct SidebarView: View {
         }
     }
     
-    // MARK: Collection Actions
+    // MARK: - Collection Actions
     private func addNewCollection() {
         dataManager.addCollection(named: newCollectionName)
-        overlayManager.showOverlay(
-            message: "Added collection: \(newCollectionName)")
-        newCollectionName = ""
-        isAddingCollection = false
+            .sink(receiveCompletion: { _ in },
+                  receiveValue: {
+                overlayManager.showToast(message: "Added collection: \(newCollectionName)")
+                newCollectionName = ""
+                isAddingCollection = false
+            })
+            .store(in: &cancellables)
     }
     
     private func deleteCollection(_ collection: BookCollection) {
         dataManager.removeCollection(collection)
-        selectedSidebarItem = nil
-        overlayManager.showOverlay(message: "Deleted \(collection.name)")
+            .sink(receiveCompletion: { _ in },
+                  receiveValue: {
+                selectedSidebarItem = nil
+                overlayManager.showToast(message: "Deleted \(collection.name)")
+            })
+            .store(in: &cancellables)
     }
     
     private func addBookToCollection(
@@ -157,13 +180,13 @@ struct SidebarView: View {
                 $0.id == collection.id
             })
         else {
-            overlayManager.showOverlay(message: "\(collection.name) not found")
+            overlayManager.showToast(message: "\(collection.name) not found")
             return false
         }
         
         // Find the corresponding BookData objects
         let booksToAdd = items.compactMap { item in
-            viewModel.books.first {
+            dataManager.books.first {
                 $0.title == item.title && $0.author == item.author
             }
         }
@@ -183,17 +206,17 @@ struct SidebarView: View {
         }
         
         if existingBooks.isEmpty && newBooks.isEmpty {
-            overlayManager.showOverlay(message: "No books to add to \(collection.name)")
+            overlayManager.showToast(message: "No books to add to \(collection.name)")
             return false
         }
         
         if !existingBooks.isEmpty {
             if existingBooks.count == 1 {
-                overlayManager.showOverlay(
+                overlayManager.showToast(
                     message: "\"\(existingBooks[0].title)\" is already in \(collection.name)"
                 )
             } else {
-                overlayManager.showOverlay(
+                overlayManager.showToast(
                     message: "\(existingBooks.count) books are already in \(collection.name)"
                 )
             }
@@ -202,52 +225,53 @@ struct SidebarView: View {
         // Only proceed if there are new books to add
         if !newBooks.isEmpty {
             dataManager.addBookToCollection(newBooks, to: targetCollection)
-            
-            if newBooks.count == 1 {
-                overlayManager.showOverlay(
-                    message: "Added \"\(newBooks[0].title)\" to \(collection.name)"
-                )
-            } else {
-                overlayManager.showOverlay(
-                    message: "Added \(newBooks.count) books to \(collection.name)"
-                )
-            }
+                .sink(receiveCompletion: { _ in },
+                      receiveValue: {
+                    if newBooks.count == 1 {
+                        overlayManager.showToast(
+                            message: "Added \"\(newBooks[0].title)\" to \(collection.name)"
+                        )
+                    } else {
+                        overlayManager.showToast(
+                            message: "Added \(newBooks.count) books to \(collection.name)"
+                        )
+                    }
+                })
+                .store(in: &cancellables)
             return true
         }
         
         return !existingBooks.isEmpty
     }
     
-    // MARK: Helpers
+    // MARK: - Helpers
     private func handleSidebarSelection(_ selection: SidebarSelection?) {
         switch selection {
         case .dashboard:
-            viewModel.selectedStatus = .all
-            viewModel.selectedCollection = nil
-            viewModel.showDashboard = true
+            contentViewModel.selectedStatus = .all
+            contentViewModel.selectedCollection = nil
+            contentViewModel.showDashboard = true
         case .status(let status):
-            viewModel.selectedStatus = status
-            viewModel.selectedCollection = nil
-            viewModel.showDashboard = false
+            contentViewModel.selectedStatus = status
+            contentViewModel.selectedCollection = nil
+            contentViewModel.showDashboard = false
         case .collection(let collection):
-            viewModel.selectedCollection = collection
-            viewModel.showDashboard = false
+            contentViewModel.selectedCollection = collection
+            contentViewModel.showDashboard = false
         case .none:
-            viewModel.selectedCollection = nil
-            viewModel.selectedStatus = .all
-            viewModel.showDashboard = false
+            contentViewModel.selectedCollection = nil
+            contentViewModel.selectedStatus = .all
+            contentViewModel.showDashboard = false
         }
     }
     
     private func ensureSidebarSelection() {
-        if viewModel.showDashboard && selectedSidebarItem != .dashboard {
+        if contentViewModel.showDashboard && selectedSidebarItem != .dashboard {
             selectedSidebarItem = .dashboard
-        } else if viewModel.selectedStatus != .all && selectedSidebarItem == nil
-        {
-            selectedSidebarItem = .status(viewModel.selectedStatus)
-        } else if let collection = viewModel.selectedCollection,
-                  selectedSidebarItem == nil
-        {
+        } else if contentViewModel.selectedStatus != .all && selectedSidebarItem == nil {
+            selectedSidebarItem = .status(contentViewModel.selectedStatus)
+        } else if let collection = contentViewModel.selectedCollection,
+                  selectedSidebarItem == nil {
             selectedSidebarItem = .collection(collection)
         }
     }
@@ -256,13 +280,13 @@ struct SidebarView: View {
         for items: [BookTransferData], with status: StatusFilter
     ) -> Bool {
         guard let newStatus = status.toReadingStatus() else {
-            overlayManager.showOverlay(
+            overlayManager.showToast(
                 message: "Cannot change status to \"All\"")
             return false
         }
         
         let alreadyInStatus = items.filter { item in
-            viewModel.books.contains { book in
+            dataManager.books.contains { book in
                 book.title == item.title && book.author == item.author
                 && book.status == newStatus
             }
@@ -270,12 +294,12 @@ struct SidebarView: View {
         
         if !alreadyInStatus.isEmpty {
             if alreadyInStatus.count == 1 {
-                overlayManager.showOverlay(
+                overlayManager.showToast(
                     message:
                         "\"\(alreadyInStatus[0].title)\" is already marked as \(newStatus.displayText)"
                 )
             } else {
-                overlayManager.showOverlay(
+                overlayManager.showToast(
                     message:
                         "\(alreadyInStatus.count) books are already marked as \(newStatus.displayText)"
                 )
@@ -284,31 +308,28 @@ struct SidebarView: View {
         }
         
         let booksToUpdate = items.compactMap { item in
-            viewModel.books.first {
+            dataManager.books.first {
                 $0.title == item.title && $0.author == item.author
             }
         }
         
-        viewModel.updateBookStatus(for: booksToUpdate, to: newStatus)
-        
-        if booksToUpdate.count == 1, let firstBook = booksToUpdate.first {
-            overlayManager.showOverlay(
-                message:
-                    "Changed status of \"\(firstBook.title)\" to \(newStatus.displayText)"
-            )
-        } else {
-            overlayManager.showOverlay(
-                message:
-                    "Changed status of \(booksToUpdate.count) books to \(newStatus.displayText)"
-            )
-        }
+        contentViewModel.updateBookStatus(for: booksToUpdate, to: newStatus)
+            .sink(receiveCompletion: { _ in },
+                  receiveValue: {
+                if booksToUpdate.count == 1, let firstBook = booksToUpdate.first {
+                    overlayManager.showToast(
+                        message:
+                            "Changed status of \"\(firstBook.title)\" to \(newStatus.displayText)"
+                    )
+                } else {
+                    overlayManager.showToast(
+                        message:
+                            "Changed status of \(booksToUpdate.count) books to \(newStatus.displayText)"
+                    )
+                }
+            })
+            .store(in: &cancellables)
         
         return true
     }
-}
-
-enum SidebarSelection: Hashable {
-    case dashboard
-    case status(StatusFilter)
-    case collection(BookCollection)
 }

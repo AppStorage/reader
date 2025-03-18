@@ -1,14 +1,23 @@
 import Foundation
 import AppKit
 
+// MARK: - GitHub Release Errors
+private enum GitHubReleaseError: Error {
+    case noAssetsAvailable
+    case invalidResponse
+    case decodingError(String)
+}
+
+// MARK: - Coding Keys
+private enum CodingKeys: String, CodingKey {
+    case tagName = "tag_name"
+    case assets
+}
+
+// MARK: - GitHub Release
 struct GitHubRelease: Decodable {
     let tagName: String
     let assets: [Asset]
-    
-    private enum CodingKeys: String, CodingKey {
-        case tagName = "tag_name"
-        case assets
-    }
     
     struct Asset: Decodable {
         let browserDownloadURL: URL
@@ -19,6 +28,7 @@ struct GitHubRelease: Decodable {
     }
 }
 
+// MARK: - Fetch Latest Release
 // Async function to fetch the latest release information from GitHub
 func fetchLatestRelease() async throws -> (String, URL) {
     let url = URL(string: "https://api.github.com/repos/chippokiddo/reader/releases/latest")!
@@ -47,10 +57,4 @@ func fetchLatestRelease() async throws -> (String, URL) {
     } catch {
         throw GitHubReleaseError.decodingError(error.localizedDescription)
     }
-}
-
-enum GitHubReleaseError: Error {
-    case noAssetsAvailable
-    case invalidResponse
-    case decodingError(String)
 }

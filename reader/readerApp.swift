@@ -7,14 +7,13 @@ import enum Settings.Settings
 struct readerApp: App {
     @StateObject private var appState = AppState()
     @StateObject private var dataManager: DataManager
-    @StateObject private var viewModel: ContentViewModel
+    @StateObject private var alertManager = AlertManager()
     @StateObject private var overlayManager = OverlayManager()
+    @StateObject private var contentViewModel: ContentViewModel
     
     @Environment(\.openWindow) private var openWindow
     
-    private static var preferencesWindow: SettingsWindowController? = nil
-    
-    private static let sharedModelContainer: ModelContainer? = {
+    private static var sharedModelContainer: ModelContainer? = {
         let schema = Schema([BookData.self, BookCollection.self])
         do {
             return try ModelContainer(
@@ -27,6 +26,63 @@ struct readerApp: App {
         }
     }()
     
+    private static var preferencesWindow: SettingsWindowController? = nil
+    
+    // MARK: - Main Window
+    private var mainWindow: some Scene {
+        WindowGroup {
+            ContentView()
+                .environmentObject(appState)
+                .environmentObject(dataManager)
+                .environmentObject(alertManager)
+                .environmentObject(overlayManager)
+                .environmentObject(contentViewModel)
+                .environment(\.modelContainer, readerApp.sharedModelContainer!)
+                .onAppear {
+                    appState.contentViewModel = contentViewModel
+                    appState.alertManager = alertManager
+                    alertManager.contentViewModel = contentViewModel
+                    alertManager.appState = appState
+                    handleOnAppear()
+                }
+                .onDisappear {
+                    NSApp.terminate(nil)
+                }
+        }
+        .commands {
+            AppCommands.fileCommands(
+                appState: appState,
+                dataManager: dataManager
+            ) { openWindow(id: $0) }
+            AppCommands.appInfoCommands(appState: appState)
+            AppCommands.settingsCommands(
+                appState: appState,
+                dataManager: dataManager
+            )
+            AppCommands.deleteCommands(
+                appState: appState,
+                contentViewModel: contentViewModel
+            )
+        }
+    }
+    
+    // MARK: - Add Book Window
+    private var addBookWindow: some Scene {
+        Window("Add Book", id: "addBookWindow") {
+            AddView(viewModel: contentViewModel)
+                .environmentObject(appState)
+                .environmentObject(overlayManager)
+        }
+        .windowStyle(HiddenTitleBarWindowStyle())
+        .windowResizability(.contentSize)
+        .defaultPosition(.center)
+    }
+    
+    var body: some Scene {
+        mainWindow
+        addBookWindow
+    }
+    
     init() {
         NSWindow.allowsAutomaticWindowTabbing = false
         
@@ -37,93 +93,7 @@ struct readerApp: App {
         
         let dataManager = DataManager(modelContainer: container)
         _dataManager = StateObject(wrappedValue: dataManager)
-        _viewModel = StateObject(wrappedValue: ContentViewModel(dataManager: dataManager))
-    }
-    
-    var body: some Scene {
-        mainWindow
-        addBookWindow
-    }
-    
-    private var mainWindow: some Scene {
-        WindowGroup {
-            ContentView()
-                .environmentObject(viewModel)
-                .environmentObject(dataManager)
-                .environmentObject(appState)
-                .environmentObject(overlayManager)
-                .environment(\.modelContainer, readerApp.sharedModelContainer!)
-                .onAppear {
-                    appState.viewModel = viewModel
-                    handleOnAppear()
-                }
-                .onDisappear {
-                    NSApp.terminate(nil)
-                }
-        }
-        .commands {
-            AppCommands.fileCommands(appState: appState, dataManager: dataManager) { openWindow(id: $0) }
-            AppCommands.appInfoCommands(appState: appState)
-            AppCommands.settingsCommands(appState: appState, dataManager: dataManager)
-            AppCommands.deleteCommands(appState: appState, viewModel: viewModel)
-        }
-    }
-    
-    // MARK: Preferences Window
-    static func showSettingsWindow(appState: AppState, dataManager: DataManager, checkForUpdates: @escaping () -> Void) {
-        if preferencesWindow == nil {
-            let settingsView = SettingsView(checkForUpdates: {
-                checkForUpdates()
-            })
-                .environmentObject(appState)
-            
-            let aboutView = AboutView()
-                .environmentObject(appState)
-            
-            let importExportView = ImportExportView()
-                .environmentObject(dataManager)
-                .environmentObject(appState)
-            
-            preferencesWindow = SettingsWindowController(
-                panes: [
-                    Settings.Pane(
-                        identifier: Settings.PaneIdentifier("general"),
-                        title: "General",
-                        toolbarIcon: { gearToolbarIcon() }()
-                    ) {
-                        settingsView
-                    },
-                    Settings.Pane(
-                        identifier: Settings.PaneIdentifier("import_export"),
-                        title: "Manage Data",
-                        toolbarIcon: { manageDataToolbarIcon() }()
-                    ) {
-                        importExportView
-                    },
-                    Settings.Pane(
-                        identifier: Settings.PaneIdentifier("about"),
-                        title: "About",
-                        toolbarIcon: { infoToolbarIcon() }()
-                    ) {
-                        aboutView
-                    }
-                ]
-            )
-        }
-        preferencesWindow?.window?.center()
-        preferencesWindow?.show()
-    }
-    
-    private var addBookWindow: some Scene {
-        Window("Add Book", id: "addBookWindow") {
-            AddView()
-                .environmentObject(dataManager)
-                .environmentObject(appState)
-                .environmentObject(overlayManager)
-        }
-        .windowStyle(HiddenTitleBarWindowStyle())
-        .windowResizability(.contentSize)
-        .defaultPosition(.center)
+        _contentViewModel = StateObject(wrappedValue: ContentViewModel(dataManager: dataManager))
     }
     
     private func handleOnAppear() {
@@ -131,7 +101,7 @@ struct readerApp: App {
         appState.scheduleUpdateCheck()
     }
     
-    // MARK: Preferences Icons
+    // MARK: - Preferences Icons
     private static func gearToolbarIcon(size: CGFloat = 24, innerSize: CGFloat = 18) -> NSImage {
         let originalImage = NSImage(named: "squareGear") ?? NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)!
         let paddedSize = NSSize(width: size, height: size)
@@ -168,5 +138,52 @@ struct readerApp: App {
             systemSymbolName: "icloud.square.fill",
             accessibilityDescription: "Manage Data"
         )!.withSymbolConfiguration(config)!
+    }
+    
+    // MARK: - Preferences Window
+    static func showSettingsWindow(appState: AppState, dataManager: DataManager, checkForUpdates: @escaping () -> Void) {
+        if preferencesWindow == nil {
+            let settingsView = SettingsView(checkForUpdates: {
+                checkForUpdates()
+            })
+                .environmentObject(appState)
+                .environmentObject(appState.alertManager!)
+            
+            let aboutView = AboutView()
+                .environmentObject(appState)
+            
+            let importExportView = ImportExportView()
+                .environmentObject(appState)
+                .environmentObject(dataManager)
+                .environmentObject(appState.alertManager!)
+            
+            preferencesWindow = SettingsWindowController(
+                panes: [
+                    Settings.Pane(
+                        identifier: Settings.PaneIdentifier("general"),
+                        title: "General",
+                        toolbarIcon: { gearToolbarIcon() }()
+                    ) {
+                        settingsView
+                    },
+                    Settings.Pane(
+                        identifier: Settings.PaneIdentifier("import_export"),
+                        title: "Manage Data",
+                        toolbarIcon: { manageDataToolbarIcon() }()
+                    ) {
+                        importExportView
+                    },
+                    Settings.Pane(
+                        identifier: Settings.PaneIdentifier("about"),
+                        title: "About",
+                        toolbarIcon: { infoToolbarIcon() }()
+                    ) {
+                        aboutView
+                    }
+                ]
+            )
+        }
+        preferencesWindow?.window?.center()
+        preferencesWindow?.show()
     }
 }

@@ -3,17 +3,16 @@ import SwiftData
 
 struct DetailView: View {
     @Bindable var book: BookData
-    @EnvironmentObject var viewModel: ContentViewModel
+    
     @EnvironmentObject var dataManager: DataManager
-    
-    @Environment(\.modelContext) var modelContext
-    
-    @State private var newQuote: String = ""
+    @EnvironmentObject var viewModel: ContentViewModel
+        
     @State private var newNote: String = ""
+    @State private var newQuote: String = ""
+    @State private var isEditingDetails = false
     @State private var descriptionText: String = ""
     @State private var saveTask: Task<Void, Never>?
     @State private var currentStatus: ReadingStatus
-    @State private var isEditingDetails = false
     
     init(book: BookData) {
         self.book = book
@@ -24,12 +23,18 @@ struct DetailView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 20) {
                 bookDetailsSection
-                StatusSection(book: book, modelContext: modelContext)
+                StatusSection(book: book)
+                
                 Divider()
+                
                 tagsSection
+                
                 Divider()
+                
                 quotesSection
+                
                 Divider()
+                
                 notesSection
             }
             .padding()
@@ -61,10 +66,11 @@ struct DetailView: View {
             }
         }
         .sheet(isPresented: $isEditingDetails) {
-            EditBookDetails(book: book)
+            EditBookDetailsSheet(book: book)
         }
     }
     
+    // MARK: - Book Info
     private var bookDetailsSection: some View {
         DetailsSection(
             title: book.title,
@@ -78,30 +84,26 @@ struct DetailView: View {
         )
     }
     
+    // MARK: - Date Start/Finish
     private func dateTextView(label: String, date: Date) -> some View {
         Text("\(label): \(formatDate(date))")
             .font(.subheadline)
             .foregroundColor(.secondary)
     }
     
+    // MARK: - Tags
     private var tagsSection: some View {
         TagsSection(book: book)
     }
     
+    // MARK: - Quotes
     private var quotesSection: some View {
-        QuotesSection(
-            book: book,
-            newQuote: $newQuote,
-            modelContext: modelContext
-        )
+        QuotesSection(book: book, newQuote: $newQuote)
     }
     
+    // MARK: - Notes
     private var notesSection: some View {
-        NotesSection(
-            book: book,
-            newNote: $newNote,
-            modelContext: modelContext
-        )
+        NotesSection(book: book, newNote: $newNote)
     }
     
     // MARK: Helpers

@@ -2,9 +2,11 @@ import SwiftUI
 
 struct SelectEditionSheet: View {
     @Binding var selectedBook: BookTransferData?
+    
+    let searchResults: [BookTransferData]
+    
     var addBook: (BookTransferData) -> Void
     var cancel: () -> Void
-    let searchResults: [BookTransferData]
     
     var body: some View {
         VStack {

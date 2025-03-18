@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 struct AboutView: View {
     @EnvironmentObject var appState: AppState
@@ -12,7 +11,6 @@ struct AboutView: View {
                 .opacity(0)
             
             VStack(spacing: 20) {
-                // App Icon
                 Image(nsImage: NSApp.applicationIconImage)
                     .resizable()
                     .frame(width: 100, height: 100)
@@ -64,7 +62,7 @@ struct AboutView: View {
         }
     }
     
-    // MARK: Cleanup
+    // MARK: - Cleanup
     private func releaseSettingsWindowResources() {
         appState.cleanupPreferencesCache()
     }

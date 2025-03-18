@@ -1,25 +1,27 @@
 import SwiftUI
 
+// MARK: - Search Suggestions Container
 struct SearchSuggestionContainer: View {
-    @ObservedObject var viewModel: ContentViewModel
+    @ObservedObject var contentViewModel: ContentViewModel
     
     var body: some View {
-        if viewModel.searchQuery.isEmpty {
-            EmptyQuerySuggestions(viewModel: viewModel)
-        } else if viewModel.searchQuery.lowercased().hasPrefix("author:") {
-            AuthorSuggestions(viewModel: viewModel)
-        } else if viewModel.searchQuery.hasPrefix("#") {
-            TagSuggestions(viewModel: viewModel)
-        } else if viewModel.searchQuery.lowercased().hasPrefix("title:") {
-            TitleSuggestions(viewModel: viewModel)
+        if contentViewModel.searchQuery.isEmpty {
+            EmptyQuerySuggestions(contentViewModel: contentViewModel)
+        } else if contentViewModel.searchQuery.lowercased().hasPrefix("author:") {
+            AuthorSuggestions(contentViewModel: contentViewModel)
+        } else if contentViewModel.searchQuery.hasPrefix("#") {
+            TagSuggestions(contentViewModel: contentViewModel)
+        } else if contentViewModel.searchQuery.lowercased().hasPrefix("title:") {
+            TitleSuggestions(contentViewModel: contentViewModel)
         } else {
-            MatchingRecentSearches(viewModel: viewModel)
+            MatchingRecentSearches(contentViewModel: contentViewModel)
         }
     }
 }
 
+// MARK: - Empty Query Suggestions
 struct EmptyQuerySuggestions: View {
-    @ObservedObject var viewModel: ContentViewModel
+    @ObservedObject var contentViewModel: ContentViewModel
     
     var body: some View {
         // Show search prefix options
@@ -35,7 +37,7 @@ struct EmptyQuerySuggestions: View {
         }
         
         // Show recent searches with clear option
-        let recentSearches = viewModel.getRecentSearches()
+        let recentSearches = contentViewModel.getRecentSearches()
         if !recentSearches.isEmpty {
             Section {
                 ForEach(recentSearches.prefix(5), id: \.self) { search in
@@ -44,7 +46,7 @@ struct EmptyQuerySuggestions: View {
                 }
                 
                 Button("Clear") {
-                    viewModel.clearRecentSearches()
+                    contentViewModel.clearRecentSearches()
                 }
                 .foregroundColor(.red)
             } header: {
@@ -54,13 +56,14 @@ struct EmptyQuerySuggestions: View {
     }
 }
 
-// Author suggestions when using the author: prefix
+// MARK: - Author Suggestions
+// When using the author: prefix
 struct AuthorSuggestions: View {
-    @ObservedObject var viewModel: ContentViewModel
+    @ObservedObject var contentViewModel: ContentViewModel
     
     var body: some View {
-        let authorPrefix = viewModel.searchQuery.dropFirst(7).trimmingCharacters(in: .whitespacesAndNewlines)
-        let suggestions = viewModel.getTopAuthors(matching: authorPrefix)
+        let authorPrefix = contentViewModel.searchQuery.dropFirst(7).trimmingCharacters(in: .whitespacesAndNewlines)
+        let suggestions = contentViewModel.getTopAuthors(matching: authorPrefix)
         
         if !suggestions.isEmpty {
             ForEach(suggestions, id: \.self) { author in
@@ -73,13 +76,14 @@ struct AuthorSuggestions: View {
     }
 }
 
-// Tag suggestions when using the # prefix
+// MARK: - Tag Suggestions
+// When using the # prefix
 struct TagSuggestions: View {
-    @ObservedObject var viewModel: ContentViewModel
+    @ObservedObject var contentViewModel: ContentViewModel
     
     var body: some View {
-        let tagPrefix = viewModel.searchQuery.dropFirst(1).trimmingCharacters(in: .whitespacesAndNewlines)
-        let suggestions = viewModel.getTopTags(matching: tagPrefix)
+        let tagPrefix = contentViewModel.searchQuery.dropFirst(1).trimmingCharacters(in: .whitespacesAndNewlines)
+        let suggestions = contentViewModel.getTopTags(matching: tagPrefix)
         
         if !suggestions.isEmpty {
             ForEach(suggestions, id: \.self) { tag in
@@ -94,11 +98,11 @@ struct TagSuggestions: View {
 
 // Title suggestions when using the title: prefix
 struct TitleSuggestions: View {
-    @ObservedObject var viewModel: ContentViewModel
+    @ObservedObject var contentViewModel: ContentViewModel
     
     var body: some View {
-        let titlePrefix = viewModel.searchQuery.dropFirst(6).trimmingCharacters(in: .whitespacesAndNewlines)
-        let suggestions = viewModel.getTopTitles(matching: titlePrefix)
+        let titlePrefix = contentViewModel.searchQuery.dropFirst(6).trimmingCharacters(in: .whitespacesAndNewlines)
+        let suggestions = contentViewModel.getTopTitles(matching: titlePrefix)
         
         if !suggestions.isEmpty {
             ForEach(suggestions, id: \.self) { title in
@@ -111,13 +115,13 @@ struct TitleSuggestions: View {
     }
 }
 
-// Matching recent searches
+// MARK: - Matching Recent Searches
 struct MatchingRecentSearches: View {
-    @ObservedObject var viewModel: ContentViewModel
+    @ObservedObject var contentViewModel: ContentViewModel
     
     var body: some View {
-        let recentSearches = viewModel.getRecentSearches()
-            .filter { $0.lowercased().contains(viewModel.searchQuery.lowercased()) }
+        let recentSearches = contentViewModel.getRecentSearches()
+            .filter { $0.lowercased().contains(contentViewModel.searchQuery.lowercased()) }
         
         if !recentSearches.isEmpty {
             Section("Recent Searches") {

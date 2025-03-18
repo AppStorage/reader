@@ -1,5 +1,16 @@
 import Foundation
 
+// Top-level response from the Google Books API
+struct GoogleBooksResponse: Codable {
+    let items: [BookItem]?
+}
+
+// Each book item in the API response
+struct BookItem: Codable {
+    let volumeInfo: VolumeInfo
+}
+
+// Book volume information from the API
 struct VolumeInfo: Codable {
     let title: String
     let authors: [String]?
@@ -10,6 +21,11 @@ struct VolumeInfo: Codable {
     let industryIdentifiers: [IndustryIdentifier]?
     let subtitle: String?
     let series: String?
+}
+
+struct IndustryIdentifier: Codable {
+    let type: String
+    let identifier: String
 }
 
 extension VolumeInfo {
@@ -32,9 +48,7 @@ extension VolumeInfo {
     var primaryCategory: String? {
         categories?.first
     }
-}
-
-extension VolumeInfo {
+    
     // Determines the primary ISBN based on input or available identifiers
     func primaryISBN(userInputISBN: String? = nil) -> String? {
         if let inputISBN = userInputISBN,

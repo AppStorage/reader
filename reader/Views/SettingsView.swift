@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var alertManager: AlertManager
     
     @Environment(\.colorScheme) private var colorScheme
     
@@ -35,13 +36,14 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .animation(.easeInOut(duration: 0.2), value: appState.checkForUpdatesAutomatically)
-        .animation(.easeInOut(duration: 0.3), value: appState.alertType != nil)
+        .animation(.easeInOut(duration: 0.3), value: alertManager.currentAlert != nil)
         .frame(width: 400, height: 300)
         .onDisappear {
             releaseSettingsWindowResources()
         }
     }
     
+    // MARK: - Automatic Updates
     private var updateToggleRow: some View {
         Toggle(isOn: $appState.checkForUpdatesAutomatically) {
             Label {
@@ -54,6 +56,8 @@ struct SettingsView: View {
         }
     }
     
+    // MARK: - Update Frequency
+    // Only when automatic updates is toggled
     private var frequencyPicker: some View {
         Picker("Check Frequency", selection: $appState.updateCheckFrequency) {
             Text("Daily").tag(86400.0)
@@ -66,6 +70,7 @@ struct SettingsView: View {
         .transition(.move(edge: .top).combined(with: .opacity))
     }
     
+    // MARK: - Manual Update Check
     private var checkForUpdatesButton: some View {
         Button {
             isCheckingManually = true
@@ -97,6 +102,7 @@ struct SettingsView: View {
         .disabled(appState.isCheckingForUpdates || isCheckingManually)
     }
     
+    // MARK: - Update Status
     @ViewBuilder
     private var updateStatusView: some View {
         switch appState.lastCheckStatus {
@@ -143,16 +149,8 @@ struct SettingsView: View {
         }
     }
     
-    // MARK: Cleanup
+    // MARK: - Cleanup
     private func releaseSettingsWindowResources() {
         appState.cleanupPreferencesCache()
     }
-}
-
-enum Theme: String, CaseIterable, Identifiable {
-    case light
-    case dark
-    case system
-    
-    var id: String { rawValue }
 }

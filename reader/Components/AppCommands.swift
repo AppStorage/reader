@@ -1,7 +1,12 @@
 import SwiftUI
+import Combine
 
+@MainActor
 struct AppCommands {
-    @MainActor static func fileCommands(appState: AppState, dataManager: DataManager, openWindow: @escaping (String) -> Void) -> some Commands {
+    private static var cancellables = Set<AnyCancellable>()
+    
+    // MARK: - Import/Export Actions
+    static func fileCommands(appState: AppState, dataManager: DataManager, openWindow: @escaping (String) -> Void) -> some Commands {
         CommandGroup(replacing: .newItem) {
             Button("Add Book") {
                 openWindow("addBookWindow")
@@ -17,14 +22,15 @@ struct AppCommands {
                 panel.canChooseDirectories = false
                 
                 if panel.runModal() == .OK, let url = panel.url {
-                    dataManager.importBooks(from: url) { result in
-                        switch result {
-                        case .success:
-                            appState.showImportSuccess()
-                        case .failure(let error):
-                            appState.alertType = .error("Import failed: \(error.localizedDescription)")
-                        }
-                    }
+                    dataManager.importBooks(from: url)
+                        .sink(receiveCompletion: { completion in
+                            if case .failure(let error) = completion {
+                                appState.alertManager?.showError("Import failed: \(error.localizedDescription)")
+                            }
+                        }, receiveValue: {
+                            appState.alertManager?.showImportSuccess()
+                        })
+                        .store(in: &Self.cancellables)
                 }
             }
             .keyboardShortcut("i", modifiers: .command)
@@ -35,21 +41,23 @@ struct AppCommands {
                 panel.nameFieldStringValue = "books-\(currentDateString()).json"
                 
                 if panel.runModal() == .OK, let url = panel.url {
-                    dataManager.exportBooks(to: url) { result in
-                        switch result {
-                        case .success:
-                            appState.showExportSuccess()
-                        case .failure(let error):
-                            appState.alertType = .error("Export failed: \(error.localizedDescription)")
-                        }
-                    }
+                    dataManager.exportBooks(to: url)
+                        .sink(receiveCompletion: { completion in
+                            if case .failure(let error) = completion {
+                                appState.alertManager?.showError("Export failed: \(error.localizedDescription)")
+                            }
+                        }, receiveValue: {
+                            appState.alertManager?.showExportSuccess()
+                        })
+                        .store(in: &Self.cancellables)
                 }
             }
             .keyboardShortcut("e", modifiers: .command)
         }
     }
     
-    @MainActor static func appInfoCommands(appState: AppState) -> some Commands {
+    // MARK: - Update
+    static func appInfoCommands(appState: AppState) -> some Commands {
         CommandGroup(after: .appInfo) {
             Button("Check for Updates...") {
                 appState.checkForAppUpdates(isUserInitiated: true)
@@ -58,6 +66,7 @@ struct AppCommands {
         }
     }
     
+    // MARK: - Preferences
     static func settingsCommands(appState: AppState, dataManager: DataManager) -> some Commands {
         CommandGroup(replacing: .appSettings) {
             Button("Preferences...") {
@@ -69,7 +78,8 @@ struct AppCommands {
         }
     }
     
-    @MainActor static func deleteCommands(appState: AppState, viewModel: ContentViewModel) -> some Commands {
+    // MARK: - Delete Book Actions
+    static func deleteCommands(appState: AppState, contentViewModel: ContentViewModel) -> some Commands {
         CommandGroup(after: CommandGroupPlacement.pasteboard) {
             let selectedBooks = appState.selectedBooks
             let bookCount = selectedBooks.count
@@ -81,9 +91,9 @@ struct AppCommands {
                 guard !selectedBooks.isEmpty else { return }
                 
                 if selectedBooks.allSatisfy({ $0.status == .deleted }) {
-                    appState.showPermanentDeleteConfirmation(for: selectedBooks)
+                    appState.alertManager?.showPermanentDeleteConfirmation(for: selectedBooks)
                 } else {
-                    appState.showSoftDeleteConfirmation(for: selectedBooks)
+                    appState.alertManager?.showSoftDeleteConfirmation(for: selectedBooks)
                 }
             }
             .keyboardShortcut(.delete, modifiers: [])
@@ -91,7 +101,7 @@ struct AppCommands {
             
             Button(permanentDeleteLabel) {
                 guard !selectedBooks.isEmpty else { return }
-                appState.showPermanentDeleteConfirmation(for: selectedBooks)
+                appState.alertManager?.showPermanentDeleteConfirmation(for: selectedBooks)
             }
             .keyboardShortcut(.delete, modifiers: .command)
             .disabled(selectedBooks.isEmpty)

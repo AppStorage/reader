@@ -3,84 +3,125 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var dataManager: DataManager
-    @EnvironmentObject var viewModel: ContentViewModel
+    @EnvironmentObject var alertManager: AlertManager
     @EnvironmentObject var overlayManager: OverlayManager
+    @EnvironmentObject var contentViewModel: ContentViewModel
     
     @Environment(\.openWindow) private var openWindow
     
-    @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
+    @State private var isSearching = false
     @State private var searchText: String = ""
     @State private var selectedBookIDs: Set<UUID> = []
-    @State private var isSearching = false
+    @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
     
     var body: some View {
         ZStack {
             NavigationSplitView(columnVisibility: $columnVisibility) {
-                SidebarView(viewModel: viewModel)
-                    .frame(width: 225)
+                sidebarContent
             } content: {
-                if viewModel.showDashboard {
-                    ReadingDashboardView()
-                        .frame(minWidth: 800, maxWidth: .infinity)
-                } else {
-                    MiddlePanelView(
-                        viewModel: viewModel, selectedBookIDs: $selectedBookIDs
-                    )
-                    .frame(minWidth: 350, maxWidth: .infinity)
-                }
+                middleContent
             } detail: {
-                if viewModel.showDashboard {
-                    EmptyView()
-                } else if selectedBookIDs.count > 1 {
-                    let selectedBooks = viewModel.displayedBooks.filter {
-                        selectedBookIDs.contains($0.id)
-                    }
-                    MultipleSelectionView(
-                        count: selectedBooks.count,
-                        selectedBooks: selectedBooks,
-                        viewModel: viewModel,
-                        dataManager: dataManager,
-                        selectedCollection: viewModel.selectedCollection
-                    )
-                    .frame(minWidth: 450, maxWidth: .infinity)
-                } else if let selectedID = selectedBookIDs.first,
-                          let selectedBook = viewModel.displayedBooks.first(where: {
-                              $0.id == selectedID
-                          })
-                {
-                    DetailView(book: selectedBook)
-                        .frame(minWidth: 450, maxWidth: .infinity)
-                } else {
-                    EmptyStateView(type: .detail, viewModel: viewModel)
-                        .frame(minWidth: 450, maxWidth: .infinity)
-                }
+                detailContent
             }
             .onChange(of: selectedBookIDs) { oldValue, newValue in
-                if oldValue != newValue {
-                    appState.selectedBooks = viewModel.displayedBooks.filter {
-                        newValue.contains($0.id)
-                    }
-                }
+                handleSelectedBooksChange(oldValue: oldValue, newValue: newValue)
             }
             .navigationSplitViewStyle(.balanced)
             .searchable(
-                text: $viewModel.searchQuery,
+                text: $contentViewModel.searchQuery,
                 isPresented: $isSearching,
                 placement: .sidebar,
                 prompt: "Search books..."
             )
             .searchSuggestions {
-                SearchSuggestionContainer(viewModel: viewModel)
+                SearchSuggestionContainer(contentViewModel: contentViewModel)
             }
             .onSubmit(of: .search) {
-                viewModel.submitSearch()
+                contentViewModel.submitSearch()
             }
             
             OverlayView()
         }
         .frame(minHeight: 475, maxHeight: .infinity)
-        .alert(item: $appState.alertType) { alertType in
-            alertType.createAlert(appState: appState)
+        .alert(item: $alertManager.currentAlert) { alertType in
+            AlertBuilder.createAlert(
+                for: alertType,
+                contentViewModel: contentViewModel,
+                appState: appState
+            )
+        }
+    }
+    
+    // MARK: - Sidebar
+    private var sidebarContent: some View {
+        SidebarView(contentViewModel: contentViewModel)
+            .frame(width: 225)
+    }
+    
+    // MARK: - Book List
+    private var middleContent: some View {
+        Group {
+            if contentViewModel.showDashboard {
+                ReadingDashboardView()
+                    .frame(minWidth: 800, maxWidth: .infinity)
+            } else {
+                MiddlePanelView(
+                    selectedBookIDs: $selectedBookIDs, contentViewModel: contentViewModel
+                )
+                .frame(minWidth: 350, maxWidth: .infinity)
+            }
+        }
+    }
+    
+    // MARK: - Third Pane
+    @ViewBuilder
+    private var detailContent: some View {
+        if contentViewModel.showDashboard {
+            EmptyView()
+        } else if selectedBookIDs.count > 1 {
+            multipleSelectionView
+        } else if let selectedBook = getSelectedBook() {
+            SingleBookDetailView(book: selectedBook)
+        } else {
+            EmptyStateView(type: .detail)
+                .frame(minWidth: 450, maxWidth: .infinity)
+        }
+    }
+    
+    // MARK: - Multiple Books Selected
+    private var multipleSelectionView: some View {
+        let selectedBooks = getSelectedBooks()
+        return MultipleSelectionView(
+            selectedBooks: selectedBooks
+        )
+        .environmentObject(dataManager)
+        .environmentObject(contentViewModel)
+        .frame(minWidth: 450, maxWidth: .infinity)
+    }
+    
+    // MARK: - Book Details
+    private func SingleBookDetailView(book: BookData) -> some View {
+        DetailView(book: book)
+            .frame(minWidth: 450, maxWidth: .infinity)
+    }
+    
+    // MARK: - Helpers
+    private func getSelectedBook() -> BookData? {
+        guard let selectedID = selectedBookIDs.first else { return nil }
+        return contentViewModel.displayedBooks.first { $0.id == selectedID }
+    }
+    
+    private func getSelectedBooks() -> [BookData] {
+        return contentViewModel.displayedBooks.filter {
+            selectedBookIDs.contains($0.id)
+        }
+    }
+    
+    private func handleSelectedBooksChange(oldValue: Set<UUID>, newValue: Set<UUID>) {
+        if oldValue != newValue {
+            appState.selectedBooks = contentViewModel.displayedBooks.filter {
+                newValue.contains($0.id)
+            }
         }
     }
 }

@@ -1,6 +1,10 @@
 import SwiftUI
+import Combine
 
+// MARK: - Book Status Buttons
 struct StatusButtons: View {
+    @State private var cancellables = Set<AnyCancellable>()
+    
     let books: [BookData]
     let dataManager: DataManager
     
@@ -30,10 +34,12 @@ struct StatusButtons: View {
         .accessibilityLabel("Mark as Read")
     }
     
-    // MARK: Overlay Feedback
+    // MARK: - UI Feedback
     private func updateStatus(for status: ReadingStatus, label: String) {
         for book in books {
             dataManager.updateBookStatus(book, to: status)
+                .sink(receiveValue: { _ in })
+                .store(in: &cancellables)
         }
     }
 }

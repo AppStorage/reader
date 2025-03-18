@@ -1,18 +1,21 @@
 import SwiftUI
 
+// MARK: - Sort Options
 enum SortOption: String, CaseIterable {
     case title = "Title"
     case author = "Author"
     case published = "Published"
 }
 
+// MARK: - Sort Order
 enum SortOrder {
     case ascending
     case descending
 }
 
+// MARK: - Sort Button
 struct SortMenuButton: View {
-    @ObservedObject var viewModel: ContentViewModel
+    @ObservedObject var contentViewModel: ContentViewModel
     
     var body: some View {
         Menu {
@@ -34,11 +37,11 @@ struct SortMenuButton: View {
     }
     
     private func sortOptionButton(label: String, option: SortOption) -> some View {
-        Button(action: { viewModel.sortOption = option }) {
+        Button(action: { contentViewModel.sortOption = option }) {
             HStack {
                 Text(label)
                 Spacer()
-                if viewModel.sortOption == option {
+                if contentViewModel.sortOption == option {
                     Image(systemName: "checkmark")
                 }
             }
@@ -46,11 +49,11 @@ struct SortMenuButton: View {
     }
     
     private func sortOrderButton(label: String, order: SortOrder, icon: String) -> some View {
-        Button(action: { viewModel.sortOrder = order }) {
+        Button(action: { contentViewModel.sortOrder = order }) {
             HStack {
                 Text(label)
                 Spacer()
-                if viewModel.sortOrder == order {
+                if contentViewModel.sortOrder == order {
                     Image(systemName: icon)
                 }
             }

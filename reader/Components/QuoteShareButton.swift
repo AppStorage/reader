@@ -16,7 +16,7 @@ struct QuoteShareButton: View {
         }
         .disabled(book.quotes.isEmpty)
         .sheet(isPresented: $isShowingShareSheet) {
-            QuoteShareView(book: book, isPresented: $isShowingShareSheet)
+            QuoteShareView(isPresented: $isShowingShareSheet, book: book)
         }
     }
 }

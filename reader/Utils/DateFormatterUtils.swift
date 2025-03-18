@@ -1,5 +1,6 @@
 import Foundation
 
+// MARK: - Date Formatter Utility
 final class DateFormatterUtils {
     static let formatterQueue = DispatchQueue(
         label: "chip.reader.dateformatter.queue", attributes: .concurrent)
@@ -41,6 +42,7 @@ final class DateFormatterUtils {
     }
 }
 
+// MARK: - Parse Date
 func parseDate(_ dateString: String?) -> Date? {
     guard let dateString, !dateString.isEmpty else { return nil }
     
@@ -59,6 +61,8 @@ func parseDate(_ dateString: String?) -> Date? {
     return nil
 }
 
+// MARK: - Current Date
+// Used in default save name for exporting data
 func currentDateString() -> String {
     var dateString: String = ""
     DateFormatterUtils.formatterQueue.sync {

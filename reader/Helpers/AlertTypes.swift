@@ -1,5 +1,6 @@
 import SwiftUI
 
+// MARK: - Alert Types
 enum AlertTypes: Identifiable {
     case newUpdateAvailable
     case upToDate
@@ -26,9 +27,13 @@ enum AlertTypes: Identifiable {
     }
 }
 
-extension AlertTypes {
-    @MainActor func createAlert(appState: AppState) -> Alert {
-        switch self {
+// MARK: - Alert Builder
+@MainActor
+class AlertBuilder {
+    static func createAlert(for alertType: AlertTypes,
+                            contentViewModel: ContentViewModel,
+                            appState: AppState) -> Alert {
+        switch alertType {
         case .newUpdateAvailable:
             return Alert(
                 title: Text("New Update Available"),
@@ -67,7 +72,7 @@ extension AlertTypes {
                 title: Text("Move to Deleted?"),
                 message: Text(message),
                 primaryButton: .default(Text("Delete")) {
-                    appState.viewModel?.softDeleteBooks(books)
+                    contentViewModel.performSoftDelete(books: books, appState: appState)
                 },
                 secondaryButton: .cancel(Text("Cancel"))
             )
@@ -81,7 +86,7 @@ extension AlertTypes {
                 title: Text("Permanently Delete?"),
                 message: Text(message),
                 primaryButton: .destructive(Text("Delete")) {
-                    appState.viewModel?.permanentlyDeleteBooks(books)
+                    contentViewModel.performPermanentDelete(books: books, appState: appState)
                 },
                 secondaryButton: .cancel(Text("Cancel"))
             )

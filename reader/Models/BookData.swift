@@ -3,7 +3,13 @@ import SwiftData
 
 @Model
 class BookData: Identifiable {
+    @Relationship(inverse: \BookCollection.books) var collections: [BookCollection] = []
+    
     @Attribute(.unique) var id: UUID = UUID()
+    @Attribute private var statusRawValue: String
+    @Attribute private var tagsData: Data?
+    @Attribute private var quotesData: Data?
+    @Attribute private var notesData: Data?
     
     var title: String
     var author: String
@@ -16,15 +22,11 @@ class BookData: Identifiable {
     var dateFinished: Date?
     var bookDescription: String?
     
-    @Relationship(inverse: \BookCollection.books) var collections: [BookCollection] = []
-    
-    @Attribute private var statusRawValue: String
     var status: ReadingStatus {
         get { ReadingStatus(rawValue: statusRawValue) ?? .unread }
         set { statusRawValue = newValue.rawValue }
     }
     
-    @Attribute private var tagsData: Data?
     var tags: [String] {
         get {
             guard let data = tagsData else { return [] }
@@ -32,13 +34,12 @@ class BookData: Identifiable {
             return decodedTags
         }
         set {
-            let encodedData = try? JSONEncoder().encode(newValue)
+            // Normalize tags by eliminating case duplicates
+            let normalizedTags = normalizeTags(newValue)
+            let encodedData = try? JSONEncoder().encode(normalizedTags)
             tagsData = encodedData
         }
     }
-    
-    @Attribute private var quotesData: Data?
-    @Attribute private var notesData: Data?
     
     var quotes: [String] {
         get { decodeTextArray(from: quotesData) ?? [] }
@@ -48,6 +49,10 @@ class BookData: Identifiable {
     var notes: [String] {
         get { decodeTextArray(from: notesData) ?? [] }
         set { notesData = encodeTextArray(newValue) }
+    }
+    
+    var hasNotesOrQuotes: Bool {
+        !notes.isEmpty || !quotes.isEmpty
     }
     
     init(
@@ -79,33 +84,7 @@ class BookData: Identifiable {
         self.dateFinished = dateFinished
         self.quotes = quotes
         self.notes = notes
-        self.tags = tags
-    }
-    
-    func updateDates(for newStatus: ReadingStatus) {
-        switch newStatus {
-        case .reading:
-            if dateStarted == nil { dateStarted = Date() }
-            if let startDate = dateStarted, let finishDate = dateFinished, finishDate < startDate {
-                dateFinished = nil
-            }
-        case .read:
-            if dateStarted == nil { dateStarted = Date() }
-            if dateFinished == nil { dateFinished = Date() }
-            if let startDate = dateStarted, let finishDate = dateFinished, finishDate < startDate {
-                dateFinished = startDate
-            }
-        case .unread, .deleted:
-            dateStarted = nil
-            dateFinished = nil
-        }
-        validateDates()
-    }
-    
-    func validateDates() {
-        if let startDate = dateStarted, let finishDate = dateFinished, finishDate < startDate {
-            dateFinished = startDate
-        }
+        self.tags = normalizeTags(tags)
     }
     
     private func encodeTags(_ tags: [String]) -> Data? {
@@ -125,16 +104,25 @@ class BookData: Identifiable {
         guard let data = data else { return nil }
         return try? JSONDecoder().decode([String].self, from: data)
     }
+    
+    // Normalize tags array by removing case duplicates
+    private static func normalizeTags(_ inputTags: [String]) -> [String] {
+        var normalizedTags: [String] = []
+        var seenTagsLowercase: Set<String> = []
         
-    var hasNotesOrQuotes: Bool {
-        !notes.isEmpty || !quotes.isEmpty
+        for tag in inputTags {
+            let lowercaseTag = tag.lowercased()
+            if !seenTagsLowercase.contains(lowercaseTag) {
+                normalizedTags.append(tag) // Keep original case
+                seenTagsLowercase.insert(lowercaseTag)
+            }
+        }
+        
+        return normalizedTags
     }
     
-    func addTag(_ tag: String) {
-        var updatedTags = tags
-        if !updatedTags.contains(tag) {
-            updatedTags.append(tag)
-        }
-        tags = updatedTags
+    // Instance method wrapper for the static function
+    private func normalizeTags(_ inputTags: [String]) -> [String] {
+        return BookData.normalizeTags(inputTags)
     }
 }

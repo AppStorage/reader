@@ -1,7 +1,11 @@
 import SwiftUI
+import Combine
 
 struct BookActionButton: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var alertManager: AlertManager
+    
+    @State private var cancellables = Set<AnyCancellable>()
     
     let books: [BookData]
     let dataManager: DataManager
@@ -19,13 +23,15 @@ struct BookActionButton: View {
         }
     }
     
-    // MARK: Recover Button
+    // MARK: - Recover Button
     private func recoverButton(for books: [BookData]) -> some View {
         let label = books.count == 1 ? "Recover Book" : "Recover Books"
         
         return Button(action: {
             for book in books {
                 dataManager.updateBookStatus(book, to: .unread)
+                    .sink(receiveValue: { _ in })
+                    .store(in: &cancellables)
             }
         }) {
             Label("Recover", systemImage: "arrow.uturn.backward")
@@ -34,7 +40,7 @@ struct BookActionButton: View {
         .accessibilityLabel(label)
     }
     
-    // MARK: Delete Button
+    // MARK: - Delete Button
     private func deleteButton(for books: [BookData], isPermanent: Bool) -> some View {
         let label = isPermanent
         ? (books.count == 1 ? "Permanently Delete Book" : "Permanently Delete Books")
@@ -42,9 +48,9 @@ struct BookActionButton: View {
         
         return Button(action: {
             if isPermanent {
-                appState.showPermanentDeleteConfirmation(for: books)
+                appState.alertManager?.showPermanentDeleteConfirmation(for: books)
             } else {
-                appState.showSoftDeleteConfirmation(for: books)
+                appState.alertManager?.showSoftDeleteConfirmation(for: books)
             }
         }) {
             Label(isPermanent ? "Permanently Delete" : "Delete", systemImage: "trash")

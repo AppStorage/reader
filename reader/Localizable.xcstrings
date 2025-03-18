@@ -27,12 +27,6 @@
     },
     "%lld Books Selected" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld Books Selected"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -43,12 +37,6 @@
     },
     "%lld day%@" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld day%2$@"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -76,14 +64,11 @@
     "•" : {
       "shouldTranslate" : false
     },
+    "↩︎" : {
+      "shouldTranslate" : false
+    },
     "Add" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -94,12 +79,6 @@
     },
     "Add Book" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add Book"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -110,12 +89,6 @@
     },
     "Add Date" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add Date"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -126,12 +99,6 @@
     },
     "Add New Book" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add New Book"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -140,14 +107,18 @@
         }
       }
     },
-    "Add some highlights to this book to create quotes" : {
+    "Add published date" : {
       "localizations" : {
-        "en" : {
+        "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add some highlights to this book to create quotes"
+            "value" : "Agregar fecha de publicación"
           }
-        },
+        }
+      }
+    },
+    "Add some highlights to this book to create quotes" : {
+      "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -158,12 +129,6 @@
     },
     "All Time" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All Time"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -172,14 +137,18 @@
         }
       }
     },
-    "Attributed to" : {
+    "already exists in this book" : {
       "localizations" : {
-        "en" : {
+        "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Attributed to"
+            "value" : "ya existe en este libro"
           }
-        },
+        }
+      }
+    },
+    "Attributed to" : {
+      "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -190,12 +159,6 @@
     },
     "author:" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "author:"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -206,12 +169,6 @@
     },
     "Author: %@" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Author: %@"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -222,12 +179,6 @@
     },
     "Automatic Updates" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Automatic Updates"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -238,12 +189,6 @@
     },
     "Background" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Background"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -252,14 +197,18 @@
         }
       }
     },
-    "Books" : {
+    "Book description" : {
       "localizations" : {
-        "en" : {
+        "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Books"
+            "value" : "Descripción del libro"
           }
-        },
+        }
+      }
+    },
+    "Books" : {
+      "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -270,12 +219,6 @@
     },
     "Books have been exported successfully." : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Books have been exported successfully."
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -286,12 +229,6 @@
     },
     "Books have been imported successfully." : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Books have been imported successfully."
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -302,12 +239,6 @@
     },
     "by %@" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "by %@"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -318,12 +249,6 @@
     },
     "By: %@" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "By: %@"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -334,12 +259,6 @@
     },
     "Cancel" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancel"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -348,30 +267,28 @@
         }
       }
     },
-    "Cancel Fetching Books" : {
+    "Cancel editing" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancel Fetching Books"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cancelar la Obtención de Libros"
+            "value" : "Cancelar edición"
+          }
+        }
+      }
+    },
+    "Cancel Operation" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar operación"
           }
         }
       }
     },
     "Check for Updates" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Check for Updates"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -382,12 +299,6 @@
     },
     "Check for Updates..." : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Check for Updates..."
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -398,12 +309,6 @@
     },
     "Check Frequency" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Check Frequency"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -414,12 +319,6 @@
     },
     "Checking..." : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Checking…"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -430,12 +329,6 @@
     },
     "Clear" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clear"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -444,14 +337,18 @@
         }
       }
     },
-    "Clear tag %@" : {
+    "Clear date" : {
       "localizations" : {
-        "en" : {
+        "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clear tag %@"
+            "value" : "Borrar fecha"
           }
-        },
+        }
+      }
+    },
+    "Clear tag %@" : {
+      "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -462,12 +359,6 @@
     },
     "Close" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Close"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -478,12 +369,6 @@
     },
     "Collection Name" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Collection Name"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -494,12 +379,6 @@
     },
     "Collections" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Collections"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -510,12 +389,6 @@
     },
     "Copy ISBN" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copy ISBN"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -526,12 +399,6 @@
     },
     "Count" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Count"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -542,12 +409,6 @@
     },
     "CSV" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CSV"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -558,12 +419,6 @@
     },
     "Daily" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daily"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -574,12 +429,6 @@
     },
     "Dashboard" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dashboard"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -590,12 +439,6 @@
     },
     "Delete" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -606,12 +449,6 @@
     },
     "Delete Collection" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete Collection"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -622,12 +459,6 @@
     },
     "Description" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Description"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -638,12 +469,6 @@
     },
     "Dismiss" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dismiss"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -654,12 +479,6 @@
     },
     "Done" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Done"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -670,12 +489,6 @@
     },
     "Download" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Download"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -686,12 +499,6 @@
     },
     "Edit" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Edit"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -700,14 +507,18 @@
         }
       }
     },
-    "Edit Book Details" : {
+    "Edit %@" : {
       "localizations" : {
-        "en" : {
+        "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit Book Details"
+            "value" : "Editar %@"
           }
-        },
+        }
+      }
+    },
+    "Edit Book Details" : {
+      "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -716,14 +527,18 @@
         }
       }
     },
-    "Enter name" : {
+    "Enter a %@ here" : {
       "localizations" : {
-        "en" : {
+        "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enter name"
+            "value" : "Ingrese un %@ aquí"
           }
-        },
+        }
+      }
+    },
+    "Enter name" : {
+      "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -734,12 +549,6 @@
     },
     "Error" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Error"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -750,12 +559,6 @@
     },
     "Error: %@" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Error: %@"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -766,12 +569,6 @@
     },
     "Export Books..." : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Export Books…"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -782,12 +579,6 @@
     },
     "Export Successful" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Export Successful"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -798,12 +589,6 @@
     },
     "Fetch Book" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fetch Book"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -814,12 +599,6 @@
     },
     "Genre" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Genre"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -830,12 +609,6 @@
     },
     "Import Books..." : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Import Books..."
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -846,12 +619,6 @@
     },
     "Import Successful" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Import Successful"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -862,12 +629,6 @@
     },
     "Invalid Data" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Invalid Data"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -878,12 +639,6 @@
     },
     "ISBN: %@" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ISBN: %@"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -894,12 +649,6 @@
     },
     "ISBN: Not available" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ISBN: Not available"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -910,12 +659,6 @@
     },
     "JSON" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "JSON"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -926,12 +669,6 @@
     },
     "Later" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Later"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -942,12 +679,6 @@
     },
     "Mark as Read" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mark as Read"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -958,12 +689,6 @@
     },
     "Mark as Reading" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mark as Reading"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -974,12 +699,6 @@
     },
     "Mark as Unread" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mark as Unread"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -990,12 +709,6 @@
     },
     "Month" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Month"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1006,12 +719,6 @@
     },
     "Monthly" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Monthly"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1022,12 +729,6 @@
     },
     "Move to Deleted?" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Move to Deleted?"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1038,12 +739,6 @@
     },
     "New Collection" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New Collection"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1054,12 +749,6 @@
     },
     "New Update Available" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New Update Available"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1070,12 +759,6 @@
     },
     "No books found. Please check the details and try again." : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No books found. Please check the details and try again."
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1084,14 +767,18 @@
         }
       }
     },
-    "No editions found." : {
+    "No date" : {
       "localizations" : {
-        "en" : {
+        "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No editions found."
+            "value" : "Sin fecha"
           }
-        },
+        }
+      }
+    },
+    "No editions found." : {
+      "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1102,12 +789,6 @@
     },
     "No matching authors found" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No matching authors found"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1116,14 +797,18 @@
         }
       }
     },
-    "No matching tags found" : {
+    "No matching tags" : {
       "localizations" : {
-        "en" : {
+        "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No matching tags found"
+            "value" : "No hay etiquetas coincidentes"
           }
-        },
+        }
+      }
+    },
+    "No matching tags found" : {
+      "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1134,12 +819,6 @@
     },
     "No matching titles found" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No matching titles found"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1148,30 +827,8 @@
         }
       }
     },
-    "No notes exist here yet." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No notes exist here yet."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No hay notas aquí todavía."
-          }
-        }
-      }
-    },
     "No quotes available" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No quotes available"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1180,30 +837,8 @@
         }
       }
     },
-    "No quotes exist here yet." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No quotes exist here yet."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No hay citas aquí todavía."
-          }
-        }
-      }
-    },
     "No Results Found" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No Results Found"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1212,30 +847,8 @@
         }
       }
     },
-    "No tags exist here yet." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No tags exist here yet."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No hay etiquetas aquí todavía."
-          }
-        }
-      }
-    },
     "No Updates Available" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No Updates Available"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1246,12 +859,6 @@
     },
     "OK" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1262,12 +869,6 @@
     },
     "Order" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Order"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1278,12 +879,6 @@
     },
     "p. %@" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "p. %@"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1294,12 +889,6 @@
     },
     "Page no. (e.g., 11 or 11-15)" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Page no. (e.g., 11 or 11-15)"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1310,12 +899,6 @@
     },
     "Permanently Delete" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Permanently Delete"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1326,12 +909,6 @@
     },
     "Permanently Delete?" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Permanently Delete?"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1342,12 +919,6 @@
     },
     "Preferences" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Preferences"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1358,12 +929,6 @@
     },
     "Preferences..." : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Preferences..."
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1372,14 +937,18 @@
         }
       }
     },
-    "Preview" : {
+    "Press Enter to create" : {
       "localizations" : {
-        "en" : {
+        "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Preview"
+            "value" : "Presione Enter para crear"
           }
-        },
+        }
+      }
+    },
+    "Preview" : {
+      "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1390,12 +959,6 @@
     },
     "Publisher: %@" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Publisher: %@"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1406,12 +969,6 @@
     },
     "Read" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Read"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1425,12 +982,6 @@
     },
     "reader %@ is available. Would you like to download it?" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "reader %@ is available. Would you like to download it?"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1441,12 +992,6 @@
     },
     "Reading" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reading"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1457,12 +1002,6 @@
     },
     "Reading Status" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reading Status"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1473,12 +1012,6 @@
     },
     "Recent Searches" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recent Searches"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1489,12 +1022,6 @@
     },
     "Recover" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recover"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1505,12 +1032,6 @@
     },
     "Refresh" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Refresh"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1521,12 +1042,6 @@
     },
     "Refreshing..." : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Refreshing..."
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1537,12 +1052,6 @@
     },
     "Remove from Collection" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove from Collection"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1553,12 +1062,6 @@
     },
     "Remove tag %@" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove tag %@"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1569,12 +1072,6 @@
     },
     "Rename Collection" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rename Collection"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1583,14 +1080,18 @@
         }
       }
     },
-    "Restore" : {
+    "Required field" : {
       "localizations" : {
-        "en" : {
+        "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Restore"
+            "value" : "Campo obligatorio"
           }
-        },
+        }
+      }
+    },
+    "Restore" : {
+      "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1601,12 +1102,6 @@
     },
     "Save" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Save"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1615,14 +1110,18 @@
         }
       }
     },
-    "Save Image" : {
+    "Save book details" : {
       "localizations" : {
-        "en" : {
+        "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Save Image"
+            "value" : "Guardar detalles del libro"
           }
-        },
+        }
+      }
+    },
+    "Save Image" : {
+      "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1633,12 +1132,6 @@
     },
     "Search books..." : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search books..."
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1649,12 +1142,6 @@
     },
     "Search by" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search by"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1665,12 +1152,6 @@
     },
     "Select Edition" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select Edition"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1681,12 +1162,6 @@
     },
     "Select Quote" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select Quote"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1697,12 +1172,6 @@
     },
     "Share" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Share"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1713,12 +1182,6 @@
     },
     "Share Quote" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Share Quote"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1729,12 +1192,6 @@
     },
     "Sort" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sort"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1745,12 +1202,6 @@
     },
     "Sort By" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sort By"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1761,12 +1212,6 @@
     },
     "Sort Options" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sort Options"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1777,12 +1222,6 @@
     },
     "Status:" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Status:"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1791,14 +1230,18 @@
         }
       }
     },
-    "Theme" : {
+    "Tag already exists" : {
       "localizations" : {
-        "en" : {
+        "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Theme"
+            "value" : "La etiqueta ya existe"
           }
-        },
+        }
+      }
+    },
+    "Theme" : {
+      "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1809,12 +1252,6 @@
     },
     "This Year" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This Year"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1825,12 +1262,6 @@
     },
     "Time Scale" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Time Scale"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1841,12 +1272,6 @@
     },
     "title:" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "title:"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1857,12 +1282,6 @@
     },
     "Title: %@" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Title: %@"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1873,12 +1292,6 @@
     },
     "Unread" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unread"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1887,14 +1300,18 @@
         }
       }
     },
-    "Version %@" : {
+    "Use ↑↓ to navigate, Enter to select" : {
       "localizations" : {
-        "en" : {
+        "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@"
+            "value" : "Use ↑↓ para navegar, Enter para seleccionar"
           }
-        },
+        }
+      }
+    },
+    "Version %@" : {
+      "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1905,12 +1322,6 @@
     },
     "Version %@ Available" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Version %@ Available"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1921,12 +1332,6 @@
     },
     "Weekly" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weekly"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1937,12 +1342,6 @@
     },
     "Year" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Year"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1953,12 +1352,6 @@
     },
     "You are already on the latest version." : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You are already on the latest version."
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1969,12 +1362,6 @@
     },
     "You're up to date" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You're up to date"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",

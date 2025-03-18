@@ -2,8 +2,8 @@ import SwiftUI
 import Charts
 
 struct MonthlyReadingChartView: View {
-    let books: [BookData]
     @State private var selectedPosition: ChartHighlightPosition? = nil
+    let books: [BookData]
     
     var body: some View {
         let calendar = Calendar.current

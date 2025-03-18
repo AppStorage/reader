@@ -1,11 +1,13 @@
 import SwiftUI
 
 struct MultipleSelectionView: View {
-    let count: Int
+    @EnvironmentObject var dataManager: DataManager
+    @EnvironmentObject var contentViewModel: ContentViewModel
+    
     let selectedBooks: [BookData]
-    let viewModel: ContentViewModel
-    let dataManager: DataManager
-    let selectedCollection: BookCollection?
+    
+    var count: Int { selectedBooks.count }
+    var selectedCollection: BookCollection? { contentViewModel.selectedCollection }
     
     var body: some View {
         VStack(spacing: 12) {

@@ -1,9 +1,11 @@
 import SwiftUI
 import SwiftData
 
+// MARK: - Status Section
 struct StatusSection: View {
     @Bindable var book: BookData
-    let modelContext: ModelContext
+    
+    @EnvironmentObject var contentViewModel: ContentViewModel
     
     @State private var isEditingStartDate = false
     @State private var isEditingFinishDate = false
@@ -35,7 +37,10 @@ struct StatusSection: View {
             DateEditorView(label: "Date Finished", date: $book.dateFinished, isEditing: $isEditingFinishDate)
         }
         .padding(.vertical, 10)
-        .onChange(of: [book.dateStarted, book.dateFinished]) { validateDates() }
+        .onChange(of: [book.dateStarted, book.dateFinished]) {
+            validateDates()
+            contentViewModel.saveChanges()
+        }
     }
     
     private func validateDates() {
@@ -45,10 +50,14 @@ struct StatusSection: View {
     }
 }
 
+// MARK: - Reading Start/Finish Dates
 struct DateEditorView: View {
     let label: String
+    
     @Binding var date: Date?
     @Binding var isEditing: Bool
+    @EnvironmentObject var contentViewModel: ContentViewModel
+    
     @State private var tempDate: Date? = nil
     
     var body: some View {
@@ -58,29 +67,49 @@ struct DateEditorView: View {
                 .frame(width: 120, alignment: .leading)
                 .foregroundColor(.secondary)
             
-            if let unwrappedDate = date {
+            if date != nil || isEditing {
                 if isEditing {
-                    DatePicker("", selection: Binding(
-                        get: { tempDate ?? unwrappedDate },
-                        set: { newDate in tempDate = newDate }
-                    ), displayedComponents: .date)
-                    .labelsHidden()
-                    .datePickerStyle(.compact)
+                    HStack {
+                        if tempDate != nil {
+                            DatePicker("", selection: Binding(
+                                get: { tempDate ?? Date() },
+                                set: { newDate in tempDate = newDate }
+                            ), displayedComponents: .date)
+                            .labelsHidden()
+                            .datePickerStyle(.compact)
+                            
+                            // Clear date button
+                            Button(action: {
+                                tempDate = nil
+                            }) {
+                                Image(systemName: "xmark.circle")
+                                    .foregroundColor(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        } else {
+                            Text("No date")
+                                .foregroundColor(.secondary)
+                                .italic()
+                        }
+                    }
                     .padding(8)
                     .background(RoundedRectangle(cornerRadius: 8)
                         .stroke(Color.gray.opacity(0.5), lineWidth: 1))
                     
+                    // Confirm changes
                     Button(action: {
-                        date = tempDate
+                        date = tempDate // Will be nil if cleared
                         isEditing = false
+                        contentViewModel.saveChanges()
                     }) {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(.green)
                     }
                     .buttonStyle(.plain)
                     
+                    // Cancel changes
                     Button(action: {
-                        date = nil
+                        tempDate = date // Reset to original
                         isEditing = false
                     }) {
                         Image(systemName: "xmark.circle.fill")
@@ -90,7 +119,7 @@ struct DateEditorView: View {
                     
                 } else {
                     HStack {
-                        Text(StatusSection.formatDate(unwrappedDate))
+                        Text(formatDate(date!))
                             .foregroundColor(.primary)
                         
                         Button(action: {
@@ -110,7 +139,6 @@ struct DateEditorView: View {
             } else {
                 Button("Add Date") {
                     tempDate = Date()
-                    date = tempDate
                     isEditing = true
                 }
                 .buttonStyle(.bordered)
@@ -118,60 +146,9 @@ struct DateEditorView: View {
         }
         .padding(.vertical, 4)
     }
-}
-
-extension StatusSection {
-    static func formatDate(_ date: Date?) -> String {
+    
+    private func formatDate(_ date: Date?) -> String {
         guard let date = date else { return "" }
         return DateFormatterUtils.cachedMediumFormatter.string(from: date)
-    }
-    
-    static func handleStatusChange(for book: BookData, to newStatus: ReadingStatus, modelContext: ModelContext) {
-        DispatchQueue.main.async {
-            updateBookDates(for: book, newStatus: newStatus)
-            saveBookStatusChange(for: book, modelContext: modelContext)
-        }
-    }
-    
-    static func updateBookDates(for book: BookData, newStatus: ReadingStatus) {
-        switch newStatus {
-        case .unread, .deleted:
-            resetBookDates(for: book)
-        case .reading:
-            startReading(for: book)
-        case .read:
-            finishReading(for: book)
-        }
-    }
-    
-    static func resetBookDates(for book: BookData) {
-        book.dateStarted = nil
-        book.dateFinished = nil
-    }
-    
-    static func startReading(for book: BookData) {
-        book.dateStarted = book.dateStarted ?? Date()
-        book.dateFinished = nil
-    }
-    
-    static func finishReading(for book: BookData) {
-        if book.dateStarted == nil {
-            book.dateStarted = Date()
-        }
-        book.dateFinished = Date()
-    }
-    
-    static func saveBookStatusChange(for book: BookData, modelContext: ModelContext) {
-        Task {
-            try? await Task.sleep(nanoseconds: 500_000_000)
-            do {
-                try await MainActor.run {
-                    try modelContext.save()
-                    print("Book status change saved successfully.")
-                }
-            } catch {
-                print("Failed to save book status change: \(error)")
-            }
-        }
     }
 }

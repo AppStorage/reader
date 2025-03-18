@@ -1,12 +1,37 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import Combine
 
+// MARK: - Export Formats
+private enum ExportFormat {
+    case json, csv
+    
+    var utType: UTType {
+        switch self {
+        case .json: return .json
+        case .csv: return .commaSeparatedText
+        }
+    }
+    
+    var fileExtension: String {
+        switch self {
+        case .json: return "json"
+        case .csv: return "csv"
+        }
+    }
+}
+
+// MARK: - Manage Data
 struct ImportExportView: View {
-    @EnvironmentObject var dataManager: DataManager
     @EnvironmentObject var appState: AppState
-    @State private var showingImporter = false
+    @EnvironmentObject var dataManager: DataManager
+    @EnvironmentObject var alertManager: AlertManager
+    @EnvironmentObject var contentViewModel: ContentViewModel
+    
     @State private var importError: String?
+    @State private var showingImporter = false
     @State private var isExportHovered: Bool = false
+    @State private var cancellables = Set<AnyCancellable>()
     
     var body: some View {
         ZStack {
@@ -21,7 +46,7 @@ struct ImportExportView: View {
                         title: "Import Books...",
                         systemImage: "square.and.arrow.down",
                         action: {
-                            showingImporter.toggle()
+                            showingImporter = true
                         }
                     )
                     .fileImporter(
@@ -89,25 +114,44 @@ struct ImportExportView: View {
             .frame(width: 400)
             .onDisappear {
                 releaseSettingsWindowResources()
+                cancellables.removeAll()
             }
         }
     }
     
+    // MARK: - Import Functions
     private func handleImport(result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
             if let url = urls.first {
                 if url.pathExtension.lowercased() == "json" {
-                    dataManager.importBooks(from: url) { result in
-                        handleImportResult(result)
-                    }
+                    dataManager.importBooks(from: url)
+                        .sink(receiveCompletion: { completion in
+                            switch completion {
+                            case .finished:
+                                break
+                            case .failure(let error):
+                                self.importError = "Import error: \(error.localizedDescription)"
+                            }
+                        }, receiveValue: { _ in
+                            self.handleImportResult(.success(()))
+                        })
+                        .store(in: &cancellables)
                 } else if url.pathExtension.lowercased() == "csv" {
-                    dataManager.importBooksFromCSV(from: url) { result in
-                        handleImportResult(result)
-                    }
+                    dataManager.importBooksFromCSV(from: url)
+                        .sink(receiveCompletion: { completion in
+                            switch completion {
+                            case .finished:
+                                break
+                            case .failure(let error):
+                                self.importError = "Import error: \(error.localizedDescription)"
+                            }
+                        }, receiveValue: { _ in
+                            self.handleImportResult(.success(()))
+                        })
+                        .store(in: &cancellables)
                 } else {
-                    importError =
-                    "Unsupported file format. Please use JSON or CSV."
+                    importError = "Unsupported file format. Please use JSON or CSV."
                 }
             }
         case .failure(let error):
@@ -118,46 +162,46 @@ struct ImportExportView: View {
     private func handleImportResult(_ result: Result<Void, Error>) {
         switch result {
         case .success:
-            appState.showImportSuccess()
+            appState.alertManager?.showImportSuccess()
         case .failure(let error):
             importError = "Import failed: \(error.localizedDescription)"
         }
     }
     
-    private enum ExportFormat {
-        case json, csv
-        
-        var utType: UTType {
-            switch self {
-            case .json: return .json
-            case .csv: return .commaSeparatedText
-            }
-        }
-        
-        var fileExtension: String {
-            switch self {
-            case .json: return "json"
-            case .csv: return "csv"
-            }
-        }
-    }
-    
+    // MARK: Export Functions
     private func handleExport(format: ExportFormat) {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [format.utType]
-        panel.nameFieldStringValue =
-        "books-\(currentDateString()).\(format.fileExtension)"
+        panel.nameFieldStringValue = "books-\(currentDateString()).\(format.fileExtension)"
         
         if panel.runModal() == .OK, let url = panel.url {
             switch format {
             case .json:
-                dataManager.exportBooks(to: url) { result in
-                    handleExportResult(result)
-                }
+                dataManager.exportBooks(to: url)
+                    .sink(receiveCompletion: { completion in
+                        switch completion {
+                        case .finished:
+                            break
+                        case .failure(let error):
+                            self.handleExportResult(.failure(error))
+                        }
+                    }, receiveValue: { _ in
+                        self.handleExportResult(.success(()))
+                    })
+                    .store(in: &cancellables)
             case .csv:
-                dataManager.exportBooksToCSV(to: url) { result in
-                    handleExportResult(result)
-                }
+                dataManager.exportBooksToCSV(to: url)
+                    .sink(receiveCompletion: { completion in
+                        switch completion {
+                        case .finished:
+                            break
+                        case .failure(let error):
+                            self.handleExportResult(.failure(error))
+                        }
+                    }, receiveValue: { _ in
+                        self.handleExportResult(.success(()))
+                    })
+                    .store(in: &cancellables)
             }
         }
     }
@@ -165,7 +209,7 @@ struct ImportExportView: View {
     private func handleExportResult(_ result: Result<Void, Error>) {
         switch result {
         case .success:
-            appState.showExportSuccess()
+            appState.alertManager?.showExportSuccess()
         case .failure(let error):
             importError = "Export failed: \(error.localizedDescription)"
         }
@@ -176,6 +220,7 @@ struct ImportExportView: View {
     }
 }
 
+// Fix for accessibility to commaSeparatedText
 extension UTType {
     static let commaSeparatedText = UTType(filenameExtension: "csv")!
 }

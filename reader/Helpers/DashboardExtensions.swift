@@ -21,27 +21,3 @@ extension Array where Element == (genre: String, count: Int) {
         return sortedData.map { BookStatisticsService.GenreData(genre: $0.genre, count: $0.count) }
     }
 }
-
-extension BookStatisticsService {
-    struct MonthlyData: Identifiable {
-        let id = UUID()
-        let month: String
-        let count: Int
-        
-        init(month: String, count: Int) {
-            self.month = month
-            self.count = count
-        }
-    }
-    
-    struct GenreData: Identifiable {
-        let id = UUID()
-        let genre: String
-        let count: Int
-        
-        init(genre: String, count: Int) {
-            self.genre = genre
-            self.count = count
-        }
-    }
-}

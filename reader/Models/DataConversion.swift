@@ -40,6 +40,7 @@ struct DataConversion {
         )
     }
     
+    // MARK: - JSON
     static func encodeToJSON(_ transferData: BookTransferData) -> Data? {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
@@ -52,6 +53,7 @@ struct DataConversion {
         return try? decoder.decode(BookTransferData.self, from: jsonData)
     }
     
+    // MARK: - CSV
     static let csvHeaders = [
         "title", "author", "published", "publisher", "genre", "series",
         "isbn", "description", "status", "dateStarted", "dateFinished",
@@ -106,7 +108,7 @@ struct DataConversion {
         return books
     }
     
-    // MARK: Helpers
+    // MARK: - Helpers
     private static func createBookFromCSVFields(_ fields: [String])
     -> BookTransferData
     {

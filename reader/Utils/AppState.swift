@@ -1,5 +1,24 @@
 import SwiftUI
 
+// MARK: - Update Check Status
+enum UpdateCheckStatus {
+    case unknown
+    case checking
+    case upToDate
+    case updateAvailable
+    case error(String)
+}
+
+// MARK: - Themes
+enum Theme: String, CaseIterable, Identifiable {
+    case light
+    case dark
+    case system
+    
+    var id: String { rawValue }
+}
+
+// MARK: - AppState
 @MainActor
 class AppState: ObservableObject {
     @AppStorage("selectedTheme") private var storedTheme: String = "system"
@@ -7,12 +26,9 @@ class AppState: ObservableObject {
     @AppStorage("updateCheckFrequency") var updateCheckFrequency: Double = 604800.0 // Default to weekly in seconds
     
     @Published var isCheckingForUpdates: Bool = false
-    @Published var alertType: AlertTypes?
     @Published var latestVersion: String?
     @Published var downloadURL: URL?
     @Published var lastCheckStatus: UpdateCheckStatus = .unknown
-    @Published var showSoftDeleteConfirmation = false
-    @Published var showPermanentDeleteConfirmation = false
     @Published var selectedBooks: [BookData] = []
     @Published var selectedTheme: Theme = .system {
         didSet {
@@ -21,9 +37,11 @@ class AppState: ObservableObject {
         }
     }
     
-    var viewModel: ContentViewModel?
-    var temporarySettings: [String: Any] = [:]
+    var alertManager: AlertManager?
     var aboutCache: [String: Any] = [:]
+    var overlayManager: OverlayManager?
+    var contentViewModel: ContentViewModel?
+    var temporarySettings: [String: Any] = [:]
     
     init() {
         selectedTheme = Theme(rawValue: storedTheme) ?? .system
@@ -36,7 +54,7 @@ class AppState: ObservableObject {
         scheduleUpdateCheck()
     }
     
-    // MARK: Appearance
+    // MARK: - Apply Theme
     func applyTheme(_ theme: Theme) {
         switch theme {
         case .system:
@@ -48,13 +66,13 @@ class AppState: ObservableObject {
         }
     }
     
-    // MARK: Cleanup
+    // MARK: - Cleanup
     func cleanupPreferencesCache() {
         temporarySettings.removeAll()
         aboutCache.removeAll()
     }
     
-    // MARK: Updates
+    // MARK: - Updates
     func checkForAppUpdates(isUserInitiated: Bool, showAlert: Bool = true) {
         isCheckingForUpdates = true
         lastCheckStatus = .checking
@@ -73,7 +91,7 @@ class AppState: ObservableObject {
                         self.lastCheckStatus = .updateAvailable
                         
                         if showAlert {
-                            self.alertType = .newUpdateAvailable
+                            self.alertManager?.showAlert(.newUpdateAvailable)
                         }
                     }
                 } else {
@@ -81,7 +99,7 @@ class AppState: ObservableObject {
                         self.lastCheckStatus = .upToDate
                         
                         if isUserInitiated && showAlert {
-                            self.alertType = .upToDate
+                            self.alertManager?.showAlert(.upToDate)
                         }
                     }
                 }
@@ -94,7 +112,7 @@ class AppState: ObservableObject {
                     self.lastCheckStatus = .error(errorMessage)
                     
                     if isUserInitiated && showAlert {
-                        self.alertType = .error(errorMessage)
+                        self.alertManager?.showAlert(.error(errorMessage))
                     }
                 }
             }
@@ -123,36 +141,5 @@ class AppState: ObservableObject {
         if timeInterval >= updateCheckFrequency {
             checkForAppUpdates(isUserInitiated: false)
         }
-    }
-    
-    enum UpdateCheckStatus {
-        case unknown
-        case checking
-        case upToDate
-        case updateAvailable
-        case error(String)
-    }
-    
-    // MARK: Delete Actions
-    func showSoftDeleteConfirmation(for books: [BookData]) {
-        alertType = .softDelete(books: books)
-    }
-    
-    func showPermanentDeleteConfirmation(for books: [BookData]) {
-        alertType = .permanentDelete(books: books)
-    }
-    
-    // MARK: Book Results
-    func showNoResults() {
-        alertType = .noResults("")
-    }
-    
-    // MARK: Import/Export
-    func showImportSuccess() {
-        alertType = .importSuccess
-    }
-    
-    func showExportSuccess() {
-        alertType = .exportSuccess
     }
 }

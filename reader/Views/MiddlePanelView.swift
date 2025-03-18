@@ -1,28 +1,34 @@
 import SwiftUI
+import Combine
 
 struct MiddlePanelView: View {
-    @ObservedObject var viewModel: ContentViewModel
+    @Binding var selectedBookIDs: Set<UUID>
+    
+    @ObservedObject var contentViewModel: ContentViewModel
+    
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var alertManager: AlertManager
+    @EnvironmentObject var overlayManager: OverlayManager
     
     @Environment(\.openWindow) private var openWindow
     @Environment(\.colorScheme) private var colorScheme
     
-    @Binding var selectedBookIDs: Set<UUID>
+    @State private var cancellables = Set<AnyCancellable>()
     
     var body: some View {
         VStack(spacing: 0) {
             bookList
         }
         .navigationTitle(
-            viewModel.selectedCollection?.name ?? viewModel.selectedStatus.rawValue
+            contentViewModel.selectedCollection?.name ?? contentViewModel.selectedStatus.rawValue
         )
         .navigationSubtitle(
-            "\(viewModel.displayedBooks.count) " +
-            (viewModel.displayedBooks.count == 1 ? "Book" : "Books")
+            "\(contentViewModel.displayedBooks.count) " +
+            (contentViewModel.displayedBooks.count == 1 ? "Book" : "Books")
         )
         .toolbar {
             ToolbarItem(placement: .automatic) {
-                SortMenuButton(viewModel: viewModel)
+                SortMenuButton(contentViewModel: contentViewModel)
                     .help("Sort Options")
                     .accessibilityLabel("Sort Options")
             }
@@ -38,14 +44,14 @@ struct MiddlePanelView: View {
         }
     }
     
-    // MARK: Book List
+    // MARK: - Book List
     private var bookList: some View {
-        List(viewModel.displayedBooks, id: \.id, selection: $selectedBookIDs) { book in
+        List(contentViewModel.displayedBooks, id: \.id, selection: $selectedBookIDs) { book in
             bookListItem(for: book)
         }
         .scrollContentBackground(.hidden)
         .overlay {
-            if viewModel.displayedBooks.isEmpty {
+            if contentViewModel.displayedBooks.isEmpty {
                 emptyStateView
             }
         }
@@ -81,17 +87,17 @@ struct MiddlePanelView: View {
     
     private func updateSelectedBook(with newSelection: Set<UUID>) {
         if let selectedID = newSelection.first,
-           let book = viewModel.displayedBooks.first(where: { $0.id == selectedID }) {
-            viewModel.selectedBook = book
+           let book = contentViewModel.displayedBooks.first(where: { $0.id == selectedID }) {
+            contentViewModel.selectedBook = book
         } else {
-            viewModel.selectedBook = nil
+            contentViewModel.selectedBook = nil
         }
     }
     
-    // MARK: Context Menu
+    // MARK: - Context Menu
     private func bookContextMenu(for book: BookData) -> some View {
         Group {
-            if let selectedCollection = viewModel.selectedCollection {
+            if let selectedCollection = contentViewModel.selectedCollection {
                 // Actions when viewing a collection
                 collectionActions(for: book, in: selectedCollection)
             } else if book.status == .deleted {
@@ -106,19 +112,43 @@ struct MiddlePanelView: View {
     
     private func collectionActions(for book: BookData, in collection: BookCollection) -> some View {
         Button("Remove from Collection") {
-            viewModel.removeBookFromSelectedCollection(book)
+            overlayManager.showLoading(message: "Removing from collection...")
+            
+            contentViewModel.removeBookFromSelectedCollection(book)
+                .sink(receiveValue: {
+                    overlayManager.hideOverlay()
+                    overlayManager.showToast(message: "Removed from collection")
+                })
+                .store(in: &cancellables)
         }
     }
     
     private func deletedBookActions(for books: [BookData]) -> some View {
         Group {
             Button("Restore") {
-                for book in books {
-                    viewModel.recoverBook(book)
+                if !books.isEmpty {
+                    let loadingMessage = books.count == 1 ?
+                    "Restoring book..." :
+                    "Restoring \(books.count) books..."
+                    overlayManager.showLoading(message: loadingMessage)
+                    
+                    let publishers = books.map { contentViewModel.recoverBook($0) }
+                    
+                    Publishers.MergeMany(publishers)
+                        .collect()
+                        .sink(receiveValue: { _ in
+                            overlayManager.hideOverlay()
+                            
+                            let message = books.count == 1 ?
+                            "Book restored" :
+                            "\(books.count) books restored"
+                            overlayManager.showToast(message: message)
+                        })
+                        .store(in: &cancellables)
                 }
             }
             Button("Permanently Delete") {
-                appState.showPermanentDeleteConfirmation(for: books)
+                alertManager.showPermanentDeleteConfirmation(for: books)
             }
         }
     }
@@ -138,31 +168,65 @@ struct MiddlePanelView: View {
             Divider()
             
             Button("Delete") {
-                appState.showSoftDeleteConfirmation(for: books)
+                alertManager.showSoftDeleteConfirmation(for: books)
             }
         }
     }
     
-    // MARK: Status Update
+    // MARK: - Status Update
     private func updateStatus(for books: [BookData], to status: ReadingStatus) {
-        viewModel.updateBookStatus(for: books, to: status)
+        if !books.isEmpty {
+            let statusVerb: String
+            switch status {
+            case .unread: statusVerb = "Marking as unread"
+            case .reading: statusVerb = "Marking as reading"
+            case .read: statusVerb = "Marking as read"
+            case .deleted: statusVerb = "Deleting"
+            }
+            
+            let loadingMessage = books.count == 1 ?
+            "\(statusVerb) book..." :
+            "\(statusVerb) \(books.count) books..."
+            
+            overlayManager.showLoading(message: loadingMessage)
+            
+            contentViewModel.updateBookStatus(for: books, to: status)
+                .sink(receiveValue: {
+                    overlayManager.hideOverlay()
+                    
+                    let pastTenseVerb: String
+                    switch status {
+                    case .unread: pastTenseVerb = "marked as unread"
+                    case .reading: pastTenseVerb = "marked as reading"
+                    case .read: pastTenseVerb = "marked as read"
+                    case .deleted: pastTenseVerb = "deleted"
+                    }
+                    
+                    let message = books.count == 1 ?
+                    "Book \(pastTenseVerb)" :
+                    "\(books.count) books \(pastTenseVerb)"
+                    
+                    overlayManager.showToast(message: message)
+                })
+                .store(in: &cancellables)
+        }
     }
     
-    // MARK: Selected Books
+    // MARK: - Selected Books
     private var selectedBooks: [BookData] {
-        viewModel.displayedBooks.filter { selectedBookIDs.contains($0.id) }
+        contentViewModel.displayedBooks.filter { selectedBookIDs.contains($0.id) }
     }
     
-    // MARK: Empty State Views
+    // MARK: - Empty State Views
     private var emptyStateView: some View {
-        EmptyStateView(type: emptyStateTypes, viewModel: viewModel)
+        EmptyStateView(type: emptyStateTypes)
     }
     
     private var emptyStateTypes: EmptyStateTypes {
-        if viewModel.selectedCollection != nil {
+        if contentViewModel.selectedCollection != nil {
             return .collection
-        } else if viewModel.searchQuery.isEmpty {
-            switch viewModel.selectedStatus {
+        } else if contentViewModel.searchQuery.isEmpty {
+            switch contentViewModel.selectedStatus {
             case .deleted: return .deleted
             case .unread: return .unread
             case .reading: return .reading
@@ -171,11 +235,11 @@ struct MiddlePanelView: View {
             }
         } else {
             // Show search empty state when there's a query
-            return viewModel.selectedStatus == .deleted ? .deleted : .search
+            return contentViewModel.selectedStatus == .deleted ? .deleted : .search
         }
     }
     
-    // MARK: Helpers
+    // MARK: - Helpers
     private func makeTransferData(for book: BookData) -> BookTransferData {
         BookTransferData(
             title: book.title,

@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct ReadingTrendsView: View {
-    let books: [BookData]
     @State private var timeScale: Int = 0 // 0: This Year, 1: All Time
+    let books: [BookData]
     
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
