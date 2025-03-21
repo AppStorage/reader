@@ -2,6 +2,7 @@
     <img src="../reader/Assets.xcassets/AppIcon.appiconset/256x256.png" width="200" height="200" />
     <h1>reader</h1>
 </div>
+
 ![macOS](https://img.shields.io/badge/macOS-14+-blue?logo=apple&style=flat)
 ![Downloads](https://img.shields.io/github/downloads/chippokiddo/reader/total)
 [![Latest Downloads](https://img.shields.io/github/downloads/chippokiddo/reader/latest/total)](https://github.com/chippokiddo/reader/releases/latest)
