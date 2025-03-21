@@ -6,7 +6,11 @@ struct AppCommands {
     private static var cancellables = Set<AnyCancellable>()
     
     // MARK: - Import/Export Actions
-    static func fileCommands(appState: AppState, dataManager: DataManager, openWindow: @escaping (String) -> Void) -> some Commands {
+    static func fileCommands(
+        appState: AppState,
+        dataManager: DataManager,
+        openWindow: @escaping (String) -> Void
+    ) -> some Commands {
         CommandGroup(replacing: .newItem) {
             Button("Add Book") {
                 openWindow("addBookWindow")
@@ -67,19 +71,31 @@ struct AppCommands {
     }
     
     // MARK: - Preferences
-    static func settingsCommands(appState: AppState, dataManager: DataManager) -> some Commands {
+    static func settingsCommands(
+        appState: AppState,
+        dataManager: DataManager,
+        contentViewModel: ContentViewModel
+    ) -> some Commands {
         CommandGroup(replacing: .appSettings) {
             Button("Preferences...") {
-                readerApp.showSettingsWindow(appState: appState, dataManager: dataManager) {
-                    appState.checkForAppUpdates(isUserInitiated: true)
-                }
+                readerApp.showSettingsWindow(
+                    appState: appState,
+                    dataManager: dataManager,
+                    contentViewModel: contentViewModel,
+                    checkForUpdates: {
+                        appState.checkForAppUpdates(isUserInitiated: true)
+                    }
+                )
             }
             .keyboardShortcut(",", modifiers: .command)
         }
     }
     
     // MARK: - Delete Book Actions
-    static func deleteCommands(appState: AppState, contentViewModel: ContentViewModel) -> some Commands {
+    static func deleteCommands(
+        appState: AppState,
+        contentViewModel: ContentViewModel
+    ) -> some Commands {
         CommandGroup(after: CommandGroupPlacement.pasteboard) {
             let selectedBooks = appState.selectedBooks
             let bookCount = selectedBooks.count

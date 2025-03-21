@@ -96,7 +96,8 @@ struct TagSuggestions: View {
     }
 }
 
-// Title suggestions when using the title: prefix
+// MARK: - Title Suggestions
+// When using the title: prefix
 struct TitleSuggestions: View {
     @ObservedObject var contentViewModel: ContentViewModel
     

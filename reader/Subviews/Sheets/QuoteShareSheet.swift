@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct QuoteShareView: View {
+struct QuoteShareSheet: View {
     @Binding var isPresented: Bool
     
     @State private var selectedQuoteIndex = 0

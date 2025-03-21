@@ -141,10 +141,13 @@ struct SidebarView: View {
         HStack {
             SettingsButton {
                 readerApp.showSettingsWindow(
-                    appState: appState, dataManager: dataManager
-                ) {
-                    appState.checkForAppUpdates(isUserInitiated: true)
-                }
+                    appState: appState,
+                    dataManager: dataManager,
+                    contentViewModel: contentViewModel,
+                    checkForUpdates: {
+                        appState.checkForAppUpdates(isUserInitiated: true)
+                    }
+                )
             }
             Spacer()
         }

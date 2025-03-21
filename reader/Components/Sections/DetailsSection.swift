@@ -5,12 +5,16 @@ struct DetailsSection: View {
     
     let title: String
     let author: String
+    let rating: Int
     let genre: String
     let series: String
     let isbn: String
     let publisher: String
     let formattedDate: String
     let description: String
+    let canRate: Bool
+    
+    var onRatingChanged: ((Int) -> Void)?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -23,6 +27,35 @@ struct DetailsSection: View {
                 .font(.system(size: 16))
                 .foregroundStyle(.secondary)
                 .accessibilityLabel("Author: \(author)")
+            
+            if canRate {
+                HStack(spacing: 4) {
+                    Text("Rating:")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    ForEach(1...5, id: \.self) { star in
+                        Image(systemName: star <= rating ? "star.fill" : "star")
+                            .foregroundStyle(.yellow)
+                            .onTapGesture {
+                                onRatingChanged?(star)
+                            }
+                            .accessibilityLabel("\(star) star\(star > 1 ? "s" : "")")
+                    }
+                    if rating != 0 {
+                        Button(action: {
+                            onRatingChanged?(0)
+                        }) {
+                            Image(systemName: "x.circle.fill")
+                                .font(.system(size: 12))
+                                .foregroundStyle(.secondary)
+                                .padding(.leading, 8)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Clear rating")
+                    }
+                }
+                .padding(.vertical, 5)
+            }
             
             ForEach(infoRows, id: \.label) { row in
                 if row.label == "ISBN" && !isbn.isEmpty {
@@ -86,12 +119,10 @@ struct DetailsSection: View {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
         
-        // Show checkmark feedback
         withAnimation {
             isbnCopied = true
         }
         
-        // Reset after delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             withAnimation {
                 isbnCopied = false

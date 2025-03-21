@@ -98,14 +98,15 @@ struct ReadingTrendsView: View {
     }
     
     private var readingStreakText: String? {
-        let currentStreak = calculateReadingStreak(books: books)
-        return currentStreak > 0
-        ? "You've read \(currentStreak) consecutive month\(currentStreak == 1 ? "" : "s") with at least one book!"
-        : nil
+        let details = calculateReadingStreakDetails(books: books)
+        let streakMonths = details.streakMonths
+        let booksCount = details.booksCount
+        return streakMonths > 0
+            ? "You've read \(booksCount) \(booksCount == 1 ? "book" : "books") in \(streakMonths) consecutive \(streakMonths == 1 ? "month" : "months")!"
+            : nil
     }
     
-    private func calculateReadingStreak(books: [BookData]) -> Int {
-        let longestStreak = BookStatisticsService.getLongestReadingStreak(books: books)
-        return longestStreak
+    private func calculateReadingStreakDetails(books: [BookData]) -> (streakMonths: Int, booksCount: Int) {
+        return BookStatisticsService.getLongestStreak(books: books)
     }
 }

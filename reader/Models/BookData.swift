@@ -10,6 +10,8 @@ class BookData: Identifiable {
     @Attribute private var tagsData: Data?
     @Attribute private var quotesData: Data?
     @Attribute private var notesData: Data?
+    @Attribute var rating: Int = 0  // Rating from 0 (unrated) to 5 stars
+    @Attribute var deletionDate: Date?
     
     var title: String
     var author: String
@@ -64,6 +66,7 @@ class BookData: Identifiable {
         series: String? = nil,
         isbn: String? = nil,
         bookDescription: String? = nil,
+        rating: Int = 0,
         status: ReadingStatus = .unread,
         dateStarted: Date? = nil,
         dateFinished: Date? = nil,
@@ -79,6 +82,7 @@ class BookData: Identifiable {
         self.series = series
         self.isbn = isbn
         self.bookDescription = bookDescription
+        self.rating = rating
         self.statusRawValue = status.rawValue
         self.dateStarted = dateStarted
         self.dateFinished = dateFinished

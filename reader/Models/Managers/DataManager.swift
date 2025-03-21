@@ -107,11 +107,11 @@ final class DataManager: ObservableObject {
         Just(())
             .handleEvents(receiveOutput: { [weak self] _ in
                 guard let self = self else { return }
-                // Batch update to minimize separate property changes
                 for book in books {
                     book.status = .deleted
                     book.dateStarted = nil
                     book.dateFinished = nil
+                    book.deletionDate = Date()
                     
                     // Remove from all collections
                     for collection in self.collections {
@@ -121,6 +121,25 @@ final class DataManager: ObservableObject {
                 self.saveChanges(reloadBooks: true, reloadCollections: true)
             })
             .eraseToAnyPublisher()
+    }
+    
+    func purgeExpiredDeletedBooks(using intervalInDays: Int) {
+        // If intervalInDays is 0, user has chosen "Never"
+        guard intervalInDays > 0 else { return }
+        let expirationInterval = TimeInterval(intervalInDays) * 24 * 60 * 60
+        let now = Date()
+        
+        let expiredBooks = books.filter { book in
+            book.status == .deleted &&
+            book.deletionDate != nil &&
+            now.timeIntervalSince(book.deletionDate!) >= expirationInterval
+        }
+        
+        if !expiredBooks.isEmpty {
+            permanentlyDeleteBooks(expiredBooks)
+                .sink(receiveValue: { })
+                .store(in: &cancellables)
+        }
     }
     
     func permanentlyDeleteBooks(_ books: [BookData]) -> AnyPublisher<Void, Never> {
@@ -188,6 +207,18 @@ final class DataManager: ObservableObject {
             }
         }
         .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Rating System
+    func updateBookRating(_ book: BookData, to rating: Int) -> AnyPublisher<Void, Never> {
+        Just(())
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self = self else { return }
+                // Clamp the rating between 0 and 5
+                book.rating = max(0, min(rating, 5))
+                self.saveChanges(reloadBooks: true)
+            })
+            .eraseToAnyPublisher()
     }
     
     // MARK: - Notes Management

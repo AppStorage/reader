@@ -61,11 +61,57 @@
         }
       }
     },
+    "%lld star%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld star%2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld estrella%2$@"
+          }
+        }
+      }
+    },
     "•" : {
       "shouldTranslate" : false
     },
     "↩︎" : {
       "shouldTranslate" : false
+    },
+    "7 days" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 días"
+          }
+        }
+      }
+    },
+    "14 days" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "14 días"
+          }
+        }
+      }
+    },
+    "30 days" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 días"
+          }
+        }
+      }
     },
     "Add" : {
       "localizations" : {
@@ -173,6 +219,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Autor: %@"
+          }
+        }
+      }
+    },
+    "Auto-delete Books" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrado Automático de Libros"
           }
         }
       }
@@ -347,6 +403,16 @@
         }
       }
     },
+    "Clear rating" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar calificación"
+          }
+        }
+      }
+    },
     "Clear tag %@" : {
       "localizations" : {
         "es" : {
@@ -443,6 +509,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eliminar"
+          }
+        }
+      }
+    },
+    "Delete After" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar Después de"
           }
         }
       }
@@ -967,12 +1043,22 @@
         }
       }
     },
+    "Rating:" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clasificación:"
+          }
+        }
+      }
+    },
     "Read" : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Leer"
+            "value" : "Leído"
           }
         }
       }

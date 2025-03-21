@@ -6,6 +6,7 @@ struct DetailView: View {
     
     @EnvironmentObject var dataManager: DataManager
     @EnvironmentObject var viewModel: ContentViewModel
+    @EnvironmentObject var overlayManager: OverlayManager
         
     @State private var newNote: String = ""
     @State private var newQuote: String = ""
@@ -75,12 +76,24 @@ struct DetailView: View {
         DetailsSection(
             title: book.title,
             author: book.author,
+            rating: book.rating,
             genre: book.genre ?? "",
             series: book.series ?? "",
             isbn: book.isbn ?? "",
             publisher: book.publisher ?? "",
             formattedDate: formatDate(book.published),
-            description: sanitizeDescription(book.bookDescription) ?? ""
+            description: sanitizeDescription(book.bookDescription) ?? "",
+            canRate: book.status == .read,
+            onRatingChanged: { newRating in
+                let loadingMessage = newRating == 0 ? "Removing rating..." : "Updating rating..."
+                overlayManager.showLoading(message: loadingMessage)
+                let _ = viewModel.updateBookRating(for: book, to: newRating)
+                    .sink { _ in
+                        overlayManager.hideOverlay()
+                        let toastMessage = newRating == 0 ? "Rating removed" : "Rating updated"
+                        overlayManager.showToast(message: toastMessage)
+                    }
+            }
         )
     }
     

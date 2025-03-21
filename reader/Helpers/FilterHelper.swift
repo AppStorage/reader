@@ -258,19 +258,27 @@ extension Array where Element == BookData {
         let queryLowercase = query.lowercased()
         let queryTerms = queryLowercase.split(separator: " ").map(String.init)
         
+        // Exact title match gets highest priority
         if titleLower == queryLowercase {
-            score += ScoreWeight.titleExactMatch
+            score += ScoreWeight.titleExactMatch * 2
         } else if titleLower.hasPrefix(queryLowercase) {
             score += ScoreWeight.titlePrefixMatch
         } else {
+            // For non-exact matches
+            // Check if all terms appear in sequence
             if hasSequentialTerms(queryTerms: queryTerms, in: titleLower) {
                 score += ScoreWeight.titleSequentialTerms
             }
             
-            for term in queryTerms where titleLower.contains(term) {
-                score += ScoreWeight.titleContainsTerm
+            // Check if all terms appear anywhere in the title
+            let allTermsMatch = queryTerms.allSatisfy { term in
+                titleLower.contains(term)
+            }
+            if allTermsMatch {
+                score += ScoreWeight.titleContainsTerm * 2
             }
             
+            // Fuzzy matching as last resort
             if fuse.search(query, in: book.title) != nil {
                 score += ScoreWeight.titleFuzzyMatch
             }

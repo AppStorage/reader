@@ -57,7 +57,8 @@ struct readerApp: App {
             AppCommands.appInfoCommands(appState: appState)
             AppCommands.settingsCommands(
                 appState: appState,
-                dataManager: dataManager
+                dataManager: dataManager,
+                contentViewModel: contentViewModel
             )
             AppCommands.deleteCommands(
                 appState: appState,
@@ -141,7 +142,7 @@ struct readerApp: App {
     }
     
     // MARK: - Preferences Window
-    static func showSettingsWindow(appState: AppState, dataManager: DataManager, checkForUpdates: @escaping () -> Void) {
+    static func showSettingsWindow(appState: AppState, dataManager: DataManager, contentViewModel: ContentViewModel, checkForUpdates: @escaping () -> Void) {
         if preferencesWindow == nil {
             let settingsView = SettingsView(checkForUpdates: {
                 checkForUpdates()
@@ -155,6 +156,7 @@ struct readerApp: App {
             let importExportView = ImportExportView()
                 .environmentObject(appState)
                 .environmentObject(dataManager)
+                .environmentObject(contentViewModel)
                 .environmentObject(appState.alertManager!)
             
             preferencesWindow = SettingsWindowController(

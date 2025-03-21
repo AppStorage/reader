@@ -3,6 +3,7 @@ import Combine
 
 @MainActor
 final class ContentViewModel: ObservableObject {
+    @AppStorage("deletionIntervalDays") var deletionIntervalDays: Int = 30
     @AppStorage("selectedStatus") var selectedStatus: StatusFilter = .all {
         didSet { invalidateDisplayedBooks() }
     }
@@ -45,8 +46,8 @@ final class ContentViewModel: ObservableObject {
     init(dataManager: DataManager) {
         self.dataManager = dataManager
         self.books = dataManager.books
-        
         setupSubscriptions()
+        dataManager.purgeExpiredDeletedBooks(using: deletionIntervalDays)
     }
     
     // MARK: - Subscription Setup
@@ -348,6 +349,11 @@ final class ContentViewModel: ObservableObject {
     func bookCount(for collection: BookCollection?) -> Int {
         guard let collection = collection else { return 0 }
         return collection.books.count
+    }
+    
+    // MARK: - Rating System
+    func updateBookRating(for book: BookData, to rating: Int) -> AnyPublisher<Void, Never> {
+        dataManager.updateBookRating(book, to: rating)
     }
     
     // MARK: - Notes Management
