@@ -72,6 +72,7 @@ struct readerApp: App {
         Window("Add Book", id: "addBookWindow") {
             AddView(viewModel: contentViewModel)
                 .environmentObject(appState)
+                .environmentObject(alertManager)
                 .environmentObject(overlayManager)
         }
         .windowStyle(HiddenTitleBarWindowStyle())

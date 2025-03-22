@@ -1276,6 +1276,26 @@
         }
       }
     },
+    "Show Less" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver Menos"
+          }
+        }
+      }
+    },
+    "Show More" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver Más"
+          }
+        }
+      }
+    },
     "Sort" : {
       "localizations" : {
         "es" : {

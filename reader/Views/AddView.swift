@@ -11,11 +11,13 @@ struct AddView: View {
     @ObservedObject var viewModel: ContentViewModel
     
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var alertManager: AlertManager
     @EnvironmentObject var overlayManager: OverlayManager
     
     @Environment(\.dismiss) private var dismiss
     
     @State private var localPublishedDate: Date?
+    @State private var showNoResultsAlert = false
     @State private var validationErrors: [Field: String] = [:]
     @State private var cancellableStorage = CancellableStorage()
     
@@ -98,6 +100,13 @@ struct AddView: View {
                     }
                 )
             }
+            .alert(isPresented: $showNoResultsAlert) {
+                Alert(
+                    title: Text("No Results Found"),
+                    message: Text("No books found. Please check the details and try again."),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
             
             OverlayView(windowId: "addBookWindow")
                 .environmentObject(overlayManager)
@@ -144,15 +153,21 @@ struct AddView: View {
         viewModel.fetchBooks()
             .receive(on: RunLoop.main)
             .sink(receiveCompletion: { completion in
-                self.overlayManager.hideOverlay(windowId: "addBookWindow")
-                
+                overlayManager.hideOverlay(windowId: "addBookWindow")
                 if case .failure(let error) = completion {
-                    self.overlayManager.showToast(
+                    overlayManager.showToast(
                         message: "Error fetching books: \(error.localizedDescription)",
                         windowId: "addBookWindow"
                     )
                 }
-            }, receiveValue: { _ in })
+            }, receiveValue: { results in
+                if results.isEmpty {
+                    showNoResultsAlert = true
+                } else {
+                    viewModel.bookSearchResults = results
+                    viewModel.isAddBookSheetPresented = true
+                }
+            })
             .store(in: &cancellableStorage.cancellables)
     }
     

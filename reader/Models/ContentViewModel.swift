@@ -61,6 +61,7 @@ final class ContentViewModel: ObservableObject {
             .store(in: &cancellables)
         
         setupCollectionsSubscription()
+        setupAddBookSubscriptions()
         
         // Handle search query changes
         $searchQuery
@@ -98,23 +99,20 @@ final class ContentViewModel: ObservableObject {
                 self?.invalidateDisplayedBooks()
             }
             .store(in: &cancellables)
-        
-        $addBookForm
-            .map { form -> Bool in
-                return !form.title.isEmpty && !form.author.isEmpty
-            }
-            .receive(on: RunLoop.main)
-            .sink { [weak self] value in
-                self?.canFetchBook = value
-            }
-            .store(in: &cancellables)
     }
     
     // MARK: - Add Book Subscription
     private func setupAddBookSubscriptions() {
-        $addBookForm
-            .map { form -> Bool in
-                return !form.title.isEmpty && !form.author.isEmpty
+        addBookForm.$title
+            .combineLatest(addBookForm.$author)
+            .map { [weak self] title, author in
+                guard let self = self else { return false }
+                let errors = BookFormView.validateFields(
+                    title: title,
+                    author: author,
+                    isbn: self.addBookForm.isbn
+                )
+                return errors[.title] == nil && errors[.author] == nil
             }
             .receive(on: RunLoop.main)
             .sink { [weak self] value in
@@ -179,8 +177,8 @@ final class ContentViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Add Book Fetching
-    func fetchBooks() -> AnyPublisher<Void, Error> {
+    // MARK: - Fetch Book
+    func fetchBooks() -> AnyPublisher<[BookTransferData], Error> {
         guard canFetchBook else {
             return Fail(error: NSError(domain: "ContentViewModel", code: 0,
                                        userInfo: [NSLocalizedDescriptionKey: "Cannot fetch book without title and author"]))
@@ -194,21 +192,9 @@ final class ContentViewModel: ObservableObject {
             author: addBookForm.author,
             isbn: addBookForm.isbn.isEmpty ? nil : addBookForm.isbn
         )
-        .handleEvents(
-            receiveOutput: { [weak self] results in
-                guard let self = self else { return }
-                self.bookSearchResults = results
-                self.isAddBookSheetPresented = !results.isEmpty
-            },
-            receiveCompletion: { [weak self] completion in
-                guard let self = self else { return }
-                self.isAddBookLoading = false
-                if case .failure = completion {
-                    // Error handling happens in the view
-                }
-            }
-        )
-        .map { _ in () }
+        .handleEvents(receiveCompletion: { [weak self] _ in
+            self?.isAddBookLoading = false
+        })
         .eraseToAnyPublisher()
     }
     
@@ -216,6 +202,30 @@ final class ContentViewModel: ObservableObject {
         isAddBookLoading = false
     }
     
+    // MARK: Manual Add Book
+    func addManualBook() -> AnyPublisher<String, Never> {
+        isAddBookLoading = true
+        
+        let book = BookData(
+            title: addBookForm.title,
+            author: addBookForm.author,
+            published: addBookForm.published,
+            publisher: addBookForm.publisher,
+            genre: addBookForm.genre,
+            series: addBookForm.series,
+            isbn: addBookForm.isbn,
+            bookDescription: addBookForm.description
+        )
+        
+        return dataManager.addBook(book: book)
+            .map { _ in "Added \"\(self.addBookForm.title)\"" }
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.isAddBookLoading = false
+            })
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Add Book
     func addBook(_ bookTransferData: BookTransferData) -> AnyPublisher<String, Never> {
         isAddBookLoading = true
         
@@ -241,37 +251,24 @@ final class ContentViewModel: ObservableObject {
             .eraseToAnyPublisher()
     }
     
-    func addManualBook() -> AnyPublisher<String, Never> {
-        isAddBookLoading = true
-        
-        let book = BookData(
-            title: addBookForm.title,
-            author: addBookForm.author,
-            published: addBookForm.published,
-            publisher: addBookForm.publisher,
-            genre: addBookForm.genre,
-            series: addBookForm.series,
-            isbn: addBookForm.isbn,
-            bookDescription: addBookForm.description
-        )
-        
-        return dataManager.addBook(book: book)
-            .map { _ in "Added \"\(self.addBookForm.title)\"" }
-            .handleEvents(receiveOutput: { [weak self] _ in
-                self?.isAddBookLoading = false
-            })
-            .eraseToAnyPublisher()
-    }
-    
+    // MARK: - Reset Book Form
     func resetAddBookForm() {
-        addBookForm = BookForm()
+        addBookForm.title = ""
+        addBookForm.author = ""
+        addBookForm.genre = ""
+        addBookForm.series = ""
+        addBookForm.isbn = ""
+        addBookForm.publisher = ""
+        addBookForm.published = nil
+        addBookForm.description = ""
     }
     
-    // MARK: - Book Actions
+    // MARK: - Recover Book
     func recoverBook(_ book: BookData) -> AnyPublisher<Void, Never> {
         dataManager.updateBookStatus(book, to: .unread)
     }
     
+    // MARK: - Soft Delete Book
     func softDeleteBooks(_ books: [BookData]) -> AnyPublisher<Void, Never> {
         dataManager.softDeleteBooks(books)
     }
@@ -299,6 +296,7 @@ final class ContentViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
+    // MARK: - Permanently Delete Book
     func permanentlyDeleteBooks(_ booksToDelete: [BookData]) -> AnyPublisher<Void, Never> {
         dataManager.permanentlyDeleteBooks(booksToDelete)
     }
@@ -309,8 +307,8 @@ final class ContentViewModel: ObservableObject {
         let overlayManager = appState.overlayManager
         
         let loadingMessage = books.count == 1 ?
-            "Permanently deleting book..." :
-            "Permanently deleting \(books.count) books..."
+        "Permanently deleting book..." :
+        "Permanently deleting \(books.count) books..."
         overlayManager?.showLoading(message: loadingMessage)
         
         permanentlyDeleteBooks(books)
@@ -321,8 +319,8 @@ final class ContentViewModel: ObservableObject {
                 
                 // Show success message
                 let toastMessage = books.count == 1 ?
-                    "Book permanently deleted" :
-                    "\(books.count) books permanently deleted"
+                "Book permanently deleted" :
+                "\(books.count) books permanently deleted"
                 overlayManager?.showLoading(message: toastMessage)
                 
                 // Clear selection and play sound
@@ -337,6 +335,7 @@ final class ContentViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
+    // MARK: - Update Book Status
     func updateBookStatus(for books: [BookData], to status: ReadingStatus) -> AnyPublisher<Void, Never> {
         dataManager.batchUpdateBookStatus(books, to: status)
     }
@@ -429,22 +428,21 @@ final class ContentViewModel: ObservableObject {
     }
     
     // MARK: - Search Suggestions
-    func getTopTitles(matching prefix: String, limit: Int = 5) -> [String] {
+    private func getTopMatches(in values: [String], matching prefix: String, limit: Int) -> [String] {
         let lowercasePrefix = prefix.lowercased()
-        return Array(Set(books.map { $0.title }))
+        return Array(Set(values))
             .filter { lowercasePrefix.isEmpty || $0.lowercased().contains(lowercasePrefix) }
             .sorted()
             .prefix(limit)
             .map { $0 }
     }
     
+    func getTopTitles(matching prefix: String, limit: Int = 5) -> [String] {
+        return getTopMatches(in: books.map { $0.title }, matching: prefix, limit: limit)
+    }
+    
     func getTopAuthors(matching prefix: String, limit: Int = 5) -> [String] {
-        let lowercasePrefix = prefix.lowercased()
-        return Array(Set(books.map { $0.author }))
-            .filter { lowercasePrefix.isEmpty || $0.lowercased().contains(lowercasePrefix) }
-            .sorted()
-            .prefix(limit)
-            .map { $0 }
+        return getTopMatches(in: books.map { $0.author }, matching: prefix, limit: limit)
     }
     
     func getTopTags(matching prefix: String, limit: Int = 5) -> [String] {

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DetailsSection: View {
     @State private var isbnCopied: Bool = false
+    @State private var showFullDescription = false
     
     let title: String
     let author: String
@@ -13,6 +14,9 @@ struct DetailsSection: View {
     let formattedDate: String
     let description: String
     let canRate: Bool
+    
+    private let lineLimit = 5
+    private let truncationThreshold = 300
     
     var onRatingChanged: ((Int) -> Void)?
     
@@ -88,19 +92,34 @@ struct DetailsSection: View {
             }
             
             if !description.isEmpty {
-                ScrollView {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(description)
                         .font(.body)
                         .foregroundStyle(.primary)
                         .multilineTextAlignment(.leading)
                         .lineSpacing(4)
+                        .lineLimit(showFullDescription ? nil : lineLimit)
                         .padding(10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.gray.opacity(0.1))
+                        )
+                        .animation(.easeInOut(duration: 0.25), value: showFullDescription)
+                    
+                    if description.count > truncationThreshold {
+                        Button(action: {
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                showFullDescription.toggle()
+                            }
+                        }) {
+                            Text(showFullDescription ? "Show Less" : "Show More")
+                                .font(.caption)
+                                .foregroundColor(.accentColor)
+                                .padding(.top, 2)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
-                .frame(maxHeight: 200)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.gray.opacity(0.1))
-                )
             }
         }
     }
