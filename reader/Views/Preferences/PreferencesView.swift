@@ -41,7 +41,6 @@ struct PreferencesView: View {
             }
         }
         .padding(12)
-        .background(.ultraThinMaterial)
     }
     
     @ViewBuilder
@@ -75,16 +74,14 @@ struct PreferencesView: View {
             .frame(width: 90, height: 62)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(isSelected ? Color.accentColor.opacity(0.2) : Color.clear)
+                    .fill(isSelected ? Color.accentColor.opacity(0.15) : Color.clear)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(
-                        isSelected ? Color.clear :
-                            (isHovered ? Color.white.opacity(0.25) : Color.clear),
+                    .strokeBorder(
+                        isHovered ? Color.primary.opacity(0.15) : Color.clear,
                         lineWidth: isHovered ? 1 : 0
                     )
-                    .opacity(0.6)
             )
             .foregroundColor(isSelected ? Color.accentColor : .primary)
             .contentShape(RoundedRectangle(cornerRadius: 8))

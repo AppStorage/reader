@@ -43,9 +43,9 @@ private struct RecentBookRow: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "book.fill")
+            Image(systemName: "book.closed.fill")
                 .font(.system(size: 16))
-                .foregroundColor(Color.accentColor.opacity(0.9))
+                .foregroundColor(.secondary)
                 .frame(width: 24, height: 24)
             
             VStack(alignment: .leading, spacing: 4) {
