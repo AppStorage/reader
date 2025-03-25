@@ -40,23 +40,14 @@ struct EditBookDetailsSheet: View {
     var body: some View {
         VStack(spacing: 20) {
             header
-            Divider()
-            
-            BookFormView(
-                title: $title,
-                author: $author,
-                genre: $genre,
-                series: $series,
-                isbn: $isbn,
-                publisher: $publisher,
-                publishedDate: $publishedDate,
-                description: $description,
-                validationErrors: $validationErrors,
-                showDescriptionField: true,
-                focusedField: $focusedField
-            )
             
             Divider()
+                .opacity(0.25)
+            bookForm
+            
+            Divider()
+                .opacity(0.25)
+            
             actionButtons
         }
         .frame(width: 450)
@@ -76,6 +67,7 @@ struct EditBookDetailsSheet: View {
         .accessibilityLabel("Edit Book Details")
     }
     
+    // MARK: - Header
     private var header: some View {
         HStack {
             Spacer()
@@ -87,6 +79,23 @@ struct EditBookDetailsSheet: View {
         }
         .padding(.top, 8)
         .accessibilityAddTraits(.isHeader)
+    }
+    
+    // MARK: - Book Form
+    private var bookForm: some View {
+        BookFormView(
+            title: $title,
+            author: $author,
+            genre: $genre,
+            series: $series,
+            isbn: $isbn,
+            publisher: $publisher,
+            publishedDate: $publishedDate,
+            description: $description,
+            validationErrors: $validationErrors,
+            showDescriptionField: true,
+            focusedField: $focusedField
+        )
     }
     
     // MARK: - Action Buttons

@@ -370,7 +370,19 @@ final class DataManager: ObservableObject {
     
     // MARK: - Date Management
     func validateDates(for book: BookData) {
-        if let startDate = book.dateStarted, let finishDate = book.dateFinished, finishDate < startDate {
+        let now = Date()
+
+        if let startDate = book.dateStarted, startDate > now {
+            book.dateStarted = now
+        }
+
+        if let finishDate = book.dateFinished, finishDate > now {
+            book.dateFinished = now
+        }
+
+        if let startDate = book.dateStarted,
+           let finishDate = book.dateFinished,
+           finishDate < startDate {
             book.dateFinished = startDate
         }
     }
@@ -379,37 +391,39 @@ final class DataManager: ObservableObject {
     private func updateBookStatusInternal(_ book: BookData, to status: ReadingStatus) {
         let oldStatus = book.status
         book.status = status
-        
+
         // Only modify dates if status changed
-        // Respect manual changes
         if oldStatus != status {
             switch status {
             case .reading:
-                // Only set dateStarted if it doesn't exist
+                // Set dateStarted only if not already set
                 if book.dateStarted == nil {
                     book.dateStarted = Date()
                 }
-                // Don't automatically clear dateFinished if manually set
+                // Always clear dateFinished when switching to reading
+                book.dateFinished = nil
+
             case .read:
-                // Only set dates if they don't exist
+                // Set missing dates only
                 if book.dateStarted == nil {
                     book.dateStarted = Date()
                 }
                 if book.dateFinished == nil {
                     book.dateFinished = Date()
                 }
+
             case .unread, .deleted:
-                // Still clear dates
+                // Clear both dates
                 book.dateStarted = nil
                 book.dateFinished = nil
-                
-                // If book is being deleted, remove it from all collections
+
+                // If book is being deleted, remove from all collections
                 if status == .deleted {
                     removeBookFromAllCollections(book)
                 }
             }
         }
-        
+
         validateDates(for: book)
     }
     

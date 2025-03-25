@@ -7,6 +7,7 @@ struct MiddlePanelView: View {
     @ObservedObject var contentViewModel: ContentViewModel
     
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var dataManager: DataManager
     @EnvironmentObject var alertManager: AlertManager
     @EnvironmentObject var overlayManager: OverlayManager
     
@@ -113,7 +114,7 @@ struct MiddlePanelView: View {
         Button("Remove from Collection") {
             overlayManager.showLoading(message: "Removing from collection...")
             
-            contentViewModel.removeBookFromSelectedCollection(book)
+            dataManager.removeBookFromCollection(book, from: collection)
                 .sink(receiveValue: {
                     overlayManager.hideOverlay()
                     overlayManager.showToast(message: "Removed from collection")

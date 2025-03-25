@@ -20,20 +20,6 @@ struct PreferencesView: View {
     @State private var selectedTab: PrefTab = .general
     @State private var hoveredTab: PrefTab? = nil
     
-    var body: some View {
-        VStack(spacing: 0) {
-            tabBar
-            Divider()
-            content
-        }
-        .onAppear {
-            if let window = NSApplication.shared.windows.first(where: { $0.identifier?.rawValue == "preferencesWindow" }) {
-                window.styleMask.remove(.resizable)
-                window.standardWindowButton(.zoomButton)?.isHidden = true
-            }
-        }
-    }
-    
     private var tabBar: some View {
         HStack(spacing: 12) {
             ForEach(PrefTab.allCases, id: \.self) { tab in
@@ -58,9 +44,24 @@ struct PreferencesView: View {
         .frame(width: 420, height: 320)
     }
     
+    var body: some View {
+        VStack(spacing: 0) {
+            tabBar
+            
+            Divider()
+                .opacity(0.25)
+            
+            content
+        }
+        .onAppear {
+            enforceWindowStyle()
+        }
+        .frame(minWidth: 420)
+    }
+    
     private func tabButton(for tab: PrefTab) -> some View {
         let isSelected = (selectedTab == tab)
-        let isHovered = (hoveredTab == tab)
+        let isHovered = (hoveredTab == tab) && (selectedTab != tab)
         
         return Button(action: {
             selectedTab = tab
@@ -89,7 +90,18 @@ struct PreferencesView: View {
         }
         .buttonStyle(.plain)
         .onHover { inside in
-            hoveredTab = inside ? tab : nil
+            if inside && selectedTab != tab {
+                hoveredTab = tab
+            } else if hoveredTab == tab {
+                hoveredTab = nil
+            }
+        }
+    }
+    
+    private func enforceWindowStyle() {
+        if let window = NSApplication.shared.windows.first(where: { $0.identifier?.rawValue == "preferencesWindow" }) {
+            window.styleMask.remove(.resizable)
+            window.standardWindowButton(.zoomButton)?.isHidden = true
         }
     }
 }

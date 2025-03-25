@@ -72,7 +72,6 @@ struct readerApp: App {
                 .environmentObject(alertManager)
                 .environmentObject(contentViewModel)
         }
-        .defaultPosition(.center)
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
     }
@@ -85,9 +84,8 @@ struct readerApp: App {
                 .environmentObject(alertManager)
                 .environmentObject(overlayManager)
         }
-        .windowStyle(HiddenTitleBarWindowStyle())
+        .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
-        .defaultPosition(.center)
     }
     
     var body: some Scene {

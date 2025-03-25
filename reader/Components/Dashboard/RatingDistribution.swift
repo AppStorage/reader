@@ -3,15 +3,15 @@ import Charts
 
 struct RatingDistribution: View {
     let books: [BookData]
-
-    var body: some View {
-        let ratingData = BookStatisticsService.ratingDistribution(books: books)
+    
+    private var ratingData: [RatingData] {
+        BookStatisticsService.ratingDistribution(books: books)
             .map { RatingData(rating: $0.key, count: $0.value) }
             .sorted { $0.rating < $1.rating }
-
-        return VStack(alignment: .leading, spacing: 12) {
-            DashboardSectionHeader("Ratings")
-
+    }
+    
+    private var chart: some View {
+        Group {
             if ratingData.isEmpty {
                 EmptyStateView(
                     type: .chart,
@@ -23,11 +23,17 @@ struct RatingDistribution: View {
                 RatingBarChart(ratingData: ratingData)
             }
         }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            DashboardSectionHeader("Ratings")
+            chart
+        }
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(NSColor.controlBackgroundColor))
-                .shadow(color: Color.black.opacity(0.07), radius: 2, x: 0, y: 1)
         )
     }
 }
@@ -45,7 +51,7 @@ private struct RatingBarChart: View {
     
     let ratingData: [RatingData]
 
-    var totalCount: Int {
+    private var totalCount: Int {
         ratingData.map { $0.count }.reduce(0, +)
     }
 
@@ -57,25 +63,36 @@ private struct RatingBarChart: View {
                         x: .value("Rating", String(data.rating)),
                         y: .value("Count", data.count)
                     )
-                    .foregroundStyle(data.count > 0 ? .yellow : .gray.opacity(0.3))
+                    .foregroundStyle(selectedRating?.rating == data.rating ? Color(red: 1.0, green: 1.0, blue: 0.2) : .yellow)
                     .cornerRadius(4)
                     .accessibilityLabel(Text("\(data.rating) stars"))
                     .accessibilityValue(Text("\(data.count) books"))
                 }
-
-                if let selected = selectedRating, selected.count > 0 {
-                    RuleMark(x: .value("Selected Rating", String(selected.rating)))
-                        .foregroundStyle(.gray.opacity(0.3))
-
-                    PointMark(
-                        x: .value("Selected Rating", String(selected.rating)),
-                        y: .value("Count", selected.count)
-                    )
-                    .foregroundStyle(.yellow)
+            }
+            .chartXAxis {
+                AxisMarks { value in
+                    AxisValueLabel {
+                        if let ratingStr = value.as(String.self),
+                           let ratingInt = Int(ratingStr) {
+                            Text("\(ratingInt)")
+                                .foregroundColor(.white) +
+                            Text(" ★")
+                                .foregroundColor(.yellow)
+                        }
+                    }
                 }
             }
             .chartYAxis {
-                AxisMarks(position: .leading)
+                AxisMarks(position: .leading) { value in
+                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [5]))
+                    AxisValueLabel() {
+                        if let intValue = value.as(Int.self) {
+                            Text("\(intValue)")
+                                .font(.system(size: 10))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
             }
             .chartOverlay { proxy in
                 GeometryReader { geometry in
@@ -110,14 +127,6 @@ private struct RatingBarChart: View {
             // Tooltip
             if let selected = selectedRating {
                 VStack(alignment: .leading, spacing: 6) {
-                    HStack(spacing: 4) {
-                        Text("★")
-                            .foregroundColor(.yellow)
-                        Text("\(selected.rating)")
-                            .font(.caption)
-                            .bold()
-                    }
-
                     Text("\(selected.count) book\(selected.count == 1 ? "" : "s") (\(Int(Double(selected.count) / Double(totalCount) * 100))%)")
                         .font(.caption)
                 }

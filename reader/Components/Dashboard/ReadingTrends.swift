@@ -108,7 +108,7 @@ struct ReadingTrends: View {
                 streakRow(text: streakText)
             }
 
-            Divider().padding(.vertical, 4)
+            Divider()
 
             trendMetricsRow
         }

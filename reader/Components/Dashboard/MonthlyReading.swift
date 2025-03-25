@@ -18,19 +18,21 @@ struct MonthlyReading: View {
         monthlyData(for: previousYear)
     }
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .center, spacing: 8) {
-                DashboardSectionHeader("Monthly Reading")
+    private var header: some View {
+        HStack(alignment: .center, spacing: 8) {
+            DashboardSectionHeader("Monthly Reading")
 
-                Spacer()
+            Spacer()
 
-                ChartLegend(items: [
-                    (label: "\(currentYear)", color: Color.accentColor),
-                    (label: "\(previousYear)", color: Color(.orange))
-                ])
-            }
+            ChartLegend(items: [
+                (label: "\(currentYear)", color: Color(red: 0.99, green: 0.46, blue: 0.44)),
+                (label: "\(previousYear)", color: Color(red: 0.49, green: 0.69, blue: 0.84))
+            ])
+        }
+    }
 
+    private var chart: some View {
+        Group {
             if currentYearData.isEmpty && previousYearData.isEmpty {
                 EmptyStateView(
                     type: .chart,
@@ -47,6 +49,13 @@ struct MonthlyReading: View {
                     previousYear: previousYear
                 )
             }
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            header
+            chart
         }
         .padding(16)
         .background(
@@ -99,36 +108,77 @@ private struct LineChart: View {
     let currentYear: Int
     let previousYear: Int
     
+    private var currentYearColor: Color {
+        Color(red: 0.99, green: 0.46, blue: 0.44)
+    }
+
+    private var previousYearColor: Color {
+        Color(red: 0.49, green: 0.69, blue: 0.84)
+    }
+    
+    private var currentYearLine: some ChartContent {
+        ForEach(currentYearData) { month in
+            LineMark(
+                x: .value("Month", month.month),
+                y: .value("Count", month.count)
+            )
+            .foregroundStyle(by: .value("Year", String(currentYear)))
+            .interpolationMethod(.catmullRom)
+            .symbol {
+                Circle()
+                    .fill(currentYearColor)
+                    .frame(width: 8, height: 8)
+            }
+
+            AreaMark(
+                x: .value("Month", month.month),
+                y: .value("Count", month.count)
+            )
+            .interpolationMethod(.catmullRom)
+            .foregroundStyle(
+                .linearGradient(
+                    Gradient(colors: [currentYearColor.opacity(0.4), currentYearColor.opacity(0.05)]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+        }
+    }
+    
+    private var previousYearLine: some ChartContent {
+        ForEach(previousYearData) { month in
+            LineMark(
+                x: .value("Month", month.month),
+                y: .value("Count", month.count)
+            )
+            .foregroundStyle(by: .value("Year", String(previousYear)))
+            .interpolationMethod(.catmullRom)
+            .symbol {
+                Circle()
+                    .fill(previousYearColor)
+                    .frame(width: 8, height: 8)
+            }
+
+            AreaMark(
+                x: .value("Month", month.month),
+                y: .value("Count", month.count)
+            )
+            .interpolationMethod(.catmullRom)
+            .foregroundStyle(
+                .linearGradient(
+                    Gradient(colors: [previousYearColor.opacity(0.3), previousYearColor.opacity(0.05)]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+        }
+    }
+
     var body: some View {
         ZStack(alignment: .topLeading) {
             Chart {
-                ForEach(currentYearData) { month in
-                    LineMark(
-                        x: .value("Month", month.month),
-                        y: .value("Count", month.count)
-                    )
-                    .foregroundStyle(by: .value("Year", String(currentYear)))
-                    .interpolationMethod(.catmullRom)
-                    .symbol {
-                        Circle()
-                            .fill(Color.accentColor)
-                            .frame(width: 7, height: 7)
-                    }
-                }
-                
-                ForEach(previousYearData) { month in
-                    LineMark(
-                        x: .value("Month", month.month),
-                        y: .value("Count", month.count)
-                    )
-                    .foregroundStyle(by: .value("Year", String(previousYear)))
-                    .interpolationMethod(.catmullRom)
-                    .symbol {
-                        Circle()
-                            .fill(Color(nsColor: NSColor.systemOrange))
-                            .frame(width: 5, height: 5)
-                    }
-                }
+                currentYearLine
+                previousYearLine
                 
                 if let position = selectedPosition {
                     if position.currentYearValue != nil {
@@ -136,7 +186,7 @@ private struct LineChart: View {
                             x: .value("Month", position.month),
                             y: .value("Count", position.currentYearValue!)
                         )
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(currentYearColor)
                         .symbolSize(CGSize(width: 12, height: 12))
                     }
                     
@@ -145,37 +195,37 @@ private struct LineChart: View {
                             x: .value("Month", position.month),
                             y: .value("Count", position.previousYearValue!)
                         )
-                        .foregroundStyle(Color(nsColor: NSColor.systemOrange))
+                        .foregroundStyle(previousYearColor)
                         .symbolSize(CGSize(width: 12, height: 12))
                     }
                     
                     RuleMark(x: .value("Month", position.month))
-                        .foregroundStyle(.gray.opacity(0.3))
+                        .foregroundStyle(.gray.opacity(0.25))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 5]))
                 }
             }
             .chartForegroundStyleScale([
-                "\(currentYear)": Color.accentColor,
-                "\(previousYear)": Color(nsColor: NSColor.systemOrange)
+                "\(currentYear)": currentYearColor,
+                "\(previousYear)": previousYearColor
             ])
             .chartLegend(.hidden)
-            .chartYAxis {
-                AxisMarks(position: .leading) { value in
-                    AxisGridLine(centered: true, stroke: StrokeStyle(lineWidth: 0.5, dash: [5]))
+            .chartXAxis {
+                AxisMarks { value in
                     AxisValueLabel() {
-                        if let intValue = value.as(Int.self) {
-                            Text("\(intValue)")
+                        if let strValue = value.as(String.self) {
+                            Text(strValue)
                                 .font(.system(size: 10))
                                 .foregroundColor(.secondary)
                         }
                     }
                 }
             }
-            .chartXAxis {
-                AxisMarks { value in
+            .chartYAxis {
+                AxisMarks(position: .leading) { value in
+                    AxisGridLine(centered: true, stroke: StrokeStyle(lineWidth: 0.5, dash: [5]))
                     AxisValueLabel() {
-                        if let strValue = value.as(String.self) {
-                            Text(strValue)
+                        if let intValue = value.as(Int.self) {
+                            Text("\(intValue)")
                                 .font(.system(size: 10))
                                 .foregroundColor(.secondary)
                         }
@@ -209,6 +259,7 @@ private struct LineChart: View {
                 }
             }
             
+            // Tooltip
             if let position = selectedPosition {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(position.month)
@@ -219,7 +270,7 @@ private struct LineChart: View {
                     if let currentValue = position.currentYearValue {
                         HStack {
                             Circle()
-                                .fill(Color.accentColor)
+                                .fill(currentYearColor)
                                 .frame(width: 8, height: 8)
                             Text(String(format: "%d", currentYear) + ": \(currentValue) book\(currentValue == 1 ? "" : "s")")
                                 .font(.caption)
@@ -229,7 +280,7 @@ private struct LineChart: View {
                     if let previousValue = position.previousYearValue {
                         HStack {
                             Circle()
-                                .fill(Color(nsColor: NSColor.systemOrange))
+                                .fill(previousYearColor)
                                 .frame(width: 8, height: 8)
                             Text(String(format: "%d", previousYear) + ": \(previousValue) book\(previousValue == 1 ? "" : "s")")
                                 .font(.caption)
@@ -237,7 +288,7 @@ private struct LineChart: View {
                     }
                 }
                 .padding(8)
-                .background(Color(NSColor.windowBackgroundColor))
+                .background(.windowBackground)
                 .cornerRadius(8)
                 .shadow(radius: 2)
                 .offset(x: position.tooltipOffset.x, y: position.tooltipOffset.y)

@@ -1,7 +1,7 @@
 import SwiftUI
 import SwiftData
 
-// MARK: - Status Section
+// MARK: - Reading Status
 struct StatusSection: View {
     @Bindable var book: BookData
     
@@ -10,31 +10,44 @@ struct StatusSection: View {
     @State private var isEditingStartDate = false
     @State private var isEditingFinishDate = false
     
+    private var bookStatus: some View {
+        HStack {
+            Text("Status:")
+                .font(.headline)
+            
+            Label {
+                Text(book.status.displayText)
+                    .font(.subheadline)
+                    .bold()
+            } icon: {
+                Image(systemName: book.status.iconName)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(book.status.statusColor.opacity(0.2))
+            .foregroundColor(book.status.statusColor)
+            .clipShape(Capsule())
+            
+            Spacer()
+        }
+        .padding(.bottom, 6)
+    }
+        
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Status:")
-                    .font(.headline)
-                
-                Label {
-                    Text(book.status.displayText)
-                        .font(.subheadline)
-                        .bold()
-                } icon: {
-                    Image(systemName: book.status.iconName)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(book.status.statusColor.opacity(0.2))
-                .foregroundColor(book.status.statusColor)
-                .clipShape(Capsule())
-                
-                Spacer()
-            }
-            .padding(.bottom, 6)
+            bookStatus
             
-            DateEditorView(label: "Date Started", date: $book.dateStarted, isEditing: $isEditingStartDate)
-            DateEditorView(label: "Date Finished", date: $book.dateFinished, isEditing: $isEditingFinishDate)
+            DateEditor(
+                date: $book.dateStarted,
+                isEditing: $isEditingStartDate,
+                label: "Date Started",
+                minDate: book.dateStarted)
+            DateEditor(
+                date: $book.dateFinished,
+                isEditing: $isEditingFinishDate,
+                label: "Date Finished",
+                minDate: book.dateStarted
+            )
         }
         .padding(.vertical, 10)
         .onChange(of: [book.dateStarted, book.dateFinished]) {
@@ -50,15 +63,18 @@ struct StatusSection: View {
     }
 }
 
-// MARK: - Reading Start/Finish Dates
-struct DateEditorView: View {
-    let label: String
-    
+// MARK: - Date Start/Finish
+private struct DateEditor: View {
     @Binding var date: Date?
     @Binding var isEditing: Bool
+    
     @EnvironmentObject var contentViewModel: ContentViewModel
     
     @State private var tempDate: Date? = nil
+    
+    let label: String
+    
+    var minDate: Date? = nil
     
     var body: some View {
         HStack {
@@ -71,13 +87,17 @@ struct DateEditorView: View {
                 if isEditing {
                     HStack {
                         if tempDate != nil {
-                            DatePicker("", selection: Binding(
-                                get: { tempDate ?? Date() },
-                                set: { newDate in tempDate = newDate }
-                            ), displayedComponents: .date)
+                            DatePicker(
+                                "",
+                                selection: Binding(
+                                    get: { tempDate ?? Date() },
+                                    set: { newDate in tempDate = newDate }
+                                ),
+                                in: (minDate ?? Date.distantPast)...Date(), displayedComponents: .date
+                            )
                             .labelsHidden()
                             .datePickerStyle(.compact)
-                            
+
                             // Clear date button
                             Button(action: {
                                 tempDate = nil
@@ -93,8 +113,10 @@ struct DateEditorView: View {
                         }
                     }
                     .padding(8)
-                    .background(RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.gray.opacity(0.5), lineWidth: 1))
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(.gray.opacity(0.5), lineWidth: 1)
+                    )
                     
                     // Confirm changes
                     Button(action: {

@@ -4,6 +4,9 @@
     "" : {
       "shouldTranslate" : false
     },
+    " ★" : {
+      "shouldTranslate" : false
+    },
     "— %@" : {
       "shouldTranslate" : false
     },
@@ -107,9 +110,6 @@
       "shouldTranslate" : false
     },
     "↩︎" : {
-      "shouldTranslate" : false
-    },
-    "★" : {
       "shouldTranslate" : false
     },
     "7 days" : {
@@ -1307,16 +1307,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Seleccionar Cita"
-          }
-        }
-      }
-    },
-    "Selected Rating" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Calificación Seleccionada"
           }
         }
       }

@@ -31,7 +31,7 @@ struct RecentBooks: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(NSColor.controlBackgroundColor))
+                .fill(Color(.controlBackgroundColor))
                 .shadow(color: Color.black.opacity(0.07), radius: 2, x: 0, y: 1)
         )
     }
@@ -101,4 +101,3 @@ private struct RecentBookRow: View {
         .padding(.vertical, 4)
     }
 }
-

@@ -109,6 +109,11 @@ final class DateFormatterUtils {
     static func formattedDuration(from start: Date?, to end: Date?) -> String? {
         guard let start, let end else { return nil }
         let days = calendar.dateComponents([.day], from: start, to: end).day ?? 0
+        
+        if days == 0 {
+            return "<1 day"
+        }
+        
         return "\(days) day" + (days == 1 ? "" : "s")
     }
 

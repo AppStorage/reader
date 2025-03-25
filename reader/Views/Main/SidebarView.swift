@@ -62,7 +62,7 @@ struct SidebarView: View {
                     originalName: collectionToRename?.name,
                     onAction: {
                         guard collectionToRename != nil else { return }
-                        contentViewModel.renameSelectedCollection(to: newCollectionName)
+                        dataManager.renameCollection(collectionToRename!, to: newCollectionName)
                             .sink(receiveCompletion: { _ in },
                                   receiveValue: {
                                 overlayManager.showToast(message: "Renamed collection to \(newCollectionName)")

@@ -3,24 +3,6 @@ import SwiftUI
 struct ReadingInsights: View {
     let books: [BookData]
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            DashboardSectionHeader("Reading Insights")
-
-            GeometryReader { geometry in
-                HStack(spacing: 16) {
-                    monthlyBooksCard
-                    yearlyBooksCard
-                    if let avgSeconds = BookStatisticsService.averageReadingTime(books: books) {
-                        let avgDays = avgSeconds / 86400
-                        averageReadingTimeCard(avgDays: avgDays)
-                    }
-                }
-            }
-            .frame(height: 100)
-        }
-    }
-
     private var monthlyBooksCard: some View {
         let monthlyComparison = BookStatisticsService.getBooksReadComparison(books: books)
 
@@ -45,6 +27,24 @@ struct ReadingInsights: View {
             icon: "calendar",
             iconColor: Color.secondary
         )
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            DashboardSectionHeader("Reading Insights")
+
+            GeometryReader { geometry in
+                HStack(spacing: 16) {
+                    monthlyBooksCard
+                    yearlyBooksCard
+                    if let avgSeconds = BookStatisticsService.averageReadingTime(books: books) {
+                        let avgDays = avgSeconds / 86400
+                        averageReadingTimeCard(avgDays: avgDays)
+                    }
+                }
+            }
+            .frame(height: 100)
+        }
     }
 
     private func averageReadingTimeCard(avgDays: Double) -> some View {

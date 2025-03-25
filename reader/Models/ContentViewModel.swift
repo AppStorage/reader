@@ -423,27 +423,6 @@ final class ContentViewModel: ObservableObject {
         selectedTags.remove(tag)
     }
     
-    // MARK: - Collection Management
-    func renameSelectedCollection(to newName: String) -> AnyPublisher<Void, Never> {
-        guard let collection = selectedCollection else {
-            return Empty().eraseToAnyPublisher()
-        }
-        
-        return dataManager.renameCollection(collection, to: newName)
-    }
-    
-    func removeCollection(_ collection: BookCollection) -> AnyPublisher<Void, Never> {
-        dataManager.removeCollection(collection)
-    }
-    
-    func removeBookFromSelectedCollection(_ book: BookData) -> AnyPublisher<Void, Never> {
-        guard let collection = selectedCollection else {
-            return Empty().eraseToAnyPublisher()
-        }
-        
-        return dataManager.removeBookFromCollection(book, from: collection)
-    }
-    
     // MARK: - Search Suggestions
     private func getTopMatches(in values: [String], matching prefix: String, limit: Int) -> [String] {
         let lowercasePrefix = prefix.lowercased()

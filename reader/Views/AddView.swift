@@ -29,48 +29,12 @@ struct AddView: View {
                 header
                 
                 Divider()
+                    .opacity(0.25)
                 
-                BookFormView(
-                    title: Binding(
-                        get: { viewModel.addBookForm.title },
-                        set: { viewModel.addBookForm.title = $0 }
-                    ),
-                    author: Binding(
-                        get: { viewModel.addBookForm.author },
-                        set: { viewModel.addBookForm.author = $0 }
-                    ),
-                    genre: Binding(
-                        get: { viewModel.addBookForm.genre },
-                        set: { viewModel.addBookForm.genre = $0 }
-                    ),
-                    series: Binding(
-                        get: { viewModel.addBookForm.series },
-                        set: { viewModel.addBookForm.series = $0 }
-                    ),
-                    isbn: Binding(
-                        get: { viewModel.addBookForm.isbn },
-                        set: { viewModel.addBookForm.isbn = $0 }
-                    ),
-                    publisher: Binding(
-                        get: { viewModel.addBookForm.publisher },
-                        set: { viewModel.addBookForm.publisher = $0 }
-                    ),
-                    publishedDate: Binding(
-                        get: { localPublishedDate },
-                        set: {
-                            localPublishedDate = $0
-                            viewModel.addBookForm.published = $0
-                        }
-                    ),
-                    description: Binding(
-                        get: { viewModel.addBookForm.description },
-                        set: { viewModel.addBookForm.description = $0 }
-                    ),
-                    validationErrors: $validationErrors,
-                    showValidationErrors: false,
-                    focusedField: $focusedField
-                )
+                bookForm
+                
                 Divider()
+                    .opacity(0.25)
                 
                 actionButtons
             }
@@ -124,6 +88,49 @@ struct AddView: View {
             Spacer()
         }
         .padding(.top, 20)
+    }
+    
+    private var bookForm: some View {
+        BookFormView(
+            title: Binding(
+                get: { viewModel.addBookForm.title },
+                set: { viewModel.addBookForm.title = $0 }
+            ),
+            author: Binding(
+                get: { viewModel.addBookForm.author },
+                set: { viewModel.addBookForm.author = $0 }
+            ),
+            genre: Binding(
+                get: { viewModel.addBookForm.genre },
+                set: { viewModel.addBookForm.genre = $0 }
+            ),
+            series: Binding(
+                get: { viewModel.addBookForm.series },
+                set: { viewModel.addBookForm.series = $0 }
+            ),
+            isbn: Binding(
+                get: { viewModel.addBookForm.isbn },
+                set: { viewModel.addBookForm.isbn = $0 }
+            ),
+            publisher: Binding(
+                get: { viewModel.addBookForm.publisher },
+                set: { viewModel.addBookForm.publisher = $0 }
+            ),
+            publishedDate: Binding(
+                get: { localPublishedDate },
+                set: {
+                    localPublishedDate = $0
+                    viewModel.addBookForm.published = $0
+                }
+            ),
+            description: Binding(
+                get: { viewModel.addBookForm.description },
+                set: { viewModel.addBookForm.description = $0 }
+            ),
+            validationErrors: $validationErrors,
+            showValidationErrors: false,
+            focusedField: $focusedField
+        )
     }
     
     private var actionButtons: some View {
@@ -234,9 +241,9 @@ struct AddView: View {
     }
     
     private func enforceWindowStyle() {
-        if let window = NSApp.windows.first(where: { $0.title == "Add Book" }) {
-            window.styleMask.remove([.resizable, .miniaturizable, .fullScreen])
-            window.canHide = false
+        if let window = NSApplication.shared.windows.first(where: { $0.title == "Add Book" }) {
+            window.styleMask.remove(.resizable)
+            window.standardWindowButton(.zoomButton)?.isHidden = true
         }
     }
 }
