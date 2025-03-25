@@ -36,23 +36,21 @@ Inkwell (formerly reader) is a simple book library and reading tracker app for m
 
 ## Screenshots
 
-<img src = "./assets/img02.png" alt = "reader in light mode" />
+![Light Mode](./assets/img02.png)
 
-<img src = "./assets/img03.png" alt = "reader's dashbaord" />
-
-<img src = "./assets/img04.png" alt = "reader's share quote sheet" />
+![Share Quote Sheet](./assets/img03.png)
 
 ## Install
 
-- Download the `reader.zip` file from the [latest release](https://github.com/chippokiddo/reader/releases/latest)
-- Unzip the file and move `reader.app` into your `Applications` folder
+- Download the `Inkwell.zip` file from the [latest release](https://github.com/chippokiddo/reader/releases/latest)
+- Unzip the file and move `Inkwell.app` into your `Applications` folder
 - Control-click or right-click the app and select 'open'
 
 > [!NOTE]
-> Since reader is not notarized, macOS Gatekeeper may block the app:
+> Since Inkwell is not notarized, macOS Gatekeeper may block the app:
 >
 > - Go to System Settings > Privacy & Security
-> - Scroll down and locate the prompt for `reader.app`
+> - Scroll down and locate the prompt for `Inkwell.app`
 > - Click 'open anyway'
 >
 > The app requires network access to fetch book data via the Google Books API and Open Library
@@ -71,4 +69,4 @@ You can help make this app more accessible by contributing translations! This pr
 
 ## Acknowledgements
 
-reader uses the [Merriweather font](https://fonts.google.com/specimen/Merriweather), made available under the [Open Font License](../reader/Merriweather/OFL.txt).
+This application uses the [Merriweather font](https://fonts.google.com/specimen/Merriweather), made available under the [Open Font License](../reader/Merriweather/OFL.txt).
