@@ -60,7 +60,6 @@ struct ImportExportView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 400, height: 200)
         .animation(.easeInOut(duration: 0.3), value: contentViewModel.deletionIntervalDays)
         .onDisappear {
             releaseSettingsWindowResources()
@@ -157,31 +156,36 @@ struct ImportExportView: View {
     private func handleImport(result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
-            if let url = urls.first {
-                if url.pathExtension.lowercased() == "json" {
-                    dataManager.importBooks(from: url)
-                        .sink(receiveCompletion: { completion in
-                            if case .failure(let error) = completion {
-                                self.importError = "Import error: \(error.localizedDescription)"
-                            }
-                        }, receiveValue: { _ in
-                            self.handleImportResult(.success(()))
-                        })
-                        .store(in: &cancellables)
-                } else if url.pathExtension.lowercased() == "csv" {
-                    dataManager.importBooksFromCSV(from: url)
-                        .sink(receiveCompletion: { completion in
-                            if case .failure(let error) = completion {
-                                self.importError = "Import error: \(error.localizedDescription)"
-                            }
-                        }, receiveValue: { _ in
-                            self.handleImportResult(.success(()))
-                        })
-                        .store(in: &cancellables)
-                } else {
-                    importError = "Unsupported file format. Please use JSON or CSV."
+            guard let url = urls.first else { return }
+
+            let fileExtension = url.pathExtension.lowercased()
+
+            let importPublisher: AnyPublisher<Void, Error>? = {
+                switch fileExtension {
+                case "json":
+                    return dataManager.importBooks(from: url)
+                case "csv":
+                    return dataManager.importBooksFromCSV(from: url)
+                default:
+                    return nil
                 }
+            }()
+
+            guard let publisher = importPublisher else {
+                importError = "Unsupported file format. Please use JSON or CSV."
+                return
             }
+
+            publisher
+                .sink(receiveCompletion: { completion in
+                    if case .failure(let error) = completion {
+                        self.importError = "Import error: \(error.localizedDescription)"
+                    }
+                }, receiveValue: {
+                    self.handleImportResult(.success(()))
+                })
+                .store(in: &cancellables)
+
         case .failure(let error):
             importError = "File selection error: \(error.localizedDescription)"
         }
@@ -200,33 +204,28 @@ struct ImportExportView: View {
     private func handleExport(format: ExportFormat) {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [format.utType]
-        // Use your existing date formatter utility here
-        panel.nameFieldStringValue = "books-\(currentDateString()).\(format.fileExtension)"
-        
-        if panel.runModal() == .OK, let url = panel.url {
+        panel.nameFieldStringValue = "books-\(DateFormatterUtils.currentDateString()).\(format.fileExtension)"
+
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+
+        let exportPublisher: AnyPublisher<Void, Error> = {
             switch format {
             case .json:
-                dataManager.exportBooks(to: url)
-                    .sink(receiveCompletion: { completion in
-                        if case .failure(let error) = completion {
-                            self.handleExportResult(.failure(error))
-                        }
-                    }, receiveValue: { _ in
-                        self.handleExportResult(.success(()))
-                    })
-                    .store(in: &cancellables)
+                return dataManager.exportBooks(to: url)
             case .csv:
-                dataManager.exportBooksToCSV(to: url)
-                    .sink(receiveCompletion: { completion in
-                        if case .failure(let error) = completion {
-                            self.handleExportResult(.failure(error))
-                        }
-                    }, receiveValue: { _ in
-                        self.handleExportResult(.success(()))
-                    })
-                    .store(in: &cancellables)
+                return dataManager.exportBooksToCSV(to: url)
             }
-        }
+        }()
+
+        exportPublisher
+            .sink(receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    self.handleExportResult(.failure(error))
+                }
+            }, receiveValue: {
+                self.handleExportResult(.success(()))
+            })
+            .store(in: &cancellables)
     }
     
     private func handleExportResult(_ result: Result<Void, Error>) {

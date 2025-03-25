@@ -106,7 +106,8 @@ class AppState: ObservableObject {
                 
                 UserDefaults.standard.set(Date(), forKey: "lastUpdateCheck")
             } catch {
-                let errorMessage = "Update Check Failed: \(error.localizedDescription)"
+                let friendlyMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                let errorMessage = "Update Check Failed: \(friendlyMessage)"
                 
                 DispatchQueue.main.async {
                     self.lastCheckStatus = .error(errorMessage)

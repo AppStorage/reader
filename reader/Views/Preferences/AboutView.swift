@@ -17,16 +17,17 @@ struct AboutView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                     .shadow(radius: 5)
                 
-                Text("reader")
+                Text("Inkwell")
                     .font(.largeTitle)
                     .bold()
                     .padding(.top, 10)
                 
                 VStack(spacing: 5) {
-                    Text("Version \(Bundle.main.appVersion)")
+                    Text("Version \(version)")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
-                    Text(Bundle.main.copyrightText)
+                    
+                    Text(copyright)
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
@@ -49,9 +50,8 @@ struct AboutView: View {
                 Spacer()
             }
             .padding(30)
-            .frame(width: 400, height: 320)
             .onAppear {
-                if let window = NSApp.windows.first(where: { $0.title == "About reader" }) {
+                if let window = NSApp.windows.first(where: { $0.title == "About Inkwell" }) {
                     window.styleMask.remove(.miniaturizable)
                     window.canHide = false
                 }
@@ -62,18 +62,20 @@ struct AboutView: View {
         }
     }
     
+    // MARK: - App Version
+    private var version: String {
+        let shortVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+        let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
+        return "\(shortVersion) (\(buildNumber))"
+    }
+
+    // MARK: - Copyright Text
+    private var copyright: String {
+        Bundle.main.infoDictionary?["NSHumanReadableCopyright"] as? String ?? "© chip"
+    }
+    
     // MARK: - Cleanup
     private func releaseSettingsWindowResources() {
         appState.cleanupPreferencesCache()
-    }
-}
-
-extension Bundle {
-    var appVersion: String {
-        return Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
-    }
-    
-    var copyrightText: String {
-        return Bundle.main.object(forInfoDictionaryKey: "NSHumanReadableCopyright") as? String ?? "Copyright © chip"
     }
 }

@@ -1,15 +1,13 @@
 import SwiftUI
 
-struct SettingsView: View {
+struct GeneralView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var alertManager: AlertManager
     
     @Environment(\.colorScheme) private var colorScheme
     
     @State private var isCheckingManually = false
-    
-    var checkForUpdates: () -> Void
-    
+        
     var body: some View {
         Form {
             Section {
@@ -37,7 +35,6 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .animation(.easeInOut(duration: 0.2), value: appState.checkForUpdatesAutomatically)
         .animation(.easeInOut(duration: 0.3), value: alertManager.currentAlert != nil)
-        .frame(width: 400, height: 300)
         .onDisappear {
             releaseSettingsWindowResources()
         }

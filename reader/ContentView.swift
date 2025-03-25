@@ -62,7 +62,7 @@ struct ContentView: View {
     private var middleContent: some View {
         Group {
             if contentViewModel.showDashboard {
-                ReadingDashboardView()
+                DashboardView()
                     .frame(minWidth: 800, maxWidth: .infinity)
             } else {
                 MiddlePanelView(

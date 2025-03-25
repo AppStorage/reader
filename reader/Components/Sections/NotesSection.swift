@@ -8,8 +8,8 @@ struct NotesSection: View {
     @EnvironmentObject var overlayManager: OverlayManager
     @EnvironmentObject var contentViewModel: ContentViewModel
     
+    @State private var currentPage: Int = 0
     @State private var isEditing: Bool = false
-    @State private var isCollapsed: Bool = false
     @State private var localNotes: [String] = []
     @State private var editNoteText: String = ""
     @State private var newPageNumber: String = ""
@@ -17,13 +17,20 @@ struct NotesSection: View {
     @State private var editPageNumber: String = ""
     @State private var saveTask: Task<Void, Never>?
     @State private var editingNoteId: String? = nil
+    
     @State private static var cancellables = Set<AnyCancellable>()
+    
+    private let pageSize: Int = 5
+    
+    var isCollapsedBinding: Binding<Bool> {
+        contentViewModel.collapseBinding(for: .notes, bookId: book.id)
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             CollapsibleHeader(
                 isEditing: $isEditing,
-                isCollapsed: $isCollapsed,
+                isCollapsed: isCollapsedBinding,
                 title: "Notes",
                 isEditingDisabled: (book.status == .deleted) || (book.notes.isEmpty),
                 onEditToggle: {
@@ -32,9 +39,9 @@ struct NotesSection: View {
                         editingNoteId = nil
                     }
                 },
-                onToggleCollapse: { isCollapsed.toggle() }
+                onToggleCollapse: { isCollapsedBinding.wrappedValue.toggle() }
             )
-            if !isCollapsed {
+            if !isCollapsedBinding.wrappedValue {
                 content
             }
         }
@@ -55,27 +62,45 @@ struct NotesSection: View {
                 emptyStateView
                     .transition(.opacity)
             } else {
-                ForEach(localNotes, id: \.self) { note in
+                ForEach(paginatedNotes, id: \.self) { note in
                     let (text, pageNumber, _) = RowItems.parseFromStorage(note)
-                    
-                    RowItems(
-                        contentType: .note,
-                        text: text,
-                        secondaryText: pageNumber.isEmpty ? nil : pageNumber,
-                        attributedText: nil,
-                        mode: editingNoteId == note ? .edit : .display,
-                        allowEditing: isEditing,
-                        isMultiline: true,
-                        editText: $editNoteText,
-                        editSecondary: $editPageNumber,
-                        onRemove: { removeNote(note) },
-                        onEdit: { beginEditingNote(note) },
-                        onSave: { saveEditedNote(originalNote: note) },
-                        onCancel: { cancelEditingNote() }
-                    )
+                    let noteId = RowItems.hashedIdentifier(for: note)
+                    let isExpanded = contentViewModel.isExpanded(hash: noteId, for: book.id)
+                    let previewLimit = 120
+                    let displayText = isExpanded || text.count < previewLimit ? text : String(text.prefix(previewLimit)) + "…"
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        RowItems(
+                            contentType: .note,
+                            text: displayText,
+                            secondaryText: pageNumber.isEmpty ? nil : pageNumber,
+                            attributedText: nil,
+                            mode: editingNoteId == note ? .edit : .display,
+                            allowEditing: isEditing,
+                            isMultiline: true,
+                            editText: $editNoteText,
+                            editSecondary: $editPageNumber,
+                            onRemove: { removeNote(note) },
+                            onEdit: { beginEditingNote(note) },
+                            onSave: { saveEditedNote(originalNote: note) },
+                            onCancel: { cancelEditingNote() }
+                        )
+                        .transition(.opacity)
+
+                        if text.count > previewLimit {
+                            ExpandableTextToggle(
+                                isExpanded: Binding(
+                                    get: { isExpanded },
+                                    set: { _ in
+                                        contentViewModel.toggleExpandedState(hash: noteId, for: book.id)
+                                    }
+                                )
+                            )
+                        }
+                    }
                 }
             }
-            
+
             if isAddingNote && editingNoteId == nil {
                 RowItems(
                     contentType: .note,
@@ -96,10 +121,24 @@ struct NotesSection: View {
                     isDisabled: book.status == .deleted
                 )
             }
+
+            if localNotes.count > pageSize {
+                PaginationControls(
+                    currentPage: currentPage,
+                    totalCount: localNotes.count,
+                    pageSize: pageSize,
+                    onPrevious: { currentPage = max(currentPage - 1, 0) },
+                    onNext: {
+                        let maxPage = (localNotes.count - 1) / pageSize
+                        currentPage = min(currentPage + 1, maxPage)
+                    }
+                )
+            }
         }
         .animation(.easeInOut(duration: 0.3), value: localNotes.isEmpty)
         .animation(.easeInOut(duration: 0.3), value: isAddingNote)
     }
+
     
     private var emptyStateView: some View {
         EmptyStateView(type: .notes, isCompact: true)
@@ -181,10 +220,17 @@ struct NotesSection: View {
             localNotes = book.notes
         }
     }
-
+    
     private func resetAddNoteForm() {
         newNote = ""
         newPageNumber = ""
         isAddingNote = false
+    }
+    
+    // MARK: - Pagination
+    private var paginatedNotes: [String] {
+        let startIndex = currentPage * pageSize
+        let endIndex = min(startIndex + pageSize, localNotes.count)
+        return Array(localNotes[startIndex..<endIndex])
     }
 }

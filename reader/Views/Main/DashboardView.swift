@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ReadingDashboardView: View {
+struct DashboardView: View {
     @EnvironmentObject var dataManager: DataManager
     @State private var isRefreshing: Bool = false
     
@@ -8,15 +8,15 @@ struct ReadingDashboardView: View {
         ZStack {
             ScrollView(.vertical, showsIndicators: true) {
                 VStack(spacing: 16) {
-                    ReadingInsightsView(books: dataManager.books)
+                    ReadingInsights(books: dataManager.books)
                         .padding(.bottom, 4)
-                    ReadingTrendsView(books: dataManager.books)
+                    ReadingTrends(books: dataManager.books)
                         .padding(.bottom, 4)
-                    MonthlyReadingChartView(books: dataManager.books)
+                    MonthlyReading(books: dataManager.books)
                         .padding(.bottom, 4)
-                    TopGenresChartView(books: dataManager.books)
+                    RatingDistribution(books: dataManager.books)
                         .padding(.bottom, 4)
-                    RecentActivityView(books: dataManager.books)
+                    RecentBooks(books: dataManager.books)
                 }
                 .padding(16)
             }

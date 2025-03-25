@@ -1,6 +1,6 @@
 <div align="center">
-    <img src="../reader/Assets.xcassets/AppIcon.appiconset/256x256.png" width="200" height="200" />
-    <h1>reader</h1>
+    <img src="../reader/Assets.xcassets/AppIcon.appiconset/icon_256x256.png" width="200" height="200" />
+    <h1>Inkwell</h1>
 </div>
 
 ![macOS](https://img.shields.io/badge/macOS-14+-blue?logo=apple&style=flat)
@@ -9,14 +9,14 @@
 [![License](https://img.shields.io/github/license/chippokiddo/reader)](../LICENSE)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?&logo=buy-me-a-coffee&logoColor=0D0C22)](https://buymeacoffee.com/chippo)
 
-reader is a simple book library and reading tracker app for macOS, designed and developed in Swift. It was purposefully built for personal use and to share with a friend, making it easier to manage book collections and track reading progress.
+Inkwell (formerly reader) is a simple book library and reading tracker app for macOS, designed and developed in Swift. It was purposefully built for personal use and to share with a friend, making it easier to manage book collections and track reading progress.
 
 ![Screenshot](./assets/img01.png)
 
 ## Dependencies
 
-- [Settings](https://github.com/sindresorhus/Settings)
 - [Fuse](https://github.com/krisk/fuse-swift)
+- [SwiftCSV](https://github.com/swiftcsv/SwiftCSV)
 
 ## Features
 

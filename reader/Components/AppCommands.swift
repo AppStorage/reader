@@ -42,7 +42,7 @@ struct AppCommands {
             Button("Export Books...") {
                 let panel = NSSavePanel()
                 panel.allowedContentTypes = [.json]
-                panel.nameFieldStringValue = "books-\(currentDateString()).json"
+                panel.nameFieldStringValue = "books-\(DateFormatterUtils.currentDateString()).json"
                 
                 if panel.runModal() == .OK, let url = panel.url {
                     dataManager.exportBooks(to: url)
@@ -70,22 +70,11 @@ struct AppCommands {
         }
     }
     
-    // MARK: - Preferences
-    static func settingsCommands(
-        appState: AppState,
-        dataManager: DataManager,
-        contentViewModel: ContentViewModel
-    ) -> some Commands {
+    // MARK: - Settings
+    static func settingsCommands(openWindow: @escaping (String) -> Void) -> some Commands {
         CommandGroup(replacing: .appSettings) {
             Button("Preferences...") {
-                readerApp.showSettingsWindow(
-                    appState: appState,
-                    dataManager: dataManager,
-                    contentViewModel: contentViewModel,
-                    checkForUpdates: {
-                        appState.checkForAppUpdates(isUserInitiated: true)
-                    }
-                )
+                openWindow("preferencesWindow")
             }
             .keyboardShortcut(",", modifiers: .command)
         }

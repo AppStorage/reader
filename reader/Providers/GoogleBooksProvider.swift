@@ -104,7 +104,8 @@ actor GoogleBooksProvider: BookProvider {
             dateFinished: nil,
             quotes: [],
             notes: [],
-            tags: []
+            tags: [],
+            rating: 0 // user sets this
         )
     }
 }

@@ -1,4 +1,5 @@
 import Foundation
+import SwiftCSV
 
 struct DataConversion {
     static func toTransferData(from book: BookData) -> BookTransferData {
@@ -17,10 +18,11 @@ struct DataConversion {
             dateFinished: book.dateFinished,
             quotes: book.quotes,
             notes: book.notes,
-            tags: book.tags
+            tags: book.tags,
+            rating: book.rating
         )
     }
-    
+
     static func toBookData(from transferData: BookTransferData) -> BookData {
         return BookData(
             title: transferData.title,
@@ -31,6 +33,7 @@ struct DataConversion {
             series: transferData.series,
             isbn: transferData.isbn,
             bookDescription: transferData.bookDescription,
+            rating: transferData.rating ?? 0,
             status: ReadingStatus(rawValue: transferData.status) ?? .unread,
             dateStarted: transferData.dateStarted,
             dateFinished: transferData.dateFinished,
@@ -39,30 +42,30 @@ struct DataConversion {
             tags: transferData.tags
         )
     }
-    
+
     // MARK: - JSON
     static func encodeToJSON(_ transferData: BookTransferData) -> Data? {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         return try? encoder.encode(transferData)
     }
-    
+
     static func decodeFromJSON(_ jsonData: Data) -> BookTransferData? {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return try? decoder.decode(BookTransferData.self, from: jsonData)
     }
-    
+
     // MARK: - CSV
     static let csvHeaders = [
         "title", "author", "published", "publisher", "genre", "series",
         "isbn", "description", "status", "dateStarted", "dateFinished",
-        "tags", "quotes", "notes",
+        "tags", "quotes", "notes", "rating"
     ]
-    
+
     static func toCSV(books: [BookTransferData]) -> String {
         var csvString = csvHeaders.joined(separator: ",") + "\n"
-        
+
         for book in books {
             let row = [
                 escapeCsvField(book.title),
@@ -74,178 +77,96 @@ struct DataConversion {
                 escapeCsvField(book.isbn ?? ""),
                 escapeCsvField(book.bookDescription ?? ""),
                 book.status,
-                book.dateStarted != nil
-                ? formatDateForCSV(book.dateStarted!) : "",
-                book.dateFinished != nil
-                ? formatDateForCSV(book.dateFinished!) : "",
+                book.dateStarted != nil ? formatDateForCSV(book.dateStarted!) : "",
+                book.dateFinished != nil ? formatDateForCSV(book.dateFinished!) : "",
                 escapeCsvField(formatArrayField(book.tags)),
                 escapeCsvField(formatArrayField(book.quotes)),
                 escapeCsvField(formatArrayField(book.notes)),
+                String(book.rating ?? 0)
             ].joined(separator: ",")
-            
+
             csvString += row + "\n"
         }
-        
+
         return csvString
     }
-    
+
     static func fromCSV(csvString: String) -> [BookTransferData] {
-        var books: [BookTransferData] = []
-        
-        let rows = csvString.components(separatedBy: "\n")
-        guard rows.count > 1 else { return [] }
-        
-        for i in 1..<rows.count {
-            let row = rows[i]
-            if row.isEmpty { continue }
-            
-            let fields = parseCSVRow(row)
-            if fields.count < csvHeaders.count { continue }
-            
-            books.append(createBookFromCSVFields(fields))
+        do {
+            let csv = try NamedCSV(string: csvString, delimiter: ",")
+            var books: [BookTransferData] = []
+
+            for row in csv.rows {
+                let title = row["title"] ?? ""
+                let author = row["author"] ?? ""
+                let published = DateFormatterUtils.parseDate(row["published"])
+                let publisher = row["publisher"]
+                let genre = row["genre"]
+                let series = row["series"]
+                let isbn = row["isbn"]
+                let description = row["description"]
+                let status = row["status"] ?? "unread"
+                let dateStarted = DateFormatterUtils.parseDate(row["dateStarted"])
+                let dateFinished = DateFormatterUtils.parseDate(row["dateFinished"])
+
+                let tags = parseArrayField(row["tags"] ?? "")
+                let quotes = parseArrayField(row["quotes"] ?? "")
+                let notes = parseArrayField(row["notes"] ?? "")
+                let rating = Int(row["rating"] ?? "") ?? 0
+
+                books.append(BookTransferData(
+                    title: title,
+                    author: author,
+                    published: published,
+                    publisher: publisher,
+                    genre: genre,
+                    series: series,
+                    isbn: isbn,
+                    bookDescription: description,
+                    status: status,
+                    dateStarted: dateStarted,
+                    dateFinished: dateFinished,
+                    quotes: quotes,
+                    notes: notes,
+                    tags: tags,
+                    rating: rating
+                ))
+            }
+
+            return books
+        } catch {
+            print("Failed to parse CSV: \(error)")
+            return []
         }
-        
-        return books
     }
-    
+
     // MARK: - Helpers
-    private static func createBookFromCSVFields(_ fields: [String])
-    -> BookTransferData
-    {
-        var fieldIndex = 0
-        
-        let title = fields[fieldIndex]
-        fieldIndex += 1
-        let author = fields[fieldIndex]
-        fieldIndex += 1
-        
-        let publishedStr = fields[fieldIndex]
-        fieldIndex += 1
-        let published = parseDate(publishedStr.isEmpty ? nil : publishedStr)
-        
-        let publisher = getStringOrNil(fields[fieldIndex])
-        fieldIndex += 1
-        let genre = getStringOrNil(fields[fieldIndex])
-        fieldIndex += 1
-        let series = getStringOrNil(fields[fieldIndex])
-        fieldIndex += 1
-        let isbn = getStringOrNil(fields[fieldIndex])
-        fieldIndex += 1
-        let description = getStringOrNil(fields[fieldIndex])
-        fieldIndex += 1
-        
-        let statusStr = fields[fieldIndex]
-        fieldIndex += 1
-        
-        let dateStartedStr = fields[fieldIndex]
-        fieldIndex += 1
-        let dateStarted = parseDate(
-            dateStartedStr.isEmpty ? nil : dateStartedStr)
-        
-        let dateFinishedStr = fields[fieldIndex]
-        fieldIndex += 1
-        let dateFinished = parseDate(
-            dateFinishedStr.isEmpty ? nil : dateFinishedStr)
-        
-        let tagsStr = fields[fieldIndex]
-        fieldIndex += 1
-        let tags = tagsStr.isEmpty ? [] : parseArrayField(tagsStr)
-        
-        let quotesStr = fields[fieldIndex]
-        fieldIndex += 1
-        let quotes = quotesStr.isEmpty ? [] : parseArrayField(quotesStr)
-        
-        let notesStr = fields[fieldIndex]
-        let notes = notesStr.isEmpty ? [] : parseArrayField(notesStr)
-        
-        return BookTransferData(
-            title: title,
-            author: author,
-            published: published,
-            publisher: publisher,
-            genre: genre,
-            series: series,
-            isbn: isbn,
-            bookDescription: description,
-            status: statusStr,
-            dateStarted: dateStarted,
-            dateFinished: dateFinished,
-            quotes: quotes,
-            notes: notes,
-            tags: tags
-        )
-    }
-    
     private static func formatDateForCSV(_ date: Date) -> String {
-        var dateString: String = ""
-        DateFormatterUtils.formatterQueue.sync {
-            let formatter = DateFormatterUtils.sharedFormatter
-            formatter.dateFormat = "yyyy-MM-dd"
-            dateString = formatter.string(from: date)
-        }
-        return dateString
+        return DateFormatterUtils.cachedCSVFormatter.string(from: date)
     }
-    
+
     private static func getStringOrNil(_ str: String) -> String? {
         return str.isEmpty ? nil : str
     }
-    
+
     private static func parseArrayField(_ field: String) -> [String] {
         return field.components(separatedBy: ";")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
     }
-    
+
     private static func formatArrayField(_ array: [String]) -> String {
         return array.joined(separator: ";")
     }
-    
+
     private static func escapeCsvField(_ field: String) -> String {
         var escaped = field
-        
-        if escaped.contains(",") || escaped.contains("\"")
-            || escaped.contains("\n")
-        {
+
+        if escaped.contains(",") || escaped.contains("\"") || escaped.contains("\n") {
             escaped = escaped.replacingOccurrences(of: "\"", with: "\"\"")
             escaped = "\"\(escaped)\""
         }
-        
+
         return escaped
-    }
-    
-    private static func parseCSVRow(_ row: String) -> [String] {
-        var fields: [String] = []
-        var currentField = ""
-        var inQuotes = false
-        
-        var i = 0
-        let characters = Array(row)
-        
-        while i < characters.count {
-            let char = characters[i]
-            
-            if char == "\"" {
-                if inQuotes && i + 1 < characters.count
-                    && characters[i + 1] == "\""
-                {
-                    currentField.append("\"")
-                    i += 2
-                    continue
-                } else {
-                    inQuotes.toggle()
-                }
-            } else if char == "," && !inQuotes {
-                fields.append(currentField)
-                currentField = ""
-            } else {
-                currentField.append(char)
-            }
-            
-            i += 1
-        }
-        
-        fields.append(currentField)
-        
-        return fields
     }
 }

@@ -8,8 +8,8 @@ struct QuotesSection: View {
     @EnvironmentObject var overlayManager: OverlayManager
     @EnvironmentObject var contentViewModel: ContentViewModel
     
+    @State private var currentPage: Int = 0
     @State private var isEditing: Bool = false
-    @State private var isCollapsed: Bool = false
     @State private var localQuotes: [String] = []
     @State private var editQuoteText: String = ""
     @State private var newPageNumber: String = ""
@@ -19,13 +19,20 @@ struct QuotesSection: View {
     @State private var editAttribution: String = ""
     @State private var saveTask: Task<Void, Never>?
     @State private var editingQuoteId: String? = nil
+    
     @State private static var cancellables = Set<AnyCancellable>()
+    
+    private let pageSize: Int = 5
+    
+    var isCollapsedBinding: Binding<Bool> {
+        contentViewModel.collapseBinding(for: .quotes, bookId: book.id)
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             CollapsibleHeader(
                 isEditing: $isEditing,
-                isCollapsed: $isCollapsed,
+                isCollapsed: isCollapsedBinding,
                 title: "Quotes",
                 isEditingDisabled: (book.status == .deleted) || (book.quotes.isEmpty),
                 onEditToggle: {
@@ -34,9 +41,9 @@ struct QuotesSection: View {
                         editingQuoteId = nil
                     }
                 },
-                onToggleCollapse: { isCollapsed.toggle() }
+                onToggleCollapse: { isCollapsedBinding.wrappedValue.toggle() }
             )
-            if !isCollapsed {
+            if !isCollapsedBinding.wrappedValue {
                 content
             }
         }
@@ -57,12 +64,16 @@ struct QuotesSection: View {
                 emptyStateView
                     .transition(.opacity)
             } else {
-                ForEach(localQuotes, id: \.self) { quote in
+                ForEach(paginatedQuotes, id: \.self) { quote in
                     let (text, pageNumber, attribution) = RowItems.parseFromStorage(quote)
+                    let quoteId = RowItems.hashedIdentifier(for: quote)
+                    let isExpanded = contentViewModel.isExpanded(hash: quoteId, for: book.id)
+                    let previewLimit = 120
+                    let displayText = isExpanded || text.count < previewLimit ? text : String(text.prefix(previewLimit)) + "…"
                     
                     RowItems(
                         contentType: .quote,
-                        text: text,
+                        text: displayText,
                         secondaryText: pageNumber.isEmpty ? nil : pageNumber,
                         attributedText: attribution.isEmpty ? nil : attribution,
                         customFont: .custom("Merriweather Regular", size: 12, relativeTo: .body),
@@ -77,6 +88,18 @@ struct QuotesSection: View {
                         onSave: { saveEditedQuote(originalQuote: quote) },
                         onCancel: { cancelEditingQuote() }
                     )
+                    .transition(.opacity)
+                    
+                    if text.count > previewLimit {
+                        ExpandableTextToggle(
+                            isExpanded: Binding(
+                                get: { isExpanded },
+                                set: { _ in
+                                    contentViewModel.toggleExpandedState(hash: quoteId, for: book.id)
+                                }
+                            )
+                        )
+                    }
                 }
             }
             
@@ -99,6 +122,19 @@ struct QuotesSection: View {
                     action: { isAddingQuote = true },
                     padding: EdgeInsets(top: 6, leading: 0, bottom: 0, trailing: 0),
                     isDisabled: book.status == .deleted
+                )
+            }
+            
+            if localQuotes.count > pageSize {
+                PaginationControls(
+                    currentPage: currentPage,
+                    totalCount: localQuotes.count,
+                    pageSize: pageSize,
+                    onPrevious: { currentPage = max(currentPage - 1, 0) },
+                    onNext: {
+                        let maxPage = (localQuotes.count - 1) / pageSize
+                        currentPage = min(currentPage + 1, maxPage)
+                    }
                 )
             }
         }
@@ -203,5 +239,12 @@ struct QuotesSection: View {
         newPageNumber = ""
         newAttribution = ""
         isAddingQuote = false
+    }
+    
+    // MARK: - Pagination
+    private var paginatedQuotes: [String] {
+        let startIndex = currentPage * pageSize
+        let endIndex = min(startIndex + pageSize, localQuotes.count)
+        return Array(localQuotes[startIndex..<endIndex])
     }
 }

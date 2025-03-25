@@ -1,4 +1,5 @@
 import SwiftUI
+import CryptoKit
 
 // MARK: - Display Modes
 enum DisplayMode {
@@ -357,19 +358,19 @@ struct RowItems: View {
     private var formButtons: some View {
         HStack {
             Button("Cancel") {
-                withAnimation(.easeOut(duration: 0.3)) {
+                withAnimation(.easeOut(duration: 0.5)) {
                     if let onCancel = onCancel {
                         onCancel()
                     }
                 }
             }
-            .buttonStyle(BorderlessButtonStyle())
+            .buttonStyle(.borderless)
             .foregroundColor(.secondary)
             
             Spacer()
             
             Button("Save") {
-                withAnimation(.easeOut(duration: 0.3)) {
+                withAnimation(.easeOut(duration: 0.5)) {
                     if let onSave = onSave {
                         onSave()
                     }
@@ -474,6 +475,13 @@ struct RowItems: View {
         }
         
         return nil
+    }
+    
+    // MARK: - Hash for Notes/Quotes
+    static func hashedIdentifier(for text: String) -> String {
+        let data = Data(text.utf8)
+        let hash = SHA256.hash(data: data)
+        return hash.compactMap { String(format: "%02x", $0) }.joined()
     }
 }
 

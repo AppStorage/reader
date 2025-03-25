@@ -36,7 +36,7 @@ extension VolumeInfo {
     
     // Parses and converts the published date to a Date object
     var parsedPublishedDate: Date? {
-        parseDate(publishedDate)
+        DateFormatterUtils.parseDate(publishedDate)
     }
     
     // Combines the title and subtitle, if available

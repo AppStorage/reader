@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct DetailsSection: View {
-    @State private var isbnCopied: Bool = false
-    @State private var showFullDescription = false
+    @Namespace private var starNamespace
+    @State private var isbnCopied = false
     
     let title: String
     let author: String
@@ -14,14 +14,22 @@ struct DetailsSection: View {
     let formattedDate: String
     let description: String
     let canRate: Bool
-    
-    private let lineLimit = 5
-    private let truncationThreshold = 300
+    let showFullDescription: Binding<Bool>
     
     var onRatingChanged: ((Int) -> Void)?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
+            titleAndAuthorRow
+            ratingRow
+            infoRow
+            descriptionRow
+        }
+    }
+    
+    // MARK: - Title and Author Row
+    private var titleAndAuthorRow: some View {
+        VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.custom("Merriweather-Regular", size: 24))
                 .foregroundStyle(.primary)
@@ -31,37 +39,62 @@ struct DetailsSection: View {
                 .font(.system(size: 16))
                 .foregroundStyle(.secondary)
                 .accessibilityLabel("Author: \(author)")
-            
+        }
+    }
+    
+    // MARK: - Rating Row
+    private var ratingRow: some View {
+        Group {
             if canRate {
-                HStack(spacing: 4) {
+                HStack(spacing: 6) {
                     Text("Rating:")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                    
                     ForEach(1...5, id: \.self) { star in
                         Image(systemName: star <= rating ? "star.fill" : "star")
+                            .matchedGeometryEffect(id: star <= rating ? "filledStar\(star)" : "emptyStar\(star)", in: starNamespace)
                             .foregroundStyle(.yellow)
                             .onTapGesture {
-                                onRatingChanged?(star)
+                                withAnimation(.spring()) {
+                                    onRatingChanged?(star)
+                                }
                             }
                             .accessibilityLabel("\(star) star\(star > 1 ? "s" : "")")
                     }
+                    
                     if rating != 0 {
                         Button(action: {
-                            onRatingChanged?(0)
+                            withAnimation(.spring()) {
+                                onRatingChanged?(0)
+                            }
                         }) {
                             Image(systemName: "x.circle.fill")
                                 .font(.system(size: 12))
                                 .foregroundStyle(.secondary)
-                                .padding(.leading, 8)
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel("Clear rating")
                     }
                 }
-                .padding(.vertical, 5)
             }
-            
-            ForEach(infoRows, id: \.label) { row in
+        }
+    }
+    
+    // MARK: - Info Row
+    private var infoLabel: [(label: String, value: String)] {
+        [
+            ("Genre", genre),
+            ("Series", series),
+            ("ISBN", isbn),
+            ("Publisher", publisher),
+            ("Published", formattedDate)
+        ].map { ($0.0, $0.1.isEmpty ? "—" : $0.1) }
+    }
+    
+    private var infoRow: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(infoLabel, id: \.label) { row in
                 if row.label == "ISBN" && !isbn.isEmpty {
                     HStack(spacing: 6) {
                         Text("\(row.label): \(row.value)")
@@ -90,54 +123,10 @@ struct DetailsSection: View {
                         .accessibilityLabel("\(row.label): \(row.value)")
                 }
             }
-            
-            if !description.isEmpty {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(description)
-                        .font(.body)
-                        .foregroundStyle(.primary)
-                        .multilineTextAlignment(.leading)
-                        .lineSpacing(4)
-                        .lineLimit(showFullDescription ? nil : lineLimit)
-                        .padding(10)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.gray.opacity(0.1))
-                        )
-                        .animation(.easeInOut(duration: 0.25), value: showFullDescription)
-                    
-                    if description.count > truncationThreshold {
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.25)) {
-                                showFullDescription.toggle()
-                            }
-                        }) {
-                            Text(showFullDescription ? "Show Less" : "Show More")
-                                .font(.caption)
-                                .foregroundColor(.accentColor)
-                                .padding(.top, 2)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
         }
     }
     
-    private var infoRows: [(label: String, value: String)] {
-        [
-            ("Genre", genre),
-            ("Series", series),
-            ("ISBN", isbn),
-            ("Publisher", publisher),
-            ("Published", formattedDate)
-        ].filter { !$0.value.isEmpty }
-    }
-    
     private func copyToClipboard(_ text: String) {
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(text, forType: .string)
-        
         withAnimation {
             isbnCopied = true
         }
@@ -145,6 +134,41 @@ struct DetailsSection: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             withAnimation {
                 isbnCopied = false
+            }
+        }
+    }
+    
+    // MARK: - Description
+    private var descriptionRow: some View {
+        let previewLimit = 300
+        let displayDescription = showFullDescription.wrappedValue || description.count <= previewLimit
+            ? description
+            : String(description.prefix(previewLimit)) + "…"
+        
+        return Group {
+            if !description.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(displayDescription)
+                        .font(.custom("Merriweather-Regular", size: 12))
+                        .foregroundStyle(.primary)
+                        .lineSpacing(4)
+                        .padding(10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.gray.opacity(0.1))
+                        )
+                        .transition(.opacity)
+                    
+                    if description.count > previewLimit {
+                        ExpandableTextToggle(
+                            isExpanded: showFullDescription,
+                            alignmentPadding: 6,
+                            font: .caption
+                        )
+                    }
+                }
+                .frame(minHeight: 100, alignment: .top)
             }
         }
     }

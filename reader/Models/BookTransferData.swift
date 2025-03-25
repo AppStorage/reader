@@ -21,7 +21,8 @@ struct BookTransferData: Codable, Transferable, Sendable, Equatable, Identifiabl
     var quotes: [String]
     var notes: [String]
     var tags: [String]
-    
+    var rating: Int?
+
     // MARK: - Transferable Conformance
     static var transferRepresentation: some TransferRepresentation {
         CodableRepresentation(for: BookTransferData.self, contentType: .bookTransferData)

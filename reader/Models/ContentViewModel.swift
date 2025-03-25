@@ -1,6 +1,15 @@
 import SwiftUI
 import Combine
 
+// MARK: - Collapsible Sections
+enum CollapsibleSection {
+    case notes
+    case quotes
+    case tags
+    case description
+}
+
+// MARK: - Content View Model
 @MainActor
 final class ContentViewModel: ObservableObject {
     @AppStorage("deletionIntervalDays") var deletionIntervalDays: Int = 30
@@ -21,6 +30,14 @@ final class ContentViewModel: ObservableObject {
     @Published var selectedCollection: BookCollection?
     @Published var bookSearchResults: [BookTransferData] = []
     @Published var selectedBookForAdd: BookTransferData? = nil
+    @Published private var expandedLongTexts: [UUID: Set<String>] = [:]
+    
+    @Published private var collapsedStates: [CollapsibleSection: [UUID: Bool]] = [
+        .notes: [:],
+        .quotes: [:],
+        .tags: [:],
+        .description: [:]
+    ]
     
     private var books: [BookData] = []
     private var dataManager: DataManager
@@ -480,6 +497,29 @@ final class ContentViewModel: ObservableObject {
     func submitSearch() {
         if !searchQuery.isEmpty {
             saveRecentSearch(searchQuery)
+        }
+    }
+    
+    // MARK: - Collapsible Binding
+    func collapseBinding(for section: CollapsibleSection, bookId: UUID) -> Binding<Bool> {
+        Binding<Bool>(
+            get: { self.collapsedStates[section]?[bookId] ?? false },
+            set: { newValue in
+                self.collapsedStates[section, default: [:]][bookId] = newValue
+            }
+        )
+    }
+    
+    // MARK: - Expand Long Text
+    func isExpanded(hash: String, for bookId: UUID) -> Bool {
+        expandedLongTexts[bookId]?.contains(hash) ?? false
+    }
+
+    func toggleExpandedState(hash: String, for bookId: UUID) {
+        if expandedLongTexts[bookId]?.contains(hash) == true {
+            expandedLongTexts[bookId]?.remove(hash)
+        } else {
+            expandedLongTexts[bookId, default: []].insert(hash)
         }
     }
 }

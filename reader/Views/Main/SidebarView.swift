@@ -31,6 +31,7 @@ struct SidebarView: View {
                 Section {
                     Label("Dashboard", systemImage: "chart.pie")
                         .tag(SidebarSelection.dashboard)
+                        .foregroundStyle(.primary)
                 }
                 
                 readingStatusSection
@@ -103,6 +104,7 @@ struct SidebarView: View {
                     .dropDestination(for: BookTransferData.self) { items, _ in
                         updateBookStatus(for: items, with: status)
                     }
+                    .foregroundStyle(.primary)
             }
         }
     }
@@ -119,6 +121,7 @@ struct SidebarView: View {
                 Label(collection.name, systemImage: "folder")
                     .badge(contentViewModel.bookCount(for: collection))
                     .tag(SidebarSelection.collection(collection))
+                    .foregroundStyle(.primary)
                     .dropDestination(for: BookTransferData.self) { items, _ in
                         addBookToCollection(items, collection: collection)
                     }
@@ -140,14 +143,7 @@ struct SidebarView: View {
     private var settingsButton: some View {
         HStack {
             SettingsButton {
-                readerApp.showSettingsWindow(
-                    appState: appState,
-                    dataManager: dataManager,
-                    contentViewModel: contentViewModel,
-                    checkForUpdates: {
-                        appState.checkForAppUpdates(isUserInitiated: true)
-                    }
-                )
+                openWindow(id: "preferencesWindow")
             }
             Spacer()
         }

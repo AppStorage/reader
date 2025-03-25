@@ -1,7 +1,5 @@
 import SwiftUI
 import SwiftData
-import Settings
-import enum Settings.Settings
 
 @main
 struct readerApp: App {
@@ -25,8 +23,6 @@ struct readerApp: App {
             return nil
         }
     }()
-    
-    private static var preferencesWindow: SettingsWindowController? = nil
     
     // MARK: - Main Window
     private var mainWindow: some Scene {
@@ -52,19 +48,33 @@ struct readerApp: App {
         .commands {
             AppCommands.fileCommands(
                 appState: appState,
-                dataManager: dataManager
-            ) { openWindow(id: $0) }
-            AppCommands.appInfoCommands(appState: appState)
-            AppCommands.settingsCommands(
-                appState: appState,
                 dataManager: dataManager,
-                contentViewModel: contentViewModel
+                openWindow: { openWindow(id: $0) }
             )
+            
+            AppCommands.appInfoCommands(appState: appState)
+            
+            AppCommands.settingsCommands(openWindow: { openWindow(id: $0) })
+            
             AppCommands.deleteCommands(
                 appState: appState,
                 contentViewModel: contentViewModel
             )
         }
+    }
+    
+    // MARK: - Preferences Window
+    private var preferencesWindow: some Scene {
+        Window("Preferences", id: "preferencesWindow") {
+            PreferencesView()
+                .environmentObject(appState)
+                .environmentObject(dataManager)
+                .environmentObject(alertManager)
+                .environmentObject(contentViewModel)
+        }
+        .defaultPosition(.center)
+        .windowStyle(.hiddenTitleBar)
+        .windowResizability(.contentSize)
     }
     
     // MARK: - Add Book Window
@@ -83,6 +93,7 @@ struct readerApp: App {
     var body: some Scene {
         mainWindow
         addBookWindow
+        preferencesWindow
     }
     
     init() {
@@ -101,92 +112,5 @@ struct readerApp: App {
     private func handleOnAppear() {
         appState.applyTheme(appState.selectedTheme)
         appState.scheduleUpdateCheck()
-    }
-    
-    // MARK: - Preferences Icons
-    private static func gearToolbarIcon(size: CGFloat = 24, innerSize: CGFloat = 18) -> NSImage {
-        let originalImage = NSImage(named: "squareGear") ?? NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)!
-        let paddedSize = NSSize(width: size, height: size)
-        let innerSize = NSSize(width: innerSize, height: innerSize)
-        
-        let paddedImage = NSImage(size: paddedSize)
-        paddedImage.lockFocus()
-        
-        let xOffset = (paddedSize.width - innerSize.width) / 2
-        let yOffset = (paddedSize.height - innerSize.height) / 2
-        originalImage.draw(
-            in: NSRect(x: xOffset, y: yOffset, width: innerSize.width, height: innerSize.height),
-            from: .zero,
-            operation: .sourceOver,
-            fraction: 1.0
-        )
-        
-        paddedImage.unlockFocus()
-        paddedImage.isTemplate = true
-        return paddedImage
-    }
-    
-    private static func infoToolbarIcon(size: CGFloat = 24) -> NSImage {
-        let config = NSImage.SymbolConfiguration(pointSize: size, weight: .regular)
-        return NSImage(
-            systemSymbolName: "info.square.fill",
-            accessibilityDescription: nil
-        )!.withSymbolConfiguration(config)!
-    }
-    
-    private static func manageDataToolbarIcon(size: CGFloat = 24) -> NSImage {
-        let config = NSImage.SymbolConfiguration(pointSize: size, weight: .regular)
-        return NSImage(
-            systemSymbolName: "icloud.square.fill",
-            accessibilityDescription: "Manage Data"
-        )!.withSymbolConfiguration(config)!
-    }
-    
-    // MARK: - Preferences Window
-    static func showSettingsWindow(appState: AppState, dataManager: DataManager, contentViewModel: ContentViewModel, checkForUpdates: @escaping () -> Void) {
-        if preferencesWindow == nil {
-            let settingsView = SettingsView(checkForUpdates: {
-                checkForUpdates()
-            })
-                .environmentObject(appState)
-                .environmentObject(appState.alertManager!)
-            
-            let aboutView = AboutView()
-                .environmentObject(appState)
-            
-            let importExportView = ImportExportView()
-                .environmentObject(appState)
-                .environmentObject(dataManager)
-                .environmentObject(contentViewModel)
-                .environmentObject(appState.alertManager!)
-            
-            preferencesWindow = SettingsWindowController(
-                panes: [
-                    Settings.Pane(
-                        identifier: Settings.PaneIdentifier("general"),
-                        title: "General",
-                        toolbarIcon: { gearToolbarIcon() }()
-                    ) {
-                        settingsView
-                    },
-                    Settings.Pane(
-                        identifier: Settings.PaneIdentifier("import_export"),
-                        title: "Manage Data",
-                        toolbarIcon: { manageDataToolbarIcon() }()
-                    ) {
-                        importExportView
-                    },
-                    Settings.Pane(
-                        identifier: Settings.PaneIdentifier("about"),
-                        title: "About",
-                        toolbarIcon: { infoToolbarIcon() }()
-                    ) {
-                        aboutView
-                    }
-                ]
-            )
-        }
-        preferencesWindow?.window?.center()
-        preferencesWindow?.show()
     }
 }

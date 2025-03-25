@@ -25,22 +25,38 @@
     "%lld" : {
       "shouldTranslate" : false
     },
+    "%lld book%@ (%lld%%)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld book%2$@ (%3$lld%%)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld libro%2$@ (%3$lld%%)"
+          }
+        }
+      }
+    },
+    "%lld books" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld libros"
+          }
+        }
+      }
+    },
     "%lld Books Selected" : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld Libros Seleccionados"
-          }
-        }
-      }
-    },
-    "%lld day%@" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld día%@"
           }
         }
       }
@@ -77,10 +93,23 @@
         }
       }
     },
+    "%lld stars" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld estrellas"
+          }
+        }
+      }
+    },
     "•" : {
       "shouldTranslate" : false
     },
     "↩︎" : {
+      "shouldTranslate" : false
+    },
+    "★" : {
       "shouldTranslate" : false
     },
     "7 days" : {
@@ -259,16 +288,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Descripción del libro"
-          }
-        }
-      }
-    },
-    "Books" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Libros"
           }
         }
       }
@@ -673,16 +692,6 @@
         }
       }
     },
-    "Genre" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Género"
-          }
-        }
-      }
-    },
     "Import Books..." : {
       "localizations" : {
         "es" : {
@@ -702,6 +711,9 @@
           }
         }
       }
+    },
+    "Inkwell" : {
+      "shouldTranslate" : false
     },
     "Invalid Data" : {
       "localizations" : {
@@ -829,6 +841,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nueva Actualización Disponible"
+          }
+        }
+      }
+    },
+    "Next page" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Página siguiente"
           }
         }
       }
@@ -963,6 +985,22 @@
         }
       }
     },
+    "Page %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Page %1$lld of %2$lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Página %1$lld de %1$2lld"
+          }
+        }
+      }
+    },
     "Page no. (e.g., 11 or 11-15)" : {
       "localizations" : {
         "es" : {
@@ -1033,12 +1071,32 @@
         }
       }
     },
+    "Previous page" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Página anterior"
+          }
+        }
+      }
+    },
     "Publisher: %@" : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Editorial: %@"
+          }
+        }
+      }
+    },
+    "Rating" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calificación"
           }
         }
       }
@@ -1062,9 +1120,6 @@
           }
         }
       }
-    },
-    "reader" : {
-      "shouldTranslate" : false
     },
     "reader %@ is available. Would you like to download it?" : {
       "localizations" : {
@@ -1252,6 +1307,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Seleccionar Cita"
+          }
+        }
+      }
+    },
+    "Selected Rating" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calificación Seleccionada"
           }
         }
       }

@@ -27,12 +27,11 @@ struct MiddlePanelView: View {
             (contentViewModel.displayedBooks.count == 1 ? "Book" : "Books")
         )
         .toolbar {
-            ToolbarItem(placement: .automatic) {
+            ToolbarItemGroup(placement: .automatic) {
                 SortMenuButton(contentViewModel: contentViewModel)
                     .help("Sort Options")
                     .accessibilityLabel("Sort Options")
-            }
-            ToolbarItem(placement: .automatic) {
+                
                 Button(action: {
                     openWindow(id: "addBookWindow")
                 }) {
@@ -255,7 +254,8 @@ struct MiddlePanelView: View {
             dateFinished: book.dateFinished,
             quotes: book.quotes,
             notes: book.notes,
-            tags: book.tags
+            tags: book.tags,
+            rating: book.rating
         )
     }
     

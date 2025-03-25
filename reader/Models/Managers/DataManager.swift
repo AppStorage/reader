@@ -531,7 +531,7 @@ final class DataManager: ObservableObject {
         }
     }
     
-    // MARK: - Import/Export
+    // MARK: - Import Books
     func importBooks(from url: URL) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { [weak self] promise in
             guard let self = self else {
@@ -549,7 +549,15 @@ final class DataManager: ObservableObject {
                 let jsonData = try Data(contentsOf: url)
                 let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .iso8601
-                let importedData = try decoder.decode([BookTransferData].self, from: jsonData)
+                guard let rawArray = try JSONSerialization.jsonObject(with: jsonData) as? [[String: Any]] else {
+                    throw NSError(domain: "ImportError", code: 2, userInfo: [NSLocalizedDescriptionKey: "Invalid JSON format"])
+                }
+
+                let importedData: [BookTransferData] = rawArray.compactMap { dict in
+                    guard let entryData = try? JSONSerialization.data(withJSONObject: dict) else { return nil }
+                    return try? decoder.decode(BookTransferData.self, from: entryData)
+                }
+
                 
                 // Batch insert books
                 for book in importedData {
@@ -558,29 +566,6 @@ final class DataManager: ObservableObject {
                 }
                 
                 self.saveChanges(reloadBooks: true)
-                promise(.success(()))
-            } catch {
-                promise(.failure(error))
-            }
-        }.eraseToAnyPublisher()
-    }
-    
-    func exportBooks(to url: URL) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
-            guard let self = self else {
-                promise(.failure(NSError(domain: "DataManager", code: 0, userInfo: [NSLocalizedDescriptionKey: "DataManager was deallocated"])))
-                return
-            }
-            
-            do {
-                let books = self.books.filter { $0.status != .deleted }.map {
-                    DataConversion.toTransferData(from: $0)
-                }
-                
-                let encoder = JSONEncoder()
-                encoder.dateEncodingStrategy = .iso8601
-                let jsonData = try encoder.encode(books)
-                try jsonData.write(to: url)
                 promise(.success(()))
             } catch {
                 promise(.failure(error))
@@ -612,6 +597,30 @@ final class DataManager: ObservableObject {
                 }
                 
                 self.saveChanges(reloadBooks: true)
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    // MARK: - Export Books
+    func exportBooks(to url: URL) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard let self = self else {
+                promise(.failure(NSError(domain: "DataManager", code: 0, userInfo: [NSLocalizedDescriptionKey: "DataManager was deallocated"])))
+                return
+            }
+            
+            do {
+                let books = self.books.filter { $0.status != .deleted }.map {
+                    DataConversion.toTransferData(from: $0)
+                }
+                
+                let encoder = JSONEncoder()
+                encoder.dateEncodingStrategy = .iso8601
+                let jsonData = try encoder.encode(books)
+                try jsonData.write(to: url)
                 promise(.success(()))
             } catch {
                 promise(.failure(error))

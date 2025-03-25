@@ -11,7 +11,6 @@ struct TagsSection: View {
     @State private var localTags: [String]
     @State private var isEditing: Bool = false
     @State private var formWidth: CGFloat = 280
-    @State private var isCollapsed: Bool = false
     @State private var isAddingTag: Bool = false
     @State private var showSuggestions: Bool = false
     @State private var selectedSuggestionIndex: Int = 0
@@ -24,23 +23,27 @@ struct TagsSection: View {
         _localTags = State(initialValue: book.tags)
     }
     
+    var isCollapsedBinding: Binding<Bool> {
+        contentViewModel.collapseBinding(for: .tags, bookId: book.id)
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             CollapsibleHeader(
                 isEditing: $isEditing,
-                isCollapsed: $isCollapsed,
+                isCollapsed: isCollapsedBinding,
                 title: "Tags",
                 isEditingDisabled: (book.status == .deleted) || (localTags.isEmpty),
                 onEditToggle: { isEditing.toggle() },
-                onToggleCollapse: { isCollapsed.toggle() }
+                onToggleCollapse: { isCollapsedBinding.wrappedValue.toggle() }
             )
-            if !isCollapsed {
+            if !isCollapsedBinding.wrappedValue {
                 tagsContent
             }
         }
         .padding(16)
         .cornerRadius(12)
-        .animation(.easeInOut(duration: 0.3), value: isCollapsed)
+        .animation(.easeInOut(duration: 0.3), value: isCollapsedBinding.wrappedValue)
         .animation(.easeInOut(duration: 0.3), value: showSuggestions)
         .onChange(of: book.tags) { onTagsChanged() }
         .onChange(of: newTag) { _, newValue in onNewTagChanged(newValue) }

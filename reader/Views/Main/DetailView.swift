@@ -7,50 +7,39 @@ struct DetailView: View {
     @EnvironmentObject var dataManager: DataManager
     @EnvironmentObject var viewModel: ContentViewModel
     @EnvironmentObject var overlayManager: OverlayManager
-        
+    
     @State private var newNote: String = ""
     @State private var newQuote: String = ""
     @State private var isEditingDetails = false
     @State private var descriptionText: String = ""
     @State private var saveTask: Task<Void, Never>?
-    @State private var currentStatus: ReadingStatus
-    
-    init(book: BookData) {
-        self.book = book
-        _currentStatus = State(initialValue: book.status)
-    }
     
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 20) {
-                bookDetailsSection
-                StatusSection(book: book)
-                
-                Divider()
+                VStack(alignment: .leading, spacing: 16) {
+                    bookDetailsSection
+                    StatusSection(book: book)
+                }
+                .modifier(SectionCard())
                 
                 tagsSection
-                
-                Divider()
+                    .modifier(SectionCard())
                 
                 quotesSection
-                
-                Divider()
+                    .modifier(SectionCard())
                 
                 notesSection
+                    .modifier(SectionCard())
             }
             .padding()
-        }
-        .onAppear {
-            currentStatus = book.status
         }
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
                 StatusButtons(books: [book], dataManager: dataManager)
-            }
-            ToolbarItem(placement: .automatic) {
+                
                 Spacer()
-            }
-            ToolbarItem(placement: .automatic) {
+                
                 Button(action: {
                     isEditingDetails = true
                 }) {
@@ -58,11 +47,8 @@ struct DetailView: View {
                         .help("Edit Book Details")
                         .accessibilityLabel("Edit Book Details")
                 }
-            }
-            ToolbarItem(placement: .automatic) {
+                
                 BookActionButton(books: [book], dataManager: dataManager)
-            }
-            ToolbarItem(placement: .automatic) {
                 QuoteShareButton(book: book)
             }
         }
@@ -73,7 +59,9 @@ struct DetailView: View {
     
     // MARK: - Book Info
     private var bookDetailsSection: some View {
-        DetailsSection(
+        let descriptionExpanded = viewModel.collapseBinding(for: .description, bookId: book.id)
+        
+        return DetailsSection(
             title: book.title,
             author: book.author,
             rating: book.rating,
@@ -84,6 +72,7 @@ struct DetailView: View {
             formattedDate: formatDate(book.published),
             description: sanitizeDescription(book.bookDescription) ?? "",
             canRate: book.status == .read,
+            showFullDescription: descriptionExpanded,
             onRatingChanged: { newRating in
                 let loadingMessage = newRating == 0 ? "Removing rating..." : "Updating rating..."
                 overlayManager.showLoading(message: loadingMessage)

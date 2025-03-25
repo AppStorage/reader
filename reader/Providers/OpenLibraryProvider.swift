@@ -33,7 +33,7 @@ actor OpenLibraryProvider: BookProvider {
                         BookTransferData(
                             title: title,
                             author: authors.joined(separator: ", "),
-                            published: parseDate(publishDate),
+                            published: DateFormatterUtils.parseDate(publishDate),
                             publisher: publishers.first,
                             genre: nil,
                             series: nil,
@@ -44,7 +44,8 @@ actor OpenLibraryProvider: BookProvider {
                             dateFinished: nil,
                             quotes: [],
                             notes: [],
-                            tags: []
+                            tags: [],
+                            rating: 0 // user sets this
                         )
                     ]
                 } catch {
@@ -204,7 +205,8 @@ actor OpenLibraryProvider: BookProvider {
             dateFinished: nil,
             quotes: [],
             notes: [],
-            tags: []
+            tags: [],
+            rating: 0 // user sets this
         )
     }
 }
