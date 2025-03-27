@@ -49,12 +49,12 @@ struct NotesSection: View {
         .cornerRadius(12)
         .animation(.easeInOut(duration: 0.3), value: isEditing)
         .animation(.easeInOut(duration: 0.3), value: editingNoteId)
-        .onChange(of: book.quotes) {
+        .onChange(of: book.id) {
+            resetAddNoteForm()
+            cancelEditingNote()
+            isEditing = false
             currentPage = 0
             loadNotes()
-        }
-        .onChange(of: localNotes) {
-            oldNotes, newNotes in if newNotes.isEmpty { isEditing = false }
         }
         .onAppear { loadNotes() }
     }

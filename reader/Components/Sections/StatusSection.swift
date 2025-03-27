@@ -42,14 +42,17 @@ struct StatusSection: View {
                     date: $book.dateStarted,
                     isEditing: $isEditingStartDate,
                     label: "Date Started",
-                    minDate: book.dateStarted
+                    minDate: nil
                 )
-                DateEditor(
-                    date: $book.dateFinished,
-                    isEditing: $isEditingFinishDate,
-                    label: "Date Finished",
-                    minDate: book.dateStarted
-                )
+
+                if book.status != .reading {
+                    DateEditor(
+                        date: $book.dateFinished,
+                        isEditing: $isEditingFinishDate,
+                        label: "Date Finished",
+                        minDate: book.dateStarted
+                    )
+                }
             }
         }
         .padding(.vertical, 10)

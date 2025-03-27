@@ -385,6 +385,10 @@ final class DataManager: ObservableObject {
            finishDate < startDate {
             book.dateFinished = startDate
         }
+
+        if book.status == .reading {
+            book.dateFinished = nil
+        }
     }
     
     // Status update method used by both single and batch operations

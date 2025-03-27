@@ -51,12 +51,12 @@ struct QuotesSection: View {
         .cornerRadius(12)
         .animation(.easeInOut(duration: 0.3), value: isEditing)
         .animation(.easeInOut(duration: 0.3), value: editingQuoteId)
-        .onChange(of: book.quotes) {
+        .onChange(of: book.id) {
+            resetAddQuoteForm()
+            cancelEditingQuote()
+            isEditing = false
             currentPage = 0
             loadQuotes()
-        }
-        .onChange(of: localQuotes) {
-            oldQuotes, newQuotes in if newQuotes.isEmpty { isEditing = false }
         }
         .onAppear { loadQuotes() }
     }
