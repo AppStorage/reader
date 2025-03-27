@@ -42,7 +42,7 @@ Inkwell (formerly reader) is a simple book library and reading tracker app for m
 
 ## Install
 
-- Download the `Inkwell.zip` file from the [latest release](https://github.com/chippokiddo/reader/releases/latest)
+- Download the `Inkwell-x.y.z.zip` file from the [latest release](https://github.com/chippokiddo/reader/releases/latest)
 - Unzip the file and move `Inkwell.app` into your `Applications` folder
 - Control-click or right-click the app and select 'open'
 
