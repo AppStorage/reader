@@ -152,71 +152,72 @@ struct QuotesSection: View {
     
     // MARK: Actions
     private func saveQuote() {
-        guard !newQuote.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-        
-        contentViewModel.addQuote(
-            newQuote,
-            pageNumber: newPageNumber,
-            attribution: newAttribution,
-            to: book
+        guard !self.newQuote.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+
+        self.contentViewModel.addQuote(
+            self.newQuote,
+            pageNumber: self.newPageNumber,
+            attribution: self.newAttribution,
+            to: self.book
         )
         .sink(receiveCompletion: { _ in },
               receiveValue: {
-            overlayManager.showToast(message: "Quote added")
-            resetAddQuoteForm()
+            self.overlayManager.showToast(message: "Quote added")
+            self.resetAddQuoteForm()
+            self.loadQuotes()
         })
         .store(in: &Self.cancellables)
     }
 
     private func removeQuote(_ quote: String) {
-        contentViewModel.removeQuote(quote, from: book)
+        self.contentViewModel.removeQuote(quote, from: self.book)
             .sink(receiveCompletion: { _ in },
                   receiveValue: {
-                overlayManager.showToast(message: "Quote removed")
-                
+                self.overlayManager.showToast(message: "Quote removed")
+
                 let quoteIdToRemove = RowItems.hashedIdentifier(for: quote)
-                localQuotes.removeAll { RowItems.hashedIdentifier(for: $0) == quoteIdToRemove }
+                self.localQuotes.removeAll { RowItems.hashedIdentifier(for: $0) == quoteIdToRemove }
             })
             .store(in: &Self.cancellables)
     }
     
     private func beginEditingQuote(_ quote: String) {
-        if editingQuoteId != nil {
-            cancelEditingQuote()
+        if self.editingQuoteId != nil {
+            self.cancelEditingQuote()
         }
-        
+
         let (text, pageNumber, attribution) = RowItems.parseFromStorage(quote)
-        
-        editQuoteText = text
-        editPageNumber = pageNumber
-        editAttribution = attribution
-        
+
+        self.editQuoteText = text
+        self.editPageNumber = pageNumber
+        self.editAttribution = attribution
+
         withAnimation(.easeInOut(duration: 0.2)) {
-            editingQuoteId = quote
+            self.editingQuoteId = quote
         }
     }
     
     private func saveEditedQuote(originalQuote: String) {
-        guard !editQuoteText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-        
-        contentViewModel.updateQuote(
+        guard !self.editQuoteText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+
+        self.contentViewModel.updateQuote(
             originalQuote: originalQuote,
-            newText: editQuoteText,
-            newPageNumber: editPageNumber,
-            newAttribution: editAttribution,
-            in: book
+            newText: self.editQuoteText,
+            newPageNumber: self.editPageNumber,
+            newAttribution: self.editAttribution,
+            in: self.book
         )
         .sink(receiveCompletion: { _ in },
               receiveValue: {
-            overlayManager.showToast(message: "Quote updated")
+            self.overlayManager.showToast(message: "Quote updated")
             withAnimation(.easeInOut(duration: 0.2)) {
-                editingQuoteId = nil
+                self.editingQuoteId = nil
             }
-            
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                editQuoteText = ""
-                editPageNumber = ""
-                editAttribution = ""
+                self.editQuoteText = ""
+                self.editPageNumber = ""
+                self.editAttribution = ""
             }
         })
         .store(in: &Self.cancellables)
@@ -224,27 +225,27 @@ struct QuotesSection: View {
     
     private func cancelEditingQuote() {
         withAnimation(.easeInOut(duration: 0.2)) {
-            editingQuoteId = nil
+            self.editingQuoteId = nil
         }
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            editQuoteText = ""
-            editPageNumber = ""
-            editAttribution = ""
+            self.editQuoteText = ""
+            self.editPageNumber = ""
+            self.editAttribution = ""
         }
     }
     
     private func loadQuotes() {
-        if localQuotes.count != book.quotes.count || !localQuotes.elementsEqual(book.quotes) {
-            localQuotes = book.quotes
+        if self.localQuotes.count != self.book.quotes.count || !self.localQuotes.elementsEqual(self.book.quotes) {
+            self.localQuotes = self.book.quotes
         }
     }
     
     private func resetAddQuoteForm() {
-        newQuote = ""
-        newPageNumber = ""
-        newAttribution = ""
-        isAddingQuote = false
+        self.newQuote = ""
+        self.newPageNumber = ""
+        self.newAttribution = ""
+        self.isAddingQuote = false
     }
     
     // MARK: - Pagination

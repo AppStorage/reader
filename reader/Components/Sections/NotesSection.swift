@@ -156,6 +156,7 @@ struct NotesSection: View {
             .sink(receiveValue: { _ in
                 overlayManager.showToast(message: "Note added")
                 self.resetAddNoteForm()
+                self.loadNotes()
             })
             .store(in: &Self.cancellables)
     }
