@@ -19,12 +19,9 @@ struct SearchSuggestionContainer: View {
     }
 }
 
-// MARK: - Empty Query Suggestions
-struct EmptyQuerySuggestions: View {
-    @ObservedObject var contentViewModel: ContentViewModel
-    
+// MARK: - Search Prefix List
+private struct PrefixList: View {
     var body: some View {
-        // Show search prefix options
         Section("Search by") {
             Label("title:", systemImage: "book.closed")
                 .searchCompletion("title:")
@@ -35,22 +32,57 @@ struct EmptyQuerySuggestions: View {
             Label("#", systemImage: "tag")
                 .searchCompletion("#")
         }
-        
-        // Show recent searches with clear option
-        let recentSearches = contentViewModel.getRecentSearches()
-        if !recentSearches.isEmpty {
-            Section {
-                ForEach(recentSearches.prefix(5), id: \.self) { search in
-                    Label(search, systemImage: "clock")
-                        .searchCompletion(search)
+    }
+}
+
+// MARK: - Suggestions List
+private struct SuggestionsList: View {
+    let suggestions: [String]
+    let prefix: String
+    let icon: String?
+    let emptyMessage: String?
+    
+    var body: some View {
+        if suggestions.isEmpty {
+            if let emptyMessage = emptyMessage {
+                Text(emptyMessage)
+            }
+        } else {
+            ForEach(suggestions, id: \.self) { item in
+                if let icon = icon {
+                    Label("\(prefix)\(item)", systemImage: icon)
+                        .searchCompletion("\(prefix)\(item)")
+                } else {
+                    Text("\(prefix)\(item)")
+                        .searchCompletion("\(prefix)\(item)")
                 }
+            }
+        }
+    }
+}
+
+// MARK: - Empty Query Suggestions
+private struct EmptyQuerySuggestions: View {
+    @ObservedObject var contentViewModel: ContentViewModel
+
+    var body: some View {
+        PrefixList()
+        
+        let recentSearches = contentViewModel.getRecentSearches()
+        
+        if !recentSearches.isEmpty {
+            Section(header: Text("Recent Searches")) {
+                SuggestionsList(
+                    suggestions: recentSearches.prefix(5).map { $0 },
+                    prefix: "",
+                    icon: "clock",
+                    emptyMessage: nil
+                )
                 
                 Button("Clear") {
                     contentViewModel.clearRecentSearches()
                 }
                 .foregroundColor(.red)
-            } header: {
-                Text("Recent Searches")
             }
         }
     }
@@ -58,78 +90,74 @@ struct EmptyQuerySuggestions: View {
 
 // MARK: - Author Suggestions
 // When using the author: prefix
-struct AuthorSuggestions: View {
+private struct AuthorSuggestions: View {
     @ObservedObject var contentViewModel: ContentViewModel
-    
+
     var body: some View {
-        let authorPrefix = contentViewModel.searchQuery.dropFirst(7).trimmingCharacters(in: .whitespacesAndNewlines)
-        let suggestions = contentViewModel.getTopAuthors(matching: authorPrefix)
+        let query = contentViewModel.searchQuery.dropFirst(7).trimmingCharacters(in: .whitespacesAndNewlines)
+        let suggestions = contentViewModel.getTopAuthors(matching: query)
         
-        if !suggestions.isEmpty {
-            ForEach(suggestions, id: \.self) { author in
-                Text(author)
-                    .searchCompletion("author:\(author)")
-            }
-        } else {
-            Text("No matching authors found")
-        }
+        SuggestionsList(
+            suggestions: suggestions,
+            prefix: "author:",
+            icon: nil,
+            emptyMessage: "No matching authors found"
+        )
     }
 }
 
 // MARK: - Tag Suggestions
 // When using the # prefix
-struct TagSuggestions: View {
+private struct TagSuggestions: View {
     @ObservedObject var contentViewModel: ContentViewModel
-    
+
     var body: some View {
-        let tagPrefix = contentViewModel.searchQuery.dropFirst(1).trimmingCharacters(in: .whitespacesAndNewlines)
-        let suggestions = contentViewModel.getTopTags(matching: tagPrefix)
+        let query = contentViewModel.searchQuery.dropFirst(1).trimmingCharacters(in: .whitespacesAndNewlines)
+        let suggestions = contentViewModel.getTopTags(matching: query)
         
-        if !suggestions.isEmpty {
-            ForEach(suggestions, id: \.self) { tag in
-                Label("#\(tag)", systemImage: "tag")
-                    .searchCompletion("#\(tag)")
-            }
-        } else {
-            Text("No matching tags found")
-        }
+        SuggestionsList(
+            suggestions: suggestions,
+            prefix: "#",
+            icon: "tag",
+            emptyMessage: "No matching tags found"
+        )
     }
 }
 
 // MARK: - Title Suggestions
 // When using the title: prefix
-struct TitleSuggestions: View {
+private struct TitleSuggestions: View {
     @ObservedObject var contentViewModel: ContentViewModel
-    
+
     var body: some View {
-        let titlePrefix = contentViewModel.searchQuery.dropFirst(6).trimmingCharacters(in: .whitespacesAndNewlines)
-        let suggestions = contentViewModel.getTopTitles(matching: titlePrefix)
+        let query = contentViewModel.searchQuery.dropFirst(6).trimmingCharacters(in: .whitespacesAndNewlines)
+        let suggestions = contentViewModel.getTopTitles(matching: query)
         
-        if !suggestions.isEmpty {
-            ForEach(suggestions, id: \.self) { title in
-                Text(title)
-                    .searchCompletion("title:\(title)")
-            }
-        } else {
-            Text("No matching titles found")
-        }
+        SuggestionsList(
+            suggestions: suggestions,
+            prefix: "title:",
+            icon: nil,
+            emptyMessage: "No matching titles found"
+        )
     }
 }
 
 // MARK: - Matching Recent Searches
-struct MatchingRecentSearches: View {
+private struct MatchingRecentSearches: View {
     @ObservedObject var contentViewModel: ContentViewModel
-    
+
     var body: some View {
-        let recentSearches = contentViewModel.getRecentSearches()
+        let filtered = contentViewModel.getRecentSearches()
             .filter { $0.lowercased().contains(contentViewModel.searchQuery.lowercased()) }
-        
-        if !recentSearches.isEmpty {
+
+        if !filtered.isEmpty {
             Section("Recent Searches") {
-                ForEach(recentSearches.prefix(5), id: \.self) { search in
-                    Label(search, systemImage: "clock")
-                        .searchCompletion(search)
-                }
+                SuggestionsList(
+                    suggestions: filtered.prefix(5).map { $0 },
+                    prefix: "",
+                    icon: "clock",
+                    emptyMessage: nil
+                )
             }
         }
     }

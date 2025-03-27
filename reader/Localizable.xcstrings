@@ -25,6 +25,17 @@
     "%@: %@" : {
       "shouldTranslate" : false
     },
+    "%@%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@%2$@"
+          }
+        }
+      },
+      "shouldTranslate" : false
+    },
     "%lld" : {
       "shouldTranslate" : false
     },
@@ -885,42 +896,12 @@
         }
       }
     },
-    "No matching authors found" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No se encontraron autores coincidentes"
-          }
-        }
-      }
-    },
     "No matching tags" : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "No hay etiquetas coincidentes"
-          }
-        }
-      }
-    },
-    "No matching tags found" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No se encontraron etiquetas coincidentes"
-          }
-        }
-      }
-    },
-    "No matching titles found" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No se encontraron títulos coincidentes"
           }
         }
       }
@@ -1167,26 +1148,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recuperar"
-          }
-        }
-      }
-    },
-    "Refresh" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Actualizar"
-          }
-        }
-      }
-    },
-    "Refreshing..." : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Actualizando..."
           }
         }
       }

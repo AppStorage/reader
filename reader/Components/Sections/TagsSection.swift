@@ -47,6 +47,13 @@ struct TagsSection: View {
         .animation(.easeInOut(duration: 0.3), value: showSuggestions)
         .onChange(of: book.tags) { onTagsChanged() }
         .onChange(of: newTag) { _, newValue in onNewTagChanged(newValue) }
+        .onChange(of: book.id) {
+            withAnimation {
+                isAddingTag = false
+                showSuggestions = false
+                newTag = ""
+            }
+        }
     }
     
     private var tagsContent: some View {

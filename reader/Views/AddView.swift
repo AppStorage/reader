@@ -241,9 +241,10 @@ struct AddView: View {
     }
     
     private func enforceWindowStyle() {
-        if let window = NSApplication.shared.windows.first(where: { $0.title == "Add Book" }) {
-            window.styleMask.remove(.resizable)
+        if let window = NSApplication.shared.windows.first(where: { $0.identifier?.rawValue == "addBookWindow" }) {
+            window.styleMask.remove([.resizable, .miniaturizable])
             window.standardWindowButton(.zoomButton)?.isHidden = true
+            window.standardWindowButton(.miniaturizeButton)?.isHidden = true
         }
     }
 }

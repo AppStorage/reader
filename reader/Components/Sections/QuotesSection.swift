@@ -51,7 +51,10 @@ struct QuotesSection: View {
         .cornerRadius(12)
         .animation(.easeInOut(duration: 0.3), value: isEditing)
         .animation(.easeInOut(duration: 0.3), value: editingQuoteId)
-        .onChange(of: book.quotes) { loadQuotes() }
+        .onChange(of: book.quotes) {
+            currentPage = 0
+            loadQuotes()
+        }
         .onChange(of: localQuotes) {
             oldQuotes, newQuotes in if newQuotes.isEmpty { isEditing = false }
         }
@@ -244,7 +247,11 @@ struct QuotesSection: View {
     // MARK: - Pagination
     private var paginatedQuotes: [String] {
         let startIndex = currentPage * pageSize
+        guard startIndex < localQuotes.count else {
+            return []
+        }
         let endIndex = min(startIndex + pageSize, localQuotes.count)
         return Array(localQuotes[startIndex..<endIndex])
     }
+
 }

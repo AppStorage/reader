@@ -19,8 +19,8 @@ struct MonthlyReading: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 8) {
-            DashboardSectionHeader("Monthly Reading")
+        HStack {
+            DashboardSectionHeader(title: "Monthly Reading")
 
             Spacer()
 
@@ -53,15 +53,14 @@ struct MonthlyReading: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(spacing: 12) {
             header
             chart
         }
-        .padding(16)
+        .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.controlBackgroundColor))
-                .shadow(color: Color.black.opacity(0.07), radius: 2, x: 0, y: 1)
         )
     }
 
@@ -76,17 +75,15 @@ private struct ChartLegend: View {
     let items: [(label: String, color: Color)]
     
     var body: some View {
-        HStack(spacing: 16) {
-            ForEach(items, id: \.label) { item in
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(item.color)
-                        .frame(width: 8, height: 8)
-                    
-                    Text(item.label)
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary)
-                }
+        ForEach(items, id: \.label) { item in
+            HStack {
+                Circle()
+                    .fill(item.color)
+                    .frame(width: 8, height: 8)
+                
+                Text(item.label)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
         }
     }
@@ -107,6 +104,10 @@ private struct LineChart: View {
     let previousYearData: [MonthlyData]
     let currentYear: Int
     let previousYear: Int
+    
+    private var hasData: Bool {
+        !currentYearData.isEmpty || !previousYearData.isEmpty
+    }
     
     private var currentYearColor: Color {
         Color(red: 0.99, green: 0.46, blue: 0.44)
@@ -214,8 +215,6 @@ private struct LineChart: View {
                     AxisValueLabel() {
                         if let strValue = value.as(String.self) {
                             Text(strValue)
-                                .font(.system(size: 10))
-                                .foregroundColor(.secondary)
                         }
                     }
                 }
@@ -226,14 +225,12 @@ private struct LineChart: View {
                     AxisValueLabel() {
                         if let intValue = value.as(Int.self) {
                             Text("\(intValue)")
-                                .font(.system(size: 10))
-                                .foregroundColor(.secondary)
                         }
                     }
                 }
             }
             .frame(height: 250)
-            .padding(.vertical, 8)
+            .padding()
             .chartOverlay { proxy in
                 GeometryReader { geometry in
                     Rectangle()
@@ -263,15 +260,14 @@ private struct LineChart: View {
             if let position = selectedPosition {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(position.month)
-                        .font(.caption)
-                        .bold()
-                        .padding(.bottom, 2)
+                        .font(.subheadline)
                     
                     if let currentValue = position.currentYearValue {
                         HStack {
                             Circle()
                                 .fill(currentYearColor)
                                 .frame(width: 8, height: 8)
+                            
                             Text(String(format: "%d", currentYear) + ": \(currentValue) book\(currentValue == 1 ? "" : "s")")
                                 .font(.caption)
                         }
@@ -282,21 +278,26 @@ private struct LineChart: View {
                             Circle()
                                 .fill(previousYearColor)
                                 .frame(width: 8, height: 8)
+                            
                             Text(String(format: "%d", previousYear) + ": \(previousValue) book\(previousValue == 1 ? "" : "s")")
                                 .font(.caption)
                         }
                     }
                 }
-                .padding(8)
+                .padding()
                 .background(.windowBackground)
                 .cornerRadius(8)
-                .shadow(radius: 2)
                 .offset(x: position.tooltipOffset.x, y: position.tooltipOffset.y)
             }
         }
     }
     
     private func updateSelection(at location: CGPoint, geometry: GeometryProxy, proxy: ChartProxy) {
+        guard !currentYearData.isEmpty || !previousYearData.isEmpty else {
+            selectedPosition = nil
+            return
+        }
+
         guard let plotFrame = proxy.plotFrame else {
             return
         }

@@ -38,41 +38,38 @@ struct ReadingTrends: View {
                 title: timeScale == 0 ? "Monthly Average" : "Overall Average",
                 value: formatted(averageBooksPerMonth, decimals: 1),
                 unit: averageBooksPerMonth == 1.0 ? "book" : "books",
-                icon: "chart.xyaxis.line",
-                iconColor: Color.secondary
+                icon: "chart.xyaxis.line"
             )
 
-            Divider().frame(height: 40)
+            Divider()
 
             TrendMetric(
                 title: timeScale == 0 ? "This Year" : "All Time",
                 value: "\(totalBooks)",
                 unit: totalBooks == 1 ? "book" : "books",
-                icon: "calendar",
-                iconColor: Color.secondary
+                icon: "calendar"
             )
-
+            
             if timeScale == 0, let lastYear = booksLastYear, lastYear > 0 {
-                Divider().frame(height: 40)
-
+                Divider()
+                
                 TrendMetric(
                     title: "Last Year",
                     value: "\(lastYear)",
                     unit: lastYear == 1 ? "book" : "books",
-                    icon: "calendar.badge.clock",
-                    iconColor: Color.secondary
+                    icon: "calendar.badge.clock"
                 )
             }
 
             if timeScale == 0 {
-                Divider().frame(height: 40)
+                
+                Divider()
 
                 TrendMetric(
                     title: "Projected \(currentYear)",
                     value: formatted(projectedTotal, decimals: 0),
                     unit: projectedTotal == 1.0 ? "book" : "books",
-                    icon: "chart.line.uptrend.xyaxis",
-                    iconColor: Color.secondary
+                    icon: "chart.line.uptrend.xyaxis"
                 )
             }
         }
@@ -89,20 +86,26 @@ struct ReadingTrends: View {
             return "You've read \(streakInfo.totalBooks) books across \(streakInfo.months) consecutive months!"
         }
     }
+    
+    private var header: some View {
+        HStack {
+            DashboardSectionHeader(title: "Reading Trends")
+            
+            Spacer()
+            
+            Picker("Time Scale", selection: $timeScale) {
+                Text("This Year").tag(0)
+                Text("All Time").tag(1)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .frame(width: 150)
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .center, spacing: 8) {
-                DashboardSectionHeader("Reading Trends")
-                Spacer()
-                Picker("Time Scale", selection: $timeScale) {
-                    Text("This Year").tag(0)
-                    Text("All Time").tag(1)
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .frame(width: 150)
-            }
+            header
 
             if let streakText = readingStreakText {
                 streakRow(text: streakText)
@@ -112,11 +115,10 @@ struct ReadingTrends: View {
 
             trendMetricsRow
         }
-        .padding(16)
+        .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.controlBackgroundColor))
-                .shadow(color: Color.black.opacity(0.07), radius: 2, x: 0, y: 1)
         )
     }
 
@@ -127,9 +129,8 @@ struct ReadingTrends: View {
                 .foregroundColor(.orange)
 
             Text(text)
-                .font(.system(size: 13))
+                .font(.system(size: 12))
                 .foregroundColor(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.vertical, 4)
     }
@@ -145,29 +146,28 @@ private struct TrendMetric: View {
     let value: String
     let unit: String
     let icon: String?
-    var iconColor: Color
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(.system(size: 13))
-                        .foregroundColor(iconColor)
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
                 }
                 
                 Text(title)
-                    .font(.system(size: 13))
+                    .font(.system(size: 12))
                     .foregroundColor(.secondary)
             }
             
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(value)
-                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    .font(.system(size: 22, weight: .semibold))
                     .foregroundColor(.primary)
                 
                 Text(unit)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.primary)
             }
         }

@@ -5,7 +5,7 @@ struct RecentBooks: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            DashboardSectionHeader("Recently Finished Books")
+            DashboardSectionHeader(title: "Recently Finished Books")
             
             let recentBooks = BookStatisticsService.getRecentlyFinishedBooks(from: books, limit: 5)
             
@@ -32,7 +32,6 @@ struct RecentBooks: View {
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.controlBackgroundColor))
-                .shadow(color: Color.black.opacity(0.07), radius: 2, x: 0, y: 1)
         )
     }
 }
@@ -46,14 +45,13 @@ private struct RecentBookRow: View {
             Image(systemName: "book.closed.fill")
                 .font(.system(size: 16))
                 .foregroundColor(.secondary)
-                .frame(width: 24, height: 24)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(book.title)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 12))
                     .lineLimit(1)
                 
-                HStack(spacing: 4) {
+                HStack {
                     Text("by \(book.author)")
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
@@ -61,7 +59,7 @@ private struct RecentBookRow: View {
                     
                     if let finishedDate = book.dateFinished {
                         Text("•")
-                            .font(.caption)
+                            .font(.system(size: 12))
                             .foregroundColor(.secondary)
                         
                         Text(DateFormatterUtils.formatDate(finishedDate))
@@ -71,7 +69,7 @@ private struct RecentBookRow: View {
                     
                     if let genre = book.genre, !genre.isEmpty {
                         Text("•")
-                            .font(.caption)
+                            .font(.system(size: 12))
                             .foregroundColor(.secondary)
                         
                         Text(genre)
@@ -87,7 +85,7 @@ private struct RecentBookRow: View {
             if let startDate = book.dateStarted, let finishedDate = book.dateFinished,
                let durationText = BookStatisticsService.readingDurationString(start: startDate, end: finishedDate) {
                 
-                HStack(spacing: 4) {
+                HStack {
                     Image(systemName: "clock")
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)

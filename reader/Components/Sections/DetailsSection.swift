@@ -2,7 +2,7 @@ import SwiftUI
 
 struct DetailsSection: View {
     @Namespace private var starNamespace
-    @State private var isbnCopied = false
+    @State private var copiedISBN: String? = nil
     
     let title: String
     let author: String
@@ -106,9 +106,9 @@ struct DetailsSection: View {
                                 .trimmingCharacters(in: .whitespacesAndNewlines)
                             copyToClipboard(cleanedISBN)
                         } label: {
-                            Image(systemName: isbnCopied ? "checkmark.circle.fill" : "doc.on.doc.fill")
+                            Image(systemName: copiedISBN == isbn ? "checkmark.circle.fill" : "doc.on.doc.fill")
                                 .font(.system(size: 12))
-                                .foregroundStyle(isbnCopied ? .green : .secondary)
+                                .foregroundStyle(copiedISBN == isbn ? .green : .secondary)
                                 .contentTransition(.symbolEffect(.replace))
                         }
                         .buttonStyle(.borderless)
@@ -127,13 +127,22 @@ struct DetailsSection: View {
     }
     
     private func copyToClipboard(_ text: String) {
+        let cleaned = text.replacingOccurrences(of: " ", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(cleaned, forType: .string)
+        
         withAnimation {
-            isbnCopied = true
+            copiedISBN = cleaned
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             withAnimation {
-                isbnCopied = false
+                if copiedISBN == cleaned {
+                    copiedISBN = nil
+                }
             }
         }
     }
@@ -142,8 +151,8 @@ struct DetailsSection: View {
     private var descriptionRow: some View {
         let previewLimit = 300
         let displayDescription = showFullDescription.wrappedValue || description.count <= previewLimit
-            ? description
-            : String(description.prefix(previewLimit)) + "…"
+        ? description
+        : String(description.prefix(previewLimit)) + "…"
         
         return Group {
             if !description.isEmpty {

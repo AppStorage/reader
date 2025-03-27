@@ -21,12 +21,12 @@ struct PreferencesView: View {
     @State private var hoveredTab: PrefTab? = nil
     
     private var tabBar: some View {
-        HStack(spacing: 12) {
+        HStack {
             ForEach(PrefTab.allCases, id: \.self) { tab in
                 tabButton(for: tab)
             }
         }
-        .padding(12)
+        .padding()
     }
     
     @ViewBuilder
@@ -45,7 +45,7 @@ struct PreferencesView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
+        VStack {
             tabBar
             
             Divider()
@@ -53,10 +53,10 @@ struct PreferencesView: View {
             
             content
         }
+        .frame(width: 450, height: 450)
         .onAppear {
             enforceWindowStyle()
         }
-        .frame(minWidth: 420)
     }
     
     private func tabButton(for tab: PrefTab) -> some View {
@@ -100,8 +100,10 @@ struct PreferencesView: View {
     
     private func enforceWindowStyle() {
         if let window = NSApplication.shared.windows.first(where: { $0.identifier?.rawValue == "preferencesWindow" }) {
-            window.styleMask.remove(.resizable)
+            window.styleMask.remove([.resizable, .miniaturizable])
             window.standardWindowButton(.zoomButton)?.isHidden = true
+            window.standardWindowButton(.miniaturizeButton)?.isHidden = true
         }
     }
+
 }

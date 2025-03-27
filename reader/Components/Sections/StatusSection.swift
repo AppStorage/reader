@@ -26,7 +26,7 @@ struct StatusSection: View {
             .padding(.vertical, 6)
             .background(book.status.statusColor.opacity(0.2))
             .foregroundColor(book.status.statusColor)
-            .clipShape(Capsule())
+            .clipShape(.capsule)
             
             Spacer()
         }
@@ -36,23 +36,30 @@ struct StatusSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             bookStatus
-            
-            DateEditor(
-                date: $book.dateStarted,
-                isEditing: $isEditingStartDate,
-                label: "Date Started",
-                minDate: book.dateStarted)
-            DateEditor(
-                date: $book.dateFinished,
-                isEditing: $isEditingFinishDate,
-                label: "Date Finished",
-                minDate: book.dateStarted
-            )
+
+            if book.status != .unread {
+                DateEditor(
+                    date: $book.dateStarted,
+                    isEditing: $isEditingStartDate,
+                    label: "Date Started",
+                    minDate: book.dateStarted
+                )
+                DateEditor(
+                    date: $book.dateFinished,
+                    isEditing: $isEditingFinishDate,
+                    label: "Date Finished",
+                    minDate: book.dateStarted
+                )
+            }
         }
         .padding(.vertical, 10)
         .onChange(of: [book.dateStarted, book.dateFinished]) {
             validateDates()
             contentViewModel.saveChanges()
+        }
+        .onChange(of: book.id) {
+            isEditingStartDate = false
+            isEditingFinishDate = false
         }
     }
     
@@ -109,7 +116,6 @@ private struct DateEditor: View {
                         } else {
                             Text("No date")
                                 .foregroundColor(.secondary)
-                                .italic()
                         }
                     }
                     .padding(8)
@@ -155,8 +161,10 @@ private struct DateEditor: View {
                     }
                     .padding(.vertical, 8)
                     .padding(.horizontal, 12)
-                    .background(RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.gray.opacity(0.5), lineWidth: 1))
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(.gray.opacity(0.5), lineWidth: 1)
+                    )
                 }
             } else {
                 Button("Add Date") {

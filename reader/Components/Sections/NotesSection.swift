@@ -49,7 +49,10 @@ struct NotesSection: View {
         .cornerRadius(12)
         .animation(.easeInOut(duration: 0.3), value: isEditing)
         .animation(.easeInOut(duration: 0.3), value: editingNoteId)
-        .onChange(of: book.notes) { loadNotes() }
+        .onChange(of: book.quotes) {
+            currentPage = 0
+            loadNotes()
+        }
         .onChange(of: localNotes) {
             oldNotes, newNotes in if newNotes.isEmpty { isEditing = false }
         }
@@ -230,6 +233,9 @@ struct NotesSection: View {
     // MARK: - Pagination
     private var paginatedNotes: [String] {
         let startIndex = currentPage * pageSize
+        guard startIndex < localNotes.count else {
+            return []
+        }
         let endIndex = min(startIndex + pageSize, localNotes.count)
         return Array(localNotes[startIndex..<endIndex])
     }

@@ -27,13 +27,13 @@ struct RatingDistribution: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            DashboardSectionHeader("Ratings")
+            DashboardSectionHeader(title: "Ratings")
             chart
         }
-        .padding(16)
+        .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(NSColor.controlBackgroundColor))
+                .fill(Color(.controlBackgroundColor))
         )
     }
 }
@@ -74,8 +74,7 @@ private struct RatingBarChart: View {
                     AxisValueLabel {
                         if let ratingStr = value.as(String.self),
                            let ratingInt = Int(ratingStr) {
-                            Text("\(ratingInt)")
-                                .foregroundColor(.white) +
+                            Text("\(ratingInt)") +
                             Text(" ★")
                                 .foregroundColor(.yellow)
                         }
@@ -88,8 +87,6 @@ private struct RatingBarChart: View {
                     AxisValueLabel() {
                         if let intValue = value.as(Int.self) {
                             Text("\(intValue)")
-                                .font(.system(size: 10))
-                                .foregroundColor(.secondary)
                         }
                     }
                 }
@@ -97,28 +94,34 @@ private struct RatingBarChart: View {
             .chartOverlay { proxy in
                 GeometryReader { geometry in
                     Rectangle()
-                        .fill(Color.clear)
+                        .fill(.clear)
                         .contentShape(Rectangle())
-                        .gesture(DragGesture(minimumDistance: 0)
-                            .onChanged { value in
-                                if let plotFrame = proxy.plotFrame {
+                        .gesture(
+                            DragGesture()
+                                .onChanged { value in
+                                    guard !ratingData.isEmpty,
+                                          let plotFrame = proxy.plotFrame else {
+                                        selectedRating = nil
+                                        return
+                                    }
+
                                     let origin = geometry[plotFrame].origin
                                     let localX = value.location.x - origin.x
-                                    if let ratingStr = proxy.value(atX: localX, as: String.self),
-                                       let ratingInt = Int(ratingStr),
-                                       let found = ratingData.first(where: { $0.rating == ratingInt }) {
-                                        
-                                        // Position tooltip above bar
-                                        let xPos = min(geometry.size.width - 150, max(0, value.location.x - origin.x - 50))
-                                        let yPos = max(10, value.location.y - origin.y - 70)
 
-                                        selectedRating = found
-                                        tooltipOffset = CGPoint(x: xPos, y: yPos)
-                                    } else {
+                                    guard let ratingStr = proxy.value(atX: localX, as: String.self),
+                                          let ratingInt = Int(ratingStr),
+                                          let found = ratingData.first(where: { $0.rating == ratingInt }) else {
                                         selectedRating = nil
+                                        return
                                     }
+
+                                    // Position tooltip above bar
+                                    let xPos = min(geometry.size.width - 150, max(0, localX - 50))
+                                    let yPos = max(10, value.location.y - origin.y - 70)
+
+                                    selectedRating = found
+                                    tooltipOffset = CGPoint(x: xPos, y: yPos)
                                 }
-                            }
                         )
                 }
             }
@@ -126,14 +129,15 @@ private struct RatingBarChart: View {
 
             // Tooltip
             if let selected = selectedRating {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("\(selected.count) book\(selected.count == 1 ? "" : "s") (\(Int(Double(selected.count) / Double(totalCount) * 100))%)")
-                        .font(.caption)
+                VStack {
+                    let percentage = totalCount > 0 ? Int(Double(selected.count) / Double(totalCount) * 100) : 0
+                    
+                    Text("\(selected.count) book\(selected.count == 1 ? "" : "s") (\(percentage)%)")
+                        .font(.subheadline)
                 }
-                .padding(8)
-                .background(Color(NSColor.windowBackgroundColor))
+                .padding()
+                .background(.windowBackground)
                 .cornerRadius(8)
-                .shadow(radius: 2)
                 .offset(x: tooltipOffset.x, y: tooltipOffset.y)
             }
         }

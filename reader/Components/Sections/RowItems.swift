@@ -238,7 +238,7 @@ struct RowItems: View {
     }
     
     // MARK: - Multi-line Form
-    // For like notes and quotes sections
+    // For notes and quotes sections
     @ViewBuilder
     private var multilineTextInputSection: some View {
         HStack(alignment: .top, spacing: 8) {
@@ -388,47 +388,46 @@ struct RowItems: View {
     // MARK: - Helpers
     // Formats content and metadata into a storage string
     static func formatForStorage(text: String, pageNumber: String, attribution: String = "") -> String {
-        let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedPage = pageNumber.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedAttribution = attribution.trimmingCharacters(in: .whitespacesAndNewlines)
+        var result = text.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        var result = trimmedText
-        
-        // Only add page number if it's provided
-        if !trimmedPage.isEmpty {
-            result += " [p. \(trimmedPage)]"
+        if !pageNumber.isEmpty {
+            result += " [p. \(pageNumber)]"
         }
-        
-        // Only add attribution if it's provided
-        if !trimmedAttribution.isEmpty {
-            result += " — \(trimmedAttribution)"
+
+        if !attribution.isEmpty {
+            result += " — \(attribution)"
         }
-        
+
         return result
     }
     
     // Parses a storage string into components (text, page, attribution)
     static func parseFromStorage(_ storedString: String) -> (text: String, pageNumber: String, attribution: String) {
-        // Split by page marker
-        let components = storedString.components(separatedBy: " [p. ")
-        let mainText = components.first ?? storedString
-        
+        var text = storedString
         var pageNumber = ""
         var attribution = ""
-        
-        if components.count > 1 {
-            let pageAndAttribution = components.last?.replacingOccurrences(of: "]", with: "") ?? ""
-            
-            // Check if there is attribution
-            let attributionComponents = pageAndAttribution.components(separatedBy: " — ")
-            
-            pageNumber = attributionComponents.first ?? ""
-            if attributionComponents.count > 1 {
-                attribution = attributionComponents.last ?? ""
+
+        // Extract page number: look for " [p. ...]"
+        if let pageRange = text.range(of: #" \[p\. ([^\]]+)\]"#, options: .regularExpression) {
+            let pageText = String(text[pageRange])
+            if let match = pageText.range(of: #"(?<=\[p\. ).+?(?=\])"#, options: .regularExpression) {
+                pageNumber = String(pageText[match])
             }
+            text.removeSubrange(pageRange)
         }
-        
-        return (mainText, pageNumber, attribution)
+
+        // Extract attribution: look for " — attribution" at end
+        if let dashRange = text.range(of: #" — .+$"#, options: .regularExpression) {
+            let attributionText = String(text[dashRange]).replacingOccurrences(of: " — ", with: "")
+            attribution = attributionText
+            text.removeSubrange(dashRange)
+        }
+
+        return (
+            text: text.trimmingCharacters(in: .whitespacesAndNewlines),
+            pageNumber: pageNumber.trimmingCharacters(in: .whitespacesAndNewlines),
+            attribution: attribution.trimmingCharacters(in: .whitespacesAndNewlines)
+        )
     }
     
     private func filterPageNumberInput(_ input: String) -> String {
