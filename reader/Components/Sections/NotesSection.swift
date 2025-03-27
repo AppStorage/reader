@@ -23,7 +23,7 @@ struct NotesSection: View {
     private let pageSize: Int = 5
     
     var isCollapsedBinding: Binding<Bool> {
-        contentViewModel.collapseBinding(for: .notes, bookId: book.id)
+        self.contentViewModel.collapseBinding(for: .notes, bookId: book.id)
     }
     
     var body: some View {
@@ -150,11 +150,11 @@ struct NotesSection: View {
     
     // MARK: - Actions
     private func saveNote() {
-        guard !newNote.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-        
-        contentViewModel.addNote(newNote, pageNumber: newPageNumber, to: book)
+        guard !self.newNote.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+
+        self.contentViewModel.addNote(self.newNote, pageNumber: self.newPageNumber, to: self.book)
             .sink(receiveValue: { _ in
-                overlayManager.showToast(message: "Note added")
+                self.overlayManager.showToast(message: "Note added")
                 self.resetAddNoteForm()
                 self.loadNotes()
             })
@@ -162,50 +162,50 @@ struct NotesSection: View {
     }
     
     private func removeNote(_ note: String) {
-        contentViewModel.removeNote(note, from: book)
+        self.contentViewModel.removeNote(note, from: self.book)
             .sink(receiveValue: { _ in
-                overlayManager.showToast(message: "Note removed")
-                
+                self.overlayManager.showToast(message: "Note removed")
+
                 let noteIdToRemove = RowItems.hashedIdentifier(for: note)
-                localNotes.removeAll { RowItems.hashedIdentifier(for: $0) == noteIdToRemove }
+                self.localNotes.removeAll { RowItems.hashedIdentifier(for: $0) == noteIdToRemove }
             })
             .store(in: &Self.cancellables)
     }
     
     private func beginEditingNote(_ note: String) {
-        if editingNoteId != nil {
-            cancelEditingNote()
+        if self.editingNoteId != nil {
+            self.cancelEditingNote()
         }
-        
+
         let (text, pageNumber, _) = RowItems.parseFromStorage(note)
-        
-        editNoteText = text
-        editPageNumber = pageNumber
-        
+
+        self.editNoteText = text
+        self.editPageNumber = pageNumber
+
         withAnimation(.easeInOut(duration: 0.2)) {
-            editingNoteId = note
+            self.editingNoteId = note
         }
     }
     
     private func saveEditedNote(originalNote: String) {
-        guard !editNoteText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-        
-        contentViewModel.updateNote(
+        guard !self.editNoteText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+
+        self.contentViewModel.updateNote(
             originalNote: originalNote,
-            newText: editNoteText,
-            newPageNumber: editPageNumber,
-            in: book
+            newText: self.editNoteText,
+            newPageNumber: self.editPageNumber,
+            in: self.book
         )
         .sink(receiveCompletion: { _ in },
               receiveValue: {
-            overlayManager.showToast(message: "Note updated")
+            self.overlayManager.showToast(message: "Note updated")
             withAnimation(.easeInOut(duration: 0.2)) {
-                editingNoteId = nil
+                self.editingNoteId = nil
             }
-            
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                editNoteText = ""
-                editPageNumber = ""
+                self.editNoteText = ""
+                self.editPageNumber = ""
             }
         })
         .store(in: &Self.cancellables)
@@ -213,25 +213,25 @@ struct NotesSection: View {
     
     private func cancelEditingNote() {
         withAnimation(.easeInOut(duration: 0.2)) {
-            editingNoteId = nil
+            self.editingNoteId = nil
         }
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            editNoteText = ""
-            editPageNumber = ""
+            self.editNoteText = ""
+            self.editPageNumber = ""
         }
     }
     
     private func loadNotes() {
-        if localNotes.count != book.notes.count || !localNotes.elementsEqual(book.notes) {
-            localNotes = book.notes
+        if self.localNotes.count != self.book.notes.count || !self.localNotes.elementsEqual(self.book.notes) {
+            self.localNotes = self.book.notes
         }
     }
     
     private func resetAddNoteForm() {
-        newNote = ""
-        newPageNumber = ""
-        isAddingNote = false
+        self.newNote = ""
+        self.newPageNumber = ""
+        self.isAddingNote = false
     }
     
     // MARK: - Pagination

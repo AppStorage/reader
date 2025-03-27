@@ -353,26 +353,26 @@ struct TagsSection: View {
     
     // MARK: - Event Handlers
     private func onTagsChanged() {
-        if localTags.count != book.tags.count || !localTags.elementsEqual(book.tags) {
-            localTags = book.tags
-            
-            if localTags.isEmpty {
-                isEditing = false
+        if self.localTags.count != self.book.tags.count || !self.localTags.elementsEqual(self.book.tags) {
+            self.localTags = self.book.tags
+
+            if self.localTags.isEmpty {
+                self.isEditing = false
             }
         }
     }
     
     private func onNewTagChanged(_ newValue: String) {
-        selectedSuggestionIndex = 0
-        
+        self.selectedSuggestionIndex = 0
+
         if newValue.isEmpty {
-            showSuggestions = false
+            self.showSuggestions = false
         } else {
-            if !newTag.isEmpty {
+            if !self.newTag.isEmpty {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     if !self.newTag.isEmpty {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                            showSuggestions = true
+                            self.showSuggestions = true
                         }
                     }
                 }
@@ -403,11 +403,11 @@ struct TagsSection: View {
     }
     
     private func removeTag(_ tag: String) {
-        contentViewModel.removeTag(tag, from: book)
+        self.contentViewModel.removeTag(tag, from: self.book)
             .sink(receiveCompletion: { _ in },
                   receiveValue: { _ in
-                overlayManager.showToast(message: "Tag removed")
-            })
+                    self.overlayManager.showToast(message: "Tag removed")
+                })
             .store(in: &Self.cancellables)
     }
     
@@ -416,29 +416,27 @@ struct TagsSection: View {
     }
     
     private func handleAddTag() {
-        let trimmedTag = newTag.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedTag = self.newTag.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedTag.isEmpty else { return }
-        
-        // Use case insensitive comparison to check for existing tags
-        guard !tagExistsCaseInsensitive(trimmedTag) else {
-            // Give feedback that tag already exists
+
+        guard !self.tagExistsCaseInsensitive(trimmedTag) else {
             NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .default)
             return
         }
-        
-        contentViewModel.addTag(trimmedTag, to: book)
+
+        self.contentViewModel.addTag(trimmedTag, to: self.book)
             .sink(receiveCompletion: { _ in },
                   receiveValue: {
-                overlayManager.showToast(message: "Tag added")
-                newTag = ""
-                
-                withAnimation {
-                    isFocused = true
-                    showSuggestions = false
-                }
-                
-                NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .default)
-            })
+                    self.overlayManager.showToast(message: "Tag added")
+                    self.newTag = ""
+
+                    withAnimation {
+                        self.isFocused = true
+                        self.showSuggestions = false
+                    }
+
+                    NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .default)
+                })
             .store(in: &Self.cancellables)
     }
     
@@ -470,22 +468,21 @@ struct TagsSection: View {
     }
     
     private func selectSuggestion(_ tag: String) {
-        // Use case insensitive comparison
-        guard !containsTagCaseInsensitive(tag) else { return }
-        
-        contentViewModel.addTag(tag, to: book)
+        guard !self.containsTagCaseInsensitive(tag) else { return }
+
+        self.contentViewModel.addTag(tag, to: self.book)
             .sink(receiveCompletion: { _ in },
                   receiveValue: {
-                overlayManager.showToast(message: "Tag added")
-                newTag = ""
-                
-                NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .default)
-                
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                    isFocused = true
-                    showSuggestions = false
-                }
-            })
+                    self.overlayManager.showToast(message: "Tag added")
+                    self.newTag = ""
+
+                    NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .default)
+
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        self.isFocused = true
+                        self.showSuggestions = false
+                    }
+                })
             .store(in: &Self.cancellables)
     }
     
