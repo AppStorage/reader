@@ -164,6 +164,9 @@ struct NotesSection: View {
         contentViewModel.removeNote(note, from: book)
             .sink(receiveValue: { _ in
                 overlayManager.showToast(message: "Note removed")
+                
+                let noteIdToRemove = RowItems.hashedIdentifier(for: note)
+                localNotes.removeAll { RowItems.hashedIdentifier(for: $0) == noteIdToRemove }
             })
             .store(in: &Self.cancellables)
     }

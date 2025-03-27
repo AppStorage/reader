@@ -4,7 +4,7 @@ struct TagItem: View {
     @State private var isHovered: Bool = false
     
     let tag: String
-    var backgroundColor: Color = Color.secondary.opacity(0.2)
+    var backgroundColor: Color = .secondary.opacity(0.2)
     var textColor: Color = .primary
     var cornerRadius: CGFloat = 8
     var isSelected: Bool = false

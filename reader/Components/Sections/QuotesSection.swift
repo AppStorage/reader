@@ -173,6 +173,9 @@ struct QuotesSection: View {
             .sink(receiveCompletion: { _ in },
                   receiveValue: {
                 overlayManager.showToast(message: "Quote removed")
+                
+                let quoteIdToRemove = RowItems.hashedIdentifier(for: quote)
+                localQuotes.removeAll { RowItems.hashedIdentifier(for: $0) == quoteIdToRemove }
             })
             .store(in: &Self.cancellables)
     }

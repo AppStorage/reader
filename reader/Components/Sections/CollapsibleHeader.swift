@@ -26,7 +26,7 @@ struct CollapsibleHeader: View {
                         .fontWeight(.semibold)
                 }
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.plain)
             
             Spacer()
             
@@ -35,7 +35,7 @@ struct CollapsibleHeader: View {
                     onEditToggle()
                 }
             }
-            .buttonStyle(LinkButtonStyle())
+            .buttonStyle(.link)
             .disabled(isEditingDisabled)
         }
         .padding(.bottom, 4)

@@ -117,7 +117,7 @@ struct TagsSection: View {
             ForEach(localTags, id: \.self) { tag in
                 TagItem(
                     tag: tag,
-                    backgroundColor: contentViewModel.selectedTags.contains(tag) ? Color.accentColor.opacity(0.2) : Color.secondary.opacity(0.2),
+                    backgroundColor: contentViewModel.selectedTags.contains(tag) ? .accentColor.opacity(0.2) : .secondary.opacity(0.2),
                     showRemoveButton: isEditing,
                     onRemove: { removeTag(tag) }
                 )

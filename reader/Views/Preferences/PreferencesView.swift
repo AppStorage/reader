@@ -53,7 +53,7 @@ struct PreferencesView: View {
             
             content
         }
-        .frame(width: 450, height: 450)
+        .frame(width: 420, height: 420)
         .onAppear {
             enforceWindowStyle()
         }

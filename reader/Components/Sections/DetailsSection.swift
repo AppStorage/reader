@@ -32,12 +32,12 @@ struct DetailsSection: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.custom("Merriweather-Regular", size: 24))
-                .foregroundStyle(.primary)
+                .foregroundColor(.primary)
                 .accessibilityLabel("Title: \(title)")
             
             Text("by \(author)")
                 .font(.system(size: 16))
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
                 .accessibilityLabel("Author: \(author)")
         }
     }
@@ -49,7 +49,7 @@ struct DetailsSection: View {
                 HStack(spacing: 6) {
                     Text("Rating:")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundColor(.secondary)
                     
                     ForEach(1...5, id: \.self) { star in
                         Image(systemName: star <= rating ? "star.fill" : "star")
@@ -70,7 +70,7 @@ struct DetailsSection: View {
                             }
                         }) {
                             Image(systemName: "x.circle.fill")
-                                .font(.system(size: 12))
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                         .buttonStyle(.plain)
@@ -107,12 +107,13 @@ struct DetailsSection: View {
                             copyToClipboard(cleanedISBN)
                         } label: {
                             Image(systemName: copiedISBN == isbn ? "checkmark.circle.fill" : "doc.on.doc.fill")
-                                .font(.system(size: 12))
+                                .font(.caption)
                                 .foregroundStyle(copiedISBN == isbn ? .green : .secondary)
                                 .contentTransition(.symbolEffect(.replace))
                         }
                         .buttonStyle(.borderless)
                         .help("Copy ISBN")
+                        .accessibilityLabel("Copy ISBN")
                     }
                     .accessibilityLabel("\(row.label): \(row.value)")
                     .accessibilityHint("Copy ISBN")
@@ -159,13 +160,13 @@ struct DetailsSection: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(displayDescription)
                         .font(.custom("Merriweather-Regular", size: 12))
-                        .foregroundStyle(.primary)
+                        .foregroundColor(.primary)
                         .lineSpacing(4)
                         .padding(10)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(
                             RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.gray.opacity(0.1))
+                                .fill(.gray.opacity(0.1))
                         )
                         .transition(.opacity)
                     
