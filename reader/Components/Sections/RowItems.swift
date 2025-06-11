@@ -37,6 +37,7 @@ struct RowItems: View {
     @Binding var editText: String
     @Binding var editSecondary: String
     @Binding var editAttribution: String
+    @Binding var selectedQuoteReference: String
     
     @FocusState private var isFocusedOnText: Bool
     @FocusState private var isFocusedOnSecondary: Bool
@@ -46,10 +47,12 @@ struct RowItems: View {
     let text: String
     let secondaryText: String?
     let attributedText: String?
+    let referencedQuote: String?
     let customFont: Font?
     let mode: DisplayMode
     let allowEditing: Bool
     let isMultiline: Bool
+    let availableQuotes: [String]
     let onRemove: (() -> Void)?
     let onEdit: (() -> Void)?
     let onSave: (() -> Void)?
@@ -60,13 +63,16 @@ struct RowItems: View {
         text: String = "",
         secondaryText: String? = nil,
         attributedText: String? = nil,
+        referencedQuote: String? = nil,
         customFont: Font? = nil,
         mode: DisplayMode = .display,
         allowEditing: Bool = true,
         isMultiline: Bool = true,
+        availableQuotes: [String] = [],
         editText: Binding<String>,
         editSecondary: Binding<String> = .constant(""),
         editAttribution: Binding<String> = .constant(""),
+        selectedQuoteReference: Binding<String> = .constant(""),
         onRemove: (() -> Void)? = nil,
         onEdit: (() -> Void)? = nil,
         onSave: (() -> Void)? = nil,
@@ -76,13 +82,16 @@ struct RowItems: View {
         self.text = text
         self.secondaryText = secondaryText
         self.attributedText = attributedText
+        self.referencedQuote = referencedQuote
         self.customFont = customFont
         self.mode = mode
         self.allowEditing = allowEditing
         self.isMultiline = isMultiline
+        self.availableQuotes = availableQuotes
         self._editText = editText
         self._editSecondary = editSecondary
         self._editAttribution = editAttribution
+        self._selectedQuoteReference = selectedQuoteReference
         self.onRemove = onRemove
         self.onEdit = onEdit
         self.onSave = onSave
@@ -107,16 +116,22 @@ struct RowItems: View {
     }
     
     private var displayView: some View {
-        HStack(alignment: .top, spacing: 8) {
-            mainTextView
-            Spacer()
-            
-            if let secondary = secondaryText, !secondary.isEmpty {
-                secondaryTextView(secondary)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top, spacing: 8) {
+                mainTextView
+                Spacer()
+                
+                if let secondary = secondaryText, !secondary.isEmpty {
+                    secondaryTextView(secondary)
+                }
+                
+                if allowEditing {
+                    editActionMenu
+                }
             }
             
-            if allowEditing {
-                editActionMenu
+            if let referencedQuote = referencedQuote, !referencedQuote.isEmpty {
+                referencedQuoteView(referencedQuote)
             }
         }
         .padding(.vertical, 6)
@@ -140,8 +155,59 @@ struct RowItems: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color.gray.opacity(0.1))
+                .fill(.gray.opacity(0.1))
         )
+    }
+    
+    private func referencedQuoteView(_ quote: String) -> some View {
+        let (quoteText, quotePage, quoteAttribution, _) = RowItems.parseFromStorage(quote)
+        let displayQuote = quoteText.count > 80 ? String(quoteText.prefix(80)) + "…" : quoteText
+        
+        return VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Label("Referenced Quote", systemImage: "link")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                
+                Spacer()
+            }
+            
+            // Quote content
+            VStack(alignment: .leading, spacing: 4) {
+                Text(displayQuote)
+                    .font(.caption)
+                    .foregroundStyle(.primary)
+                    .lineLimit(3)
+                
+                // Attribution and page info
+                HStack(spacing: 12) {
+                    if !quotePage.isEmpty {
+                        Text("p. \(quotePage)")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    if !quoteAttribution.isEmpty {
+                        Text("— \(quoteAttribution)")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    Spacer()
+                }
+            }
+        }
+        
+        .padding()
+        .background {
+            RoundedRectangle(cornerRadius: 6)
+                .fill(.blue.opacity(0.04))
+        }
+        .overlay(alignment: .leading) {
+            Rectangle()
+                .frame(width: 2)
+                .foregroundStyle(.blue.opacity(0.3))
+        }
     }
     
     private func secondaryTextView(_ text: String) -> some View {
@@ -151,7 +217,7 @@ struct RowItems: View {
             .padding(8)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.gray.opacity(0.1))
+                    .fill(.gray.opacity(0.1))
             )
             .frame(minWidth: 50, alignment: .trailing)
     }
@@ -182,7 +248,7 @@ struct RowItems: View {
                 .foregroundColor(.secondary)
                 .frame(width: 24, height: 24)
         }
-        .buttonStyle(BorderlessButtonStyle())
+        .buttonStyle(.borderless)
         .contentShape(Rectangle())
         .transition(.opacity)
     }
@@ -207,10 +273,15 @@ struct RowItems: View {
                 if contentType == .quote && shouldShowAttributionField {
                     attributionField
                 }
+                
+                // Quote reference selector for notes only
+                if contentType == .note && !availableQuotes.isEmpty {
+                    quoteReferenceSelector
+                }
             }
             
             Divider()
-                .background(Color(NSColor.separatorColor))
+                .background(.separator)
                 .frame(height: 1)
             
             formButtons
@@ -218,8 +289,8 @@ struct RowItems: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(NSColor.windowBackgroundColor))
-                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                .fill(.windowBackground)
+                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
         )
         .onAppear {
             // Set focus to the text field when edit view appears
@@ -235,6 +306,34 @@ struct RowItems: View {
     
     private var shouldShowAttributionField: Bool {
         contentType == .quote
+    }
+    
+    // MARK: - Quote Reference Selector
+    @ViewBuilder
+    private var quoteReferenceSelector: some View {
+        if !availableQuotes.isEmpty {
+            HStack(alignment: .center, spacing: 8) {
+                Label("Reference Quote:", systemImage: "link")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                
+                Picker("", selection: $selectedQuoteReference) {
+                    Text("None")
+                        .tag("")
+                    
+                    ForEach(availableQuotes, id: \.self) { quote in
+                        let (quoteText, quotePage, _, _) = RowItems.parseFromStorage(quote)
+                        let displayText = quoteText.count > 35 ? String(quoteText.prefix(35)) + "…" : quoteText
+                        let displayWithPage = quotePage.isEmpty ? displayText : "\(displayText) (p. \(quotePage))"
+                        
+                        Text(displayWithPage)
+                            .tag(quote)
+                    }
+                }
+                .pickerStyle(.menu)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
     }
     
     // MARK: - Multi-line Form
@@ -261,10 +360,10 @@ struct RowItems: View {
                     .padding(6)
                     .frame(height: 100)
                     .background(RoundedRectangle(cornerRadius: 6)
-                        .fill(Color(NSColor.controlBackgroundColor)))
+                        .fill(Color(.controlBackgroundColor)))
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
-                            .stroke(isFocusedOnText ? Color.accentColor : Color(NSColor.separatorColor), lineWidth: 2)
+                            .stroke(isFocusedOnText ? Color.accentColor : Color(.separatorColor), lineWidth: 2)
                     )
                     .focused($isFocusedOnText)
                     .animation(.easeInOut(duration: 0.2), value: isFocusedOnText)
@@ -293,13 +392,13 @@ struct RowItems: View {
                 }
                 
                 TextField("", text: $editText)
-                    .textFieldStyle(PlainTextFieldStyle())
+                    .textFieldStyle(.plain)
                     .padding(8)
                     .background(RoundedRectangle(cornerRadius: 6)
-                        .fill(Color(NSColor.controlBackgroundColor)))
+                        .fill(Color(.controlBackgroundColor)))
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
-                            .stroke(isFocusedOnText ? Color.accentColor : Color(NSColor.separatorColor), lineWidth: 2)
+                            .stroke(isFocusedOnText ? Color.accentColor : Color(.separatorColor), lineWidth: 2)
                     )
                     .focused($isFocusedOnText)
                     .animation(.easeInOut(duration: 0.2), value: isFocusedOnText)
@@ -314,7 +413,7 @@ struct RowItems: View {
                 .foregroundColor(.secondary)
             
             TextField("Page no. (e.g., 11 or 11-15)", text: $editSecondary)
-                .textFieldStyle(PlainTextFieldStyle())
+                .textFieldStyle(.plain)
                 .padding(6)
                 .background(
                     RoundedRectangle(cornerRadius: 6)
@@ -322,7 +421,7 @@ struct RowItems: View {
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
-                        .stroke(isFocusedOnSecondary ? Color.accentColor : Color(NSColor.separatorColor), lineWidth: 2)
+                        .stroke(isFocusedOnSecondary ? Color.accentColor : Color(.separatorColor), lineWidth: 2)
                 )
                 .focused($isFocusedOnSecondary)
                 .onChange(of: editSecondary) { _, newValue in
@@ -341,13 +440,13 @@ struct RowItems: View {
                 .foregroundColor(.secondary)
             
             TextField("Attributed to", text: $editAttribution)
-                .textFieldStyle(PlainTextFieldStyle())
+                .textFieldStyle(.plain)
                 .padding(8)
                 .background(RoundedRectangle(cornerRadius: 6)
-                    .fill(Color(NSColor.controlBackgroundColor)))
+                    .fill(Color(.controlBackgroundColor)))
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
-                        .stroke(isFocusedOnAttribution ? Color.accentColor : Color(NSColor.separatorColor), lineWidth: 2)
+                        .stroke(isFocusedOnAttribution ? Color.accentColor : Color(.separatorColor), lineWidth: 2)
                 )
                 .focused($isFocusedOnAttribution)
                 .animation(.easeInOut(duration: 0.2), value: isFocusedOnAttribution)
@@ -377,7 +476,7 @@ struct RowItems: View {
                 }
             }
             .buttonStyle(.borderedProminent)
-            .tint(Color.accentColor)
+            .tint(.accentColor)
             .foregroundColor(editText.isEmpty ? .gray : .white)
             .disabled(editText.isEmpty)
             .scaleEffect(editText.isEmpty ? 0.95 : 1.0)
@@ -387,26 +486,41 @@ struct RowItems: View {
     
     // MARK: - Helpers
     // Formats content and metadata into a storage string
-    static func formatForStorage(text: String, pageNumber: String, attribution: String = "") -> String {
+    static func formatForStorage(text: String, pageNumber: String, attribution: String = "", quoteReference: String = "") -> String {
         var result = text.trimmingCharacters(in: .whitespacesAndNewlines)
         
         if !pageNumber.isEmpty {
             result += " [p. \(pageNumber)]"
         }
-
+        
         if !attribution.isEmpty {
             result += " — \(attribution)"
         }
-
+        
+        if !quoteReference.isEmpty {
+            let quoteHash = hashedIdentifier(for: quoteReference)
+            result += " [ref: \(quoteHash)]"
+        }
+        
         return result
     }
     
     // Parses a storage string into components (text, page, attribution)
-    static func parseFromStorage(_ storedString: String) -> (text: String, pageNumber: String, attribution: String) {
+    static func parseFromStorage(_ storedString: String) -> (text: String, pageNumber: String, attribution: String, quoteReference: String) {
         var text = storedString
         var pageNumber = ""
         var attribution = ""
-
+        var quoteReference = ""
+        
+        // Extract quote reference: look for " [ref: hash]"
+        if let refRange = text.range(of: #" \[ref: ([^\]]+)\]"#, options: .regularExpression) {
+            let refText = String(text[refRange])
+            if let match = refText.range(of: #"(?<=\[ref: ).+?(?=\])"#, options: .regularExpression) {
+                quoteReference = String(refText[match])
+            }
+            text.removeSubrange(refRange)
+        }
+        
         // Extract page number: look for " [p. ...]"
         if let pageRange = text.range(of: #" \[p\. ([^\]]+)\]"#, options: .regularExpression) {
             let pageText = String(text[pageRange])
@@ -415,19 +529,25 @@ struct RowItems: View {
             }
             text.removeSubrange(pageRange)
         }
-
+        
         // Extract attribution: look for " — attribution" at end
         if let dashRange = text.range(of: #" — .+$"#, options: .regularExpression) {
             let attributionText = String(text[dashRange]).replacingOccurrences(of: " — ", with: "")
             attribution = attributionText
             text.removeSubrange(dashRange)
         }
-
+        
         return (
             text: text.trimmingCharacters(in: .whitespacesAndNewlines),
             pageNumber: pageNumber.trimmingCharacters(in: .whitespacesAndNewlines),
-            attribution: attribution.trimmingCharacters(in: .whitespacesAndNewlines)
+            attribution: attribution.trimmingCharacters(in: .whitespacesAndNewlines),
+            quoteReference: quoteReference.trimmingCharacters(in: .whitespacesAndNewlines)
         )
+    }
+    
+    // Find quote by hash
+    static func findQuoteByHash(_ hash: String, in quotes: [String]) -> String? {
+        return quotes.first { hashedIdentifier(for: $0) == hash }
     }
     
     private func filterPageNumberInput(_ input: String) -> String {
@@ -521,7 +641,7 @@ extension RowItems {
                         .foregroundColor(isDisabled ? .gray : foregroundColor)
                 }
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.plain)
             .padding(padding ?? .init())
             .disabled(isDisabled)
         }

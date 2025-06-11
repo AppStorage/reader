@@ -204,6 +204,7 @@
       }
     },
     "Add some highlights to this book to create quotes" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -907,6 +908,7 @@
       }
     },
     "No quotes available" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -932,6 +934,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No hay actualizaciones disponibles."
+          }
+        }
+      }
+    },
+    "None" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ninguno"
           }
         }
       }
@@ -1148,6 +1160,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recuperar"
+          }
+        }
+      }
+    },
+    "Reference Quote:" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cita de Referencia:"
+          }
+        }
+      }
+    },
+    "Referenced Quote" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cita Referenciada:"
           }
         }
       }

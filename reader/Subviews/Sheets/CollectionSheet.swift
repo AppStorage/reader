@@ -65,7 +65,7 @@ struct CollectionSheet: View {
             
             VStack(alignment: .leading, spacing: 8) {
                 Text("Collection Name")
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.subheadline)
                     .foregroundColor(.secondary)
                 
                 HStack(spacing: 8) {
@@ -75,7 +75,7 @@ struct CollectionSheet: View {
                     
                     TextField("Enter name", text: $collectionName)
                         .font(.system(size: 14))
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textFieldStyle(.roundedBorder)
                         .onChange(of: collectionName) {
                             typingTimer?.invalidate()
                             typingTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
@@ -106,14 +106,14 @@ struct CollectionSheet: View {
                 .padding(.bottom, 20)
         }
         .frame(width: 350, height: 225)
-        .background(Color(.windowBackgroundColor))
+        .background(.windowBackground)
         .cornerRadius(12)
     }
     
     private var headerView: some View {
         HStack {
             Text(mode.title)
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .font(.title3)
                 .foregroundColor(.primary)
             
             Spacer()
@@ -129,7 +129,6 @@ struct CollectionSheet: View {
                 .foregroundColor(.yellow)
             
             Text(message)
-                .font(.system(size: 13))
                 .foregroundColor(.primary.opacity(0.8))
             
             Spacer()
@@ -137,10 +136,10 @@ struct CollectionSheet: View {
         .padding(10)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color.yellow.opacity(0.1))
+                .fill(.yellow.opacity(0.1))
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.yellow.opacity(0.3), lineWidth: 0.5)
+                        .stroke(.yellow.opacity(0.3), lineWidth: 0.5)
                 )
         )
     }
@@ -151,7 +150,6 @@ struct CollectionSheet: View {
                 onCancel()
             }) {
                 Text("Cancel")
-                    .font(.system(size: 13, weight: .regular))
                     .foregroundColor(.primary)
                     .frame(minWidth: 80)
             }
@@ -167,7 +165,6 @@ struct CollectionSheet: View {
                 }
             }) {
                 Text(mode.actionButtonText)
-                    .font(.system(size: 13, weight: .semibold))
                     .frame(minWidth: 80)
             }
             .buttonStyle(.borderedProminent)

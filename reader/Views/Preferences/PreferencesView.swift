@@ -75,12 +75,12 @@ struct PreferencesView: View {
             .frame(width: 90, height: 62)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(isSelected ? Color.accentColor.opacity(0.15) : Color.clear)
+                    .fill(isSelected ? Color.accentColor.opacity(0.15) : .clear)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .strokeBorder(
-                        isHovered ? Color.primary.opacity(0.15) : Color.clear,
+                        isHovered ? Color.primary.opacity(0.15) : .clear,
                         lineWidth: isHovered ? 1 : 0
                     )
             )

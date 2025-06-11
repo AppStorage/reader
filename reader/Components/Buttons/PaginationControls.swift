@@ -27,7 +27,7 @@ struct PaginationControls: View {
                 .font(.caption)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(Capsule().fill(Color.secondary.opacity(0.1)))
+                .background(Capsule().fill(.secondary.opacity(0.1)))
 
             Button(action: {
                 withAnimation { onNext() }

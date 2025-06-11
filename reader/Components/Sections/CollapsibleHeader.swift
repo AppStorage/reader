@@ -22,7 +22,7 @@ struct CollapsibleHeader: View {
                         .animation(.easeInOut(duration: 0.5), value: isCollapsed)
                         .font(.body)
                     Text(title)
-                        .font(.title2)
+                        .font(.title3)
                         .fontWeight(.semibold)
                 }
             }
@@ -35,7 +35,8 @@ struct CollapsibleHeader: View {
                     onEditToggle()
                 }
             }
-            .buttonStyle(.link)
+            .buttonStyle(.plain)
+            .foregroundColor(.accentColor)
             .disabled(isEditingDisabled)
         }
         .padding(.bottom, 4)

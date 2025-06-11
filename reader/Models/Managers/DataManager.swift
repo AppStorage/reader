@@ -222,11 +222,15 @@ final class DataManager: ObservableObject {
     }
     
     // MARK: - Notes Management
-    func addNote(_ text: String, pageNumber: String, to book: BookData) -> AnyPublisher<Void, Never> {
+    func addNote(_ text: String, pageNumber: String, quoteReference: String = "", to book: BookData) -> AnyPublisher<Void, Never> {
         Just(())
             .handleEvents(receiveOutput: { [weak self] _ in
                 guard let self = self else { return }
-                let formattedNote = RowItems.formatForStorage(text: text, pageNumber: pageNumber)
+                let formattedNote = RowItems.formatForStorage(
+                    text: text,
+                    pageNumber: pageNumber,
+                    quoteReference: quoteReference
+                )
                 var updatedNotes = book.notes
                 updatedNotes.append(formattedNote)
                 book.notes = updatedNotes
@@ -247,11 +251,15 @@ final class DataManager: ObservableObject {
             .eraseToAnyPublisher()
     }
     
-    func updateNote(originalNote: String, newText: String, newPageNumber: String, in book: BookData) -> AnyPublisher<Void, Never> {
+    func updateNote(originalNote: String, newText: String, newPageNumber: String, newQuoteReference: String = "", in book: BookData) -> AnyPublisher<Void, Never> {
         Just(())
             .handleEvents(receiveOutput: { [weak self] _ in
                 guard let self = self else { return }
-                let formattedNote = RowItems.formatForStorage(text: newText, pageNumber: newPageNumber)
+                let formattedNote = RowItems.formatForStorage(
+                    text: newText,
+                    pageNumber: newPageNumber,
+                    quoteReference: newQuoteReference
+                )
                 var updatedNotes = book.notes
                 if let index = updatedNotes.firstIndex(of: originalNote) {
                     updatedNotes[index] = formattedNote

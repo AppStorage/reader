@@ -10,36 +10,36 @@ enum QuoteBackgroundStyle: String, CaseIterable, Identifiable {
     
     var backgroundColor: Color {
         switch self {
-        case .light: return Color.white
-        case .sepia: return Color(red: 249/255, green: 241/255, blue: 228/255)
+        case .light: return .white
+        case .sepia: return Color(red: 0.98, green: 0.95, blue: 0.89)
         case .dark: return Color(white: 0.1)
         }
     }
     
     var quoteTextColor: Color {
         switch self {
-        case .light, .sepia: return Color.black
-        case .dark: return Color.white
+        case .light, .sepia: return .black
+        case .dark: return .white
         }
     }
     
     var attributionTextColor: Color {
         switch self {
-        case .light, .sepia: return Color.gray
+        case .light, .sepia: return .gray
         case .dark: return Color(white: 0.8)
         }
     }
     
     var bookAuthorColor: Color {
         switch self {
-        case .light, .sepia: return Color.black
-        case .dark: return Color.white
+        case .light, .sepia: return .black
+        case .dark: return .white
         }
     }
     
     var bookTitleColor: Color {
         switch self {
-        case .light, .sepia: return Color.gray
+        case .light, .sepia: return .gray
         case .dark: return Color(white: 0.8)
         }
     }
@@ -68,15 +68,15 @@ struct QuoteCard: View {
             VStack(alignment: .leading, spacing: 0) {
                 Image(systemName: "quote.opening")
                     .font(.system(size: 24))
-                    .foregroundColor(style.quoteTextColor.opacity(0.3))
+                    .foregroundColor(style.quoteTextColor.opacity(0.2))
                     .padding(.bottom, fixedSize != nil ? 4 : 1)
-                    .padding(.leading, 17)
+                    .padding(.leading, 20)
                 
                 VStack(alignment: .leading, spacing: 16) {
-                    quoteTextView
-                    bookInfoView
+                    quoteText
+                    bookInfo
                 }
-                .padding(.all, 24)
+                .padding()
                 .frame(width: fixedSize?.width ?? 500)
             }
             .padding(.top, 20)
@@ -86,10 +86,10 @@ struct QuoteCard: View {
         .id(style)
     }
     
-    private var quoteTextView: some View {
+    private var quoteText: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(quote)
-                .font(.custom("Merriweather-Regular", size: 18))
+                .font(.custom("Merriweather-Regular", size: 14))
                 .foregroundColor(style.quoteTextColor)
                 .lineSpacing(7)
                 .fixedSize(horizontal: false, vertical: true)
@@ -98,7 +98,7 @@ struct QuoteCard: View {
             
             if let attribution = attribution, !attribution.isEmpty {
                 Text("— \(attribution)")
-                    .font(.custom("Merriweather-Italic", size: 16))
+                    .font(.custom("Merriweather-Italic", size: 12))
                     .foregroundColor(style.attributionTextColor)
                     .padding(.leading, 16)
                     .frame(width: (fixedSize?.width ?? 500) - 48, alignment: .leading)
@@ -106,20 +106,20 @@ struct QuoteCard: View {
         }
         .overlay(
             Rectangle()
-                .fill(style.quoteTextColor.opacity(0.5))
-                .frame(width: 3)
+                .fill(style.quoteTextColor.opacity(0.2))
+                .frame(width: 4)
             , alignment: .leading
         )
     }
     
-    private var bookInfoView: some View {
+    private var bookInfo: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(book.author)
-                .font(.system(size: 15, weight: .semibold))
+                .font(.headline)
                 .foregroundColor(style.bookAuthorColor)
             
             Text(book.title)
-                .font(.system(size: 13, weight: .regular))
+                .font(.subheadline)
                 .foregroundColor(style.bookTitleColor)
         }
         .frame(width: (fixedSize?.width ?? 500) - 48, alignment: .leading)

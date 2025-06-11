@@ -29,7 +29,7 @@ struct GeneralView: View {
                         Text(theme.rawValue.capitalized).tag(theme)
                     }
                 }
-                .pickerStyle(SegmentedPickerStyle())
+                .pickerStyle(.segmented)
             }
         }
         .formStyle(.grouped)

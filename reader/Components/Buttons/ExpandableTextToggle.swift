@@ -20,4 +20,3 @@ struct ExpandableTextToggle: View {
         .padding(.leading, alignmentPadding)
     }
 }
-

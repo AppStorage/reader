@@ -128,12 +128,12 @@ struct BookFormView: View {
                     .lineSpacing(1.5)
                     .background(
                         RoundedRectangle(cornerRadius: 6)
-                            .fill(Color(nsColor: .controlBackgroundColor))
+                            .fill(Color(.controlBackgroundColor))
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
                             .stroke(focusedField.wrappedValue == .description ? Color.accentColor :
-                                        (validationErrors[.description] != nil && showValidationErrors ? Color.red : Color(nsColor: .separatorColor)),
+                                        (validationErrors[.description] != nil && showValidationErrors ? .red : Color(.separatorColor)),
                                     lineWidth: 1.5)
                     )
                     .focused(focusedField, equals: .description)
@@ -145,7 +145,7 @@ struct BookFormView: View {
                         .foregroundColor(.red)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 4)
-                        .background(Color(nsColor: .controlBackgroundColor).opacity(0.8))
+                        .background(Color(.controlBackgroundColor).opacity(0.8))
                         .cornerRadius(4)
                         .offset(y: -8)
                         .transition(.opacity)
@@ -182,15 +182,15 @@ struct BookFormView: View {
                     .lineSpacing(1.3)
                     .background(
                         RoundedRectangle(cornerRadius: 6)
-                            .fill(Color(nsColor: .controlBackgroundColor))
+                            .fill(Color(.controlBackgroundColor))
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
-                            .stroke(focusedField.wrappedValue == field ? Color.accentColor :
-                                        (error != nil ? Color.red : Color(nsColor: .separatorColor)),
+                            .stroke(focusedField.wrappedValue == field ? .accentColor :
+                                        (error != nil ? .red : Color(.separatorColor)),
                                     lineWidth: 1.5)
                     )
-                    .textFieldStyle(PlainTextFieldStyle())
+                    .textFieldStyle(.plain)
                     .focused(focusedField, equals: field)
                     .accessibilityLabel(label)
             }
@@ -256,11 +256,11 @@ struct BookFormView: View {
                     .padding(.horizontal, 8)
                     .background(
                         RoundedRectangle(cornerRadius: 6)
-                            .fill(Color(nsColor: .controlBackgroundColor))
+                            .fill(Color(.controlBackgroundColor))
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
-                            .stroke(error != nil ? Color.red : Color(nsColor: .separatorColor), lineWidth: 1.5)
+                            .stroke(error != nil ? .red : Color(.separatorColor), lineWidth: 1.5)
                     )
                     .opacity(date.wrappedValue != nil ? 1 : 0)
                     .disabled(date.wrappedValue == nil)

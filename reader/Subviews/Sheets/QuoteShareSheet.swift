@@ -16,24 +16,20 @@ struct QuoteShareSheet: View {
             Divider()
                 .padding(.horizontal)
             
-            if book.quotes.isEmpty {
-                emptyStateView
-            } else {
-                VStack(spacing: 0) {
-                    previewView
-                        .padding(.top, 24)
-                    
-                    Spacer()
-                        .frame(height: 30)
-                    
-                    controlsView
-                    
-                    Spacer(minLength: 25)
-                    
-                    actionButtonsView
-                }
-                .padding(.bottom, 24)
+            VStack(spacing: 0) {
+                previewView
+                    .padding(.top, 24)
+                
+                Spacer()
+                    .frame(height: 30)
+                
+                controlsView
+                
+                Spacer(minLength: 25)
+                
+                actionButtonsView
             }
+            .padding(.bottom, 24)
         }
         .frame(width: 580, height: 650)
         .background(Color(.windowBackgroundColor))
@@ -63,34 +59,13 @@ struct QuoteShareSheet: View {
                     .foregroundColor(.secondary)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.plain)
             .keyboardShortcut(.escape)
             .help("Close")
         }
         .padding(.horizontal, 24)
         .padding(.top, 18)
         .padding(.bottom, 14)
-    }
-    
-    private var emptyStateView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "quote.bubble")
-                .font(.system(size: 54))
-                .symbolRenderingMode(.hierarchical)
-                .foregroundStyle(.secondary)
-                .padding(.bottom, 8)
-            
-            Text("No quotes available")
-                .font(.headline)
-                .foregroundColor(.primary)
-            
-            Text("Add some highlights to this book to create quotes")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding()
     }
     
     private var previewView: some View {
@@ -117,7 +92,7 @@ struct QuoteShareSheet: View {
                         DispatchQueue.main.async {
                             quoteContentSize = geo.size
                         }
-                        return Color.clear
+                        return .clear
                     }
                 )
             }
@@ -205,7 +180,7 @@ struct QuoteShareSheet: View {
                 .frame(width: 36, height: 32)
                 .contentShape(Rectangle())
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(.plain)
         .disabled(!isEnabled)
     }
     
@@ -231,9 +206,9 @@ struct QuoteShareSheet: View {
                         .frame(width: 48, height: 48)
                         .overlay(
                             Circle()
-                                .stroke(Color.secondary.opacity(0.2), lineWidth: 0.5)
+                                .stroke(.secondary.opacity(0.2), lineWidth: 0.5)
                         )
-                        .shadow(color: Color.black.opacity(0.05), radius: 1, x: 0, y: 1)
+                        .shadow(color: .black.opacity(0.05), radius: 1, x: 0, y: 1)
                     
                     Image(systemName: style.iconName)
                         .font(.system(size: 18))
@@ -241,7 +216,7 @@ struct QuoteShareSheet: View {
                     
                     if selectedBackground == style {
                         Circle()
-                            .stroke(Color.blue, lineWidth: 2)
+                            .stroke(.blue, lineWidth: 2)
                             .frame(width: 48, height: 48)
                     }
                 }
@@ -251,7 +226,7 @@ struct QuoteShareSheet: View {
                     .foregroundColor(style == selectedBackground ? .blue : .primary)
             }
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(.plain)
         .frame(maxWidth: .infinity)
     }
     

@@ -373,12 +373,16 @@ final class ContentViewModel: ObservableObject {
     }
     
     // MARK: - Notes Management
-    func addNote(_ text: String, pageNumber: String, to book: BookData) -> AnyPublisher<Void, Never> {
-        dataManager.addNote(text, pageNumber: pageNumber, to: book)
+    func addNote(_ text: String, pageNumber: String, quoteReference: String = "", to book: BookData) -> AnyPublisher<Void, Never> {
+        dataManager.addNote(text, pageNumber: pageNumber, quoteReference: quoteReference, to: book)
     }
     
     func removeNote(_ note: String, from book: BookData) -> AnyPublisher<Void, Never> {
         dataManager.removeNote(note, from: book)
+    }
+    
+    func updateNote(originalNote: String, newText: String, newPageNumber: String, newQuoteReference: String = "", in book: BookData) -> AnyPublisher<Void, Never> {
+        dataManager.updateNote(originalNote: originalNote, newText: newText, newPageNumber: newPageNumber, newQuoteReference: newQuoteReference, in: book)
     }
     
     func updateNote(originalNote: String, newText: String, newPageNumber: String, in book: BookData) -> AnyPublisher<Void, Never> {

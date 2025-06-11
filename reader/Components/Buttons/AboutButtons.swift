@@ -16,26 +16,22 @@ struct AboutButtons: View {
                 NSWorkspace.shared.open(validURL)
             }
         }) {
-            HStack {
-                Image(systemName: systemImage)
-                    .foregroundColor(.primary)
-                Text(title)
-                    .foregroundColor(.primary)
-            }
-            .font(.callout)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(isHovered ? Color.gray.opacity(0.2) : Color.gray.opacity(0.1))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(isHovered ? Color.gray : Color.clear, lineWidth: 1)
-            )
-            .animation(.easeInOut(duration: 0.2), value: isHovered)
+            Label(title, systemImage: systemImage)
+                .foregroundColor(.primary)
+                .font(.callout)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(isHovered ? .gray.opacity(0.2) : .gray.opacity(0.1))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(isHovered ? .gray : .clear, lineWidth: 1)
+                )
+                .animation(.easeInOut(duration: 0.2), value: isHovered)
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(.plain)
         .onHover { hovering in
             isHovered = hovering
         }

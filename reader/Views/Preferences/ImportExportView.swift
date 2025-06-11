@@ -105,16 +105,16 @@ struct ImportExportView: View {
                 .padding(.vertical, 8)
                 .background(
                     RoundedRectangle(cornerRadius: 10)
-                        .fill(isExportHovered ? Color.gray.opacity(0.2) : Color.gray.opacity(0.1))
+                        .fill(isExportHovered ? .gray.opacity(0.2) : .gray.opacity(0.1))
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
-                        .stroke(isExportHovered ? Color.gray : Color.clear, lineWidth: 1)
+                        .stroke(isExportHovered ? .gray : .clear, lineWidth: 1)
                 )
                 .animation(.easeInOut(duration: 0.2), value: isExportHovered)
                 .frame(width: 150)
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.plain)
             .onHover { hovering in
                 isExportHovered = hovering
             }
@@ -146,7 +146,7 @@ struct ImportExportView: View {
             Text("14 days").tag(14)
             Text("30 days").tag(30)
         }
-        .pickerStyle(SegmentedPickerStyle())
+        .pickerStyle(.segmented)
         .padding(.vertical, 6)
         .listRowInsets(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
         .transition(.move(edge: .top).combined(with: .opacity))

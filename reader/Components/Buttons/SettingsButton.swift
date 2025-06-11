@@ -11,9 +11,8 @@ struct SettingsButton: View {
             action()
         }) {
             Label("Preferences", systemImage: "gear")
-                .font(.system(size: 16, weight: .regular))
+                .font(.system(size: 16))
                 .frame(width: 24, height: 24)
-                .contentShape(Rectangle())
                 .foregroundColor(buttonForegroundColor)
                 .brightness(buttonBrightness)
                 .scaleEffect(isHovered ? 1.1 : 1.0)

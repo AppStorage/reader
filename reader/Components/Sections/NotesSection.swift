@@ -17,6 +17,8 @@ struct NotesSection: View {
     @State private var editPageNumber: String = ""
     @State private var saveTask: Task<Void, Never>?
     @State private var editingNoteId: String? = nil
+    @State private var selectedQuoteReference: String = ""
+    @State private var editSelectedQuoteReference: String = ""
     
     @State private static var cancellables = Set<AnyCancellable>()
     
@@ -66,30 +68,34 @@ struct NotesSection: View {
                     .transition(.opacity)
             } else {
                 ForEach(paginatedNotes, id: \.self) { note in
-                    let (text, pageNumber, _) = RowItems.parseFromStorage(note)
+                    let (text, pageNumber, _, quoteHash) = RowItems.parseFromStorage(note)
                     let noteId = RowItems.hashedIdentifier(for: note)
                     let isExpanded = contentViewModel.isExpanded(hash: noteId, for: book.id)
                     let previewLimit = 120
                     let displayText = isExpanded || text.count < previewLimit ? text : String(text.prefix(previewLimit)) + "…"
-
+                    let referencedQuote = quoteHash.isEmpty ? nil : RowItems.findQuoteByHash(quoteHash, in: book.quotes)
+                    
                     VStack(alignment: .leading, spacing: 4) {
                         RowItems(
                             contentType: .note,
                             text: displayText,
                             secondaryText: pageNumber.isEmpty ? nil : pageNumber,
                             attributedText: nil,
+                            referencedQuote: referencedQuote,
                             mode: editingNoteId == note ? .edit : .display,
                             allowEditing: isEditing,
                             isMultiline: true,
+                            availableQuotes: book.quotes,
                             editText: $editNoteText,
                             editSecondary: $editPageNumber,
+                            selectedQuoteReference: $editSelectedQuoteReference,
                             onRemove: { removeNote(note) },
                             onEdit: { beginEditingNote(note) },
                             onSave: { saveEditedNote(originalNote: note) },
                             onCancel: { cancelEditingNote() }
                         )
                         .transition(.opacity)
-
+                        
                         if text.count > previewLimit {
                             ExpandableTextToggle(
                                 isExpanded: Binding(
@@ -103,14 +109,16 @@ struct NotesSection: View {
                     }
                 }
             }
-
+            
             if isAddingNote && editingNoteId == nil {
                 RowItems(
                     contentType: .note,
                     mode: .add,
                     isMultiline: true,
+                    availableQuotes: book.quotes,
                     editText: $newNote,
                     editSecondary: $newPageNumber,
+                    selectedQuoteReference: $selectedQuoteReference,
                     onSave: saveNote,
                     onCancel: resetAddNoteForm
                 )
@@ -124,7 +132,7 @@ struct NotesSection: View {
                     isDisabled: book.status == .deleted
                 )
             }
-
+            
             if localNotes.count > pageSize {
                 PaginationControls(
                     currentPage: currentPage,
@@ -141,7 +149,7 @@ struct NotesSection: View {
         .animation(.easeInOut(duration: 0.3), value: localNotes.isEmpty)
         .animation(.easeInOut(duration: 0.3), value: isAddingNote)
     }
-
+    
     
     private var emptyStateView: some View {
         EmptyStateView(type: .notes, isCompact: true)
@@ -151,23 +159,32 @@ struct NotesSection: View {
     // MARK: - Actions
     private func saveNote() {
         guard !self.newNote.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-
-        self.contentViewModel.addNote(self.newNote, pageNumber: self.newPageNumber, to: self.book)
-            .sink(receiveValue: { _ in
-                self.overlayManager.showToast(message: "Note added")
-                self.resetAddNoteForm()
-                self.loadNotes()
-            })
-            .store(in: &Self.cancellables)
+        
+        self.contentViewModel.addNote(
+            self.newNote,
+            pageNumber: self.newPageNumber,
+            quoteReference: self.selectedQuoteReference,
+            to: self.book)
+        .sink(receiveValue: { _ in
+            self.overlayManager.showToast(message: "Note added")
+            self.resetAddNoteForm()
+            self.loadNotes()
+        })
+        .store(in: &Self.cancellables)
     }
     
     private func removeNote(_ note: String) {
-        self.contentViewModel.removeNote(note, from: self.book)
+        contentViewModel.removeNote(note, from: self.book)
             .sink(receiveValue: { _ in
                 self.overlayManager.showToast(message: "Note removed")
 
                 let noteIdToRemove = RowItems.hashedIdentifier(for: note)
                 self.localNotes.removeAll { RowItems.hashedIdentifier(for: $0) == noteIdToRemove }
+                
+                if self.localNotes.isEmpty && self.isEditing {
+                    self.isEditing = false
+                    self.editingNoteId = nil
+                }
             })
             .store(in: &Self.cancellables)
     }
@@ -176,12 +193,18 @@ struct NotesSection: View {
         if self.editingNoteId != nil {
             self.cancelEditingNote()
         }
-
-        let (text, pageNumber, _) = RowItems.parseFromStorage(note)
-
+        
+        let (text, pageNumber, _, quoteHash) = RowItems.parseFromStorage(note)
+        
         self.editNoteText = text
         self.editPageNumber = pageNumber
-
+        
+        if !quoteHash.isEmpty, let referencedQuote = RowItems.findQuoteByHash(quoteHash, in: book.quotes) {
+            self.editSelectedQuoteReference = referencedQuote
+        } else {
+            self.editSelectedQuoteReference = ""
+        }
+        
         withAnimation(.easeInOut(duration: 0.2)) {
             self.editingNoteId = note
         }
@@ -189,11 +212,12 @@ struct NotesSection: View {
     
     private func saveEditedNote(originalNote: String) {
         guard !self.editNoteText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-
+        
         self.contentViewModel.updateNote(
             originalNote: originalNote,
             newText: self.editNoteText,
             newPageNumber: self.editPageNumber,
+            newQuoteReference: self.editSelectedQuoteReference,
             in: self.book
         )
         .sink(receiveCompletion: { _ in },
@@ -202,10 +226,13 @@ struct NotesSection: View {
             withAnimation(.easeInOut(duration: 0.2)) {
                 self.editingNoteId = nil
             }
-
+            
+            self.loadNotes()
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 self.editNoteText = ""
                 self.editPageNumber = ""
+                self.editSelectedQuoteReference = ""
             }
         })
         .store(in: &Self.cancellables)
@@ -215,22 +242,24 @@ struct NotesSection: View {
         withAnimation(.easeInOut(duration: 0.2)) {
             self.editingNoteId = nil
         }
-
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             self.editNoteText = ""
             self.editPageNumber = ""
+            self.editSelectedQuoteReference = ""
         }
     }
     
     private func loadNotes() {
-        if self.localNotes.count != self.book.notes.count || !self.localNotes.elementsEqual(self.book.notes) {
-            self.localNotes = self.book.notes
+        if localNotes != book.notes {
+            localNotes = book.notes
         }
     }
     
     private func resetAddNoteForm() {
         self.newNote = ""
         self.newPageNumber = ""
+        self.selectedQuoteReference = ""
         self.isAddingNote = false
     }
     

@@ -12,7 +12,6 @@ struct MiddlePanelView: View {
     @EnvironmentObject var overlayManager: OverlayManager
     
     @Environment(\.openWindow) private var openWindow
-    @Environment(\.colorScheme) private var colorScheme
     
     @State private var cancellables = Set<AnyCancellable>()
     

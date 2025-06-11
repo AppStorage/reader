@@ -8,7 +8,7 @@ struct SectionCard: ViewModifier {
             .background(
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color(.controlBackgroundColor))
-                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                    .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
             )
     }
 }

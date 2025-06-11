@@ -68,7 +68,7 @@ struct QuotesSection: View {
                     .transition(.opacity)
             } else {
                 ForEach(paginatedQuotes, id: \.self) { quote in
-                    let (text, pageNumber, attribution) = RowItems.parseFromStorage(quote)
+                    let (text, pageNumber, attribution, _) = RowItems.parseFromStorage(quote)
                     let quoteId = RowItems.hashedIdentifier(for: quote)
                     let isExpanded = contentViewModel.isExpanded(hash: quoteId, for: book.id)
                     let previewLimit = 120
@@ -177,6 +177,11 @@ struct QuotesSection: View {
 
                 let quoteIdToRemove = RowItems.hashedIdentifier(for: quote)
                 self.localQuotes.removeAll { RowItems.hashedIdentifier(for: $0) == quoteIdToRemove }
+                
+                if self.localQuotes.isEmpty && self.isEditing {
+                    self.isEditing = false
+                    self.editingQuoteId = nil
+                }
             })
             .store(in: &Self.cancellables)
     }
@@ -186,7 +191,7 @@ struct QuotesSection: View {
             self.cancelEditingQuote()
         }
 
-        let (text, pageNumber, attribution) = RowItems.parseFromStorage(quote)
+        let (text, pageNumber, attribution, _) = RowItems.parseFromStorage(quote)
 
         self.editQuoteText = text
         self.editPageNumber = pageNumber
@@ -213,6 +218,8 @@ struct QuotesSection: View {
             withAnimation(.easeInOut(duration: 0.2)) {
                 self.editingQuoteId = nil
             }
+            
+            self.loadQuotes()
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 self.editQuoteText = ""
@@ -236,8 +243,8 @@ struct QuotesSection: View {
     }
     
     private func loadQuotes() {
-        if self.localQuotes.count != self.book.quotes.count || !self.localQuotes.elementsEqual(self.book.quotes) {
-            self.localQuotes = self.book.quotes
+        if localQuotes != book.quotes {
+            localQuotes = book.quotes
         }
     }
     

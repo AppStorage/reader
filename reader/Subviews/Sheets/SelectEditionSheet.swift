@@ -58,7 +58,7 @@ struct SelectEditionSheet: View {
                             }
                             .padding()
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(selectedBook == book ? Color.blue.opacity(0.2) : Color.clear)
+                            .background(selectedBook == book ? .blue.opacity(0.2) : .clear)
                             .cornerRadius(8)
                             .onTapGesture { selectedBook = book }
                         }

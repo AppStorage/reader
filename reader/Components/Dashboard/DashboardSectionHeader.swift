@@ -5,7 +5,8 @@ struct DashboardSectionHeader: View {
     
     var body: some View {
         Text(title)
-            .font(.headline)
+            .font(.title3)
+            .fontWeight(.semibold)
             .foregroundColor(.primary)
             .accessibilityAddTraits(.isHeader)
     }

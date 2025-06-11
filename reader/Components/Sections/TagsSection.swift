@@ -215,12 +215,12 @@ struct TagsSection: View {
         .frame(width: formWidth)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color(NSColor.windowBackgroundColor))
-                .shadow(color: Color.black.opacity(0.15), radius: 5, x: 0, y: 2)
+                .fill(Color(.windowBackgroundColor))
+                .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 2)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.gray.opacity(0.2), lineWidth: 0.5)
+                .stroke(.gray.opacity(0.2), lineWidth: 0.5)
         )
     }
     
@@ -242,7 +242,7 @@ struct TagsSection: View {
                     .foregroundColor(.primary)
                     .padding(.horizontal, 4)
                     .padding(.vertical, 2)
-                    .background(Color.secondary.opacity(0.2))
+                    .background(.secondary.opacity(0.2))
                     .cornerRadius(4)
                 
                 Text("already exists in this book")
@@ -294,7 +294,7 @@ struct TagsSection: View {
                         .foregroundColor(.secondary)
                         .padding(.horizontal, 4)
                         .padding(.vertical, 2)
-                        .background(Color.secondary.opacity(0.1))
+                        .background(.secondary.opacity(0.1))
                         .cornerRadius(4)
                 }
             }
@@ -324,7 +324,7 @@ struct TagsSection: View {
         .frame(maxWidth: .infinity, alignment: .center)
         .padding(.vertical, 6)
         .padding(.horizontal, 12)
-        .background(Color.secondary.opacity(0.05))
+        .background(.secondary.opacity(0.05))
     }
     
     private var noSuggestionsView: some View {
@@ -343,7 +343,7 @@ struct TagsSection: View {
                     .foregroundColor(.primary)
                     .padding(.horizontal, 4)
                     .padding(.vertical, 2)
-                    .background(Color.secondary.opacity(0.2))
+                    .background(.secondary.opacity(0.2))
                     .cornerRadius(4)
             }
         }

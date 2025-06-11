@@ -11,7 +11,7 @@ struct BookActionButton: View {
     let dataManager: DataManager
     
     var body: some View {
-        HStack(spacing: 12) {
+        HStack {
             if allSelectedBooksAreDeleted() {
                 // Show recover and permanent delete buttons for deleted books
                 recoverButton(for: books)

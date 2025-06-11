@@ -13,20 +13,15 @@ struct StatusSection: View {
     private var bookStatus: some View {
         HStack {
             Text("Status:")
-                .font(.headline)
+                .font(.subheadline)
             
-            Label {
-                Text(book.status.displayText)
-                    .font(.subheadline)
-                    .bold()
-            } icon: {
-                Image(systemName: book.status.iconName)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(book.status.statusColor.opacity(0.2))
-            .foregroundColor(book.status.statusColor)
-            .clipShape(.capsule)
+            Label(book.status.displayText, systemImage: book.status.iconName)
+                .font(.subheadline)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(book.status.statusColor.opacity(0.2))
+                .foregroundColor(book.status.statusColor)
+                .clipShape(.capsule)
             
             Spacer()
         }
@@ -162,8 +157,8 @@ private struct DateEditor: View {
                         }
                         .buttonStyle(.plain)
                     }
-                    .padding(.vertical, 8)
                     .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
                     .background(
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(.gray.opacity(0.5), lineWidth: 1)
